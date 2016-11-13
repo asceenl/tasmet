@@ -13,7 +13,7 @@
 #include "tasmet_types.h"
 #include "tasmet_tracer.h"
 
-class Globalconf{
+class GlobalConf{
     d _omg;		// The "base" frequency in rad/s
     us _Nf;			// Number of frequencies to solve for
 
@@ -25,12 +25,12 @@ class Globalconf{
     // Wfo=1, interpolation is done from
     // the right side
 public:
-    Globalconf(us Nf,d freq);
+    GlobalConf(us Nf,d freq);
     
     us Nf() const {return _Nf;}
     us Ns() const {return 2*_Nf+1;}    
 
-    ~Globalconf(){TRACE(-5,"~Globalconf()");}
+    ~GlobalConf(){TRACE(-5,"~GlobalConf()");}
     d getomg() const {return _omg;}
     d getfreq() const {return _omg/2/number_pi;}
     // d meshPeclet(const Gas& gas,d dx,d u) const {return u*dx*gas.rho0()*gas().cp(T0())/gas().kappa(T0());}
@@ -48,7 +48,7 @@ public:
 
     void show() const;
 
-}; /* Class Globalconf */
+}; /* Class GlobalConf */
 
 #endif /* _GLOBALCONF_H_ */
 //////////////////////////////////////////////////////////////////////

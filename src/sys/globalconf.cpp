@@ -3,20 +3,20 @@
 #include "tasmet_exception.h"
 #include "tasmet_io.h"
 
-Globalconf::Globalconf(us Nf,d freq)
+GlobalConf::GlobalConf(us Nf,d freq)
 
 {
 
     set(Nf,freq);
-    TRACE(10,"Globalconf constructor done");
+    TRACE(10,"GlobalConf constructor done");
 }
-void Globalconf::show() const {
+void GlobalConf::show() const {
     cout << "------- Global configuration ------ \n";        
     cout << "------- Number of harmonics to solve for: "<< _Nf <<"\n";
     cout << "------- Fundamental frequency           : " << _omg/2/number_pi << " Hz\n";           
 }
-void Globalconf::set(us Nf,d freq){
-    TRACE(15,"Globalconf::set(_Nf,freq)");
+void GlobalConf::set(us Nf,d freq){
+    TRACE(15,"GlobalConf::set(_Nf,freq)");
     d omg = 2*number_pi*freq;
     //ctor
     // Sanity checks
