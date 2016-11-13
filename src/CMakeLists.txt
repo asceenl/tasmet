@@ -32,7 +32,7 @@ add_subdirectory(material)
 # add_subdirectory(sys)
 # add_subdirectory(var)
 
-add_library(tasmet_src tasmet_tracer.cpp tasmet_exception.cpp)
+add_library(tasmet_src tasmet_tracer.cpp tasmet_exception.cpp tasmet_assert.cpp)
 target_link_libraries(tasmet_src
   # duct
   # mech

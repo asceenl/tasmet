@@ -13,7 +13,7 @@ add_definitions(-DTRACER=1)
 # add_definitions(-DTRACER_IN_COMMON)
 
 add_definitions(-DTASMET_FLOAT=64)
-
+add_definitions(-DTASMET_DEBUG=1)
 #====================================================
 # Compiler settings ************************************************
 #====================================================
