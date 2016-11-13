@@ -15,7 +15,7 @@ class Air : public PerfectGas {
 protected:
     d Rs() const {return 287;}
 public:
-    Air():PerfectGas(air){}
+    Air(d T0,d p0):PerfectGas(air,T0,p0){}
     d cp(d T,d p) const;
     vd cp(const vd& T,const vd& p) const;
     d h(d T,d p) const;

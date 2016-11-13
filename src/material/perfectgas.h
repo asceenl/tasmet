@@ -23,7 +23,7 @@
   
 class PerfectGas: public Gas {
 protected:
-    PerfectGas(GasType gastype): Gas(gastype){}
+    PerfectGas(GasType gastype,d T0,d p0): Gas(gastype,T0,p0){}
 
     // Not implemented for a perfect gas:
     // mu, kappa, h, cp, Rs

@@ -12,7 +12,7 @@
 #include <armadillo>
 #include "tasmet_enum.h"
 #include "tasmet_types.h"
-
+#include "tasmet_constants.h"
 
 
 class Gas{
@@ -21,18 +21,30 @@ public:
 private:    
     GasType _gastype;
 protected:
-    Gas(GasType gastype):_gastype(gastype){}
+    d _T0,_p0;			/* Reference temperature and pressure */
+    
+    Gas(GasType gastype,d T0,d p0):_gastype(gastype),_T0(T0),_p0(p0){}
 public:
-
-
-
     Gas(const Gas& other) =delete;
     Gas& operator=(const Gas&)=delete;
     virtual ~Gas(){}
 
     // Static method to generate a Gas
-    static Gas* newGas(const GasType gastype);
+
+
+    static Gas* newGas(const GasType gastype,d T0=constants::T0,
+                     d p0=constants::p0);
+
     operator GasType() { return _gastype;}
+
+    d T0() const {return _T0;}
+    d p0() const {return _p0;}
+
+    // Speed of sound at the reference temperature and pressure
+    d c0() const {return cm(_T0,_p0);}
+    d rho0() const {return rho(_T0,_p0);}
+    d deltanu0(d freq) const{ return sqrt(2*mu(_T0,_p0)/(rho0()*2*number_pi*freq));}
+    d deltanu(d freq,d T,d p) const { return sqrt(2*mu(T,p)/(rho(T,p)*2*number_pi*freq)); }
 
     // Dimensionless numbers:
 
@@ -48,6 +60,10 @@ public:
     // Density [kg/m^3]
     virtual d rho(d T,d p) const=0;
     virtual vd rho(const vd& T,const vd& p) const=0;
+
+    // Adiabatic speed of sound
+    virtual d cm(d T,d p) const=0;
+    virtual vd cm(const vd& T,const vd& p) const=0;    
 
     // Internal energy [J/kg]
     virtual d e(d T,d p) const=0;
@@ -67,10 +83,6 @@ public:
 
     virtual d beta(d T,d p) const=0;
     virtual vd beta(const vd& T,const vd& p) const=0;
-
-    // Adiabatic speed of sound [m/s]
-    virtual d cm(d T,d p) const=0;
-    virtual vd cm(const vd& T,const vd& p) const=0;
 
     // Dynamic viscosity [Pa*s]
     virtual d mu(d T,d p) const=0;

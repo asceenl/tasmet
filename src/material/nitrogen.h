@@ -16,7 +16,7 @@ class Nitrogen : public PerfectGas {
 protected:
     d Rs() const {return 297;}
 public:
-    Nitrogen():PerfectGas(nitrogen){}
+    Nitrogen(d T0,d p0):PerfectGas(nitrogen,T0,p0){}
 
     d cp(d T,d p) const;
     vd cp(const vd& T,const vd& p) const;

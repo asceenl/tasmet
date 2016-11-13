@@ -14,7 +14,7 @@ class Helium :public PerfectGas {
 protected:
     d Rs() const {return 2070;}
 public:
-    Helium():PerfectGas(helium){}
+    Helium(d T0,d p0):PerfectGas(helium,T0,p0){}
 
     d cp(d T,d p) const { return 5195;}
     vd cp(const vd& T,const vd& p) const;

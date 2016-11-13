@@ -29,7 +29,7 @@ add_subdirectory(material)
 # add_subdirectory(mech)
 # add_subdirectory(seg)
 # add_subdirectory(sol)
-# add_subdirectory(sys)
+add_subdirectory(sys)
 # add_subdirectory(var)
 
 add_library(tasmet_src tasmet_tracer.cpp tasmet_exception.cpp tasmet_assert.cpp)
