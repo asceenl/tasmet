@@ -36,7 +36,7 @@ public:
     // Make one row zero
     void zeroOutRow(us rownr);
 
-    void multiplyTriplets(const d& multiplicationfactor);
+    TripletList& operator*=(d multiplicationfactor);
 
     // Add to capacity
     void reserveExtraDofs(us n);

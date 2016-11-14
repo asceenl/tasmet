@@ -3,6 +3,9 @@
 #include "tasmet_io.h"
 #include "tasmet_exception.h"
 
+TripletList::TripletList(us ndofs): _ndofs(ndofs) {
+    TRACE(15,"TripletList::TripletList()");
+}
 TripletList::operator sdmat() const {
       
     TRACE(15,"TripletList::operator sdmat()");
@@ -60,11 +63,12 @@ void TripletList::show()  const {
         cout << "Row: " << t.row << " , column: " << t.col << " , value: " << t.value << "\n";
     }
 }
-void TripletList::multiplyTriplets(const d& factor){
+TripletList& TripletList::operator*=(d factor){
     TRACE(15,"multiplyTriplets()");
     for(auto tr: triplets){
         tr.value*= factor;
     }
+    return *this;
 }
 
 void TripletList::reserveExtraDofs(us n){
@@ -77,8 +81,12 @@ void TripletList::shiftTriplets(int nrows,int ncols){
     // shift the position of the values in a matrix. nrows and ncols
     // can be negative numbers.
     TRACE(15,"shiftTriplets()");
-    TRACE(100,"EXTRA CHECKS HERE!");
     for(auto tr: triplets){
+        #if TASMET_DEBUG == 1
+        if(tr.col+ncols >= _ndofs || (tr.row+nrows >= _ndofs)) {
+            FATAL("Out of bounds shift");
+        }
+        #endif
         tr.col+=ncols;
         tr.row+=nrows;
     }
