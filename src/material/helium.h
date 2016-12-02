@@ -11,22 +11,18 @@
 #include "perfectgas.h"
 
 class Helium :public PerfectGas {
+    vdi<1> _cpc = {5195};
 protected:
     d Rs() const {return 2070;}
 public:
     Helium(d T0,d p0):PerfectGas(helium,T0,p0){}
 
-    d cp(d T,d p) const { return 5195;}
-    vd cp(const vd& T,const vd& p) const;
-
-    d h(d T,d p) const {return cp(0.0,0.0)*T;}
-    vd h(const vd& T,const vd& p) const;
+    const vd& cpc() const { return _cpc; }
+    d cp(d T,d p) const { return _cpc(0);}
 
     d mu(d T,d p) const;
-    vd mu(const vd& T,const vd& p) const;
 
     d kappa(d T,d p) const;
-    vd kappa(const vd& T,const vd& p) const;
 
     virtual ~Helium(){}
 };

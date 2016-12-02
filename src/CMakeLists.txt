@@ -18,7 +18,8 @@ include_directories(
   # python
   # seg
   # sol
-  # sys
+  sys
+  solver
   # var
   # volume
   )
@@ -28,19 +29,25 @@ add_subdirectory(material)
 # add_subdirectory(duct)
 # add_subdirectory(mech)
 # add_subdirectory(seg)
-# add_subdirectory(sol)
+add_subdirectory(solver)
 add_subdirectory(sys)
 # add_subdirectory(var)
 
-add_library(tasmet_src tasmet_tracer.cpp tasmet_exception.cpp tasmet_assert.cpp)
-target_link_libraries(tasmet_src
-  # duct
-  # mech
-  # seg
-  # sol
-  # sys
-  # var
+add_library(tasmet_src_src
+  tasmet_tracer.cpp
+  tasmet_exception.cpp
+  tasmet_assert.cpp
   )
+add_library(tasmet_src)
+target_link_libraries(tasmet_src
+  funcs
+  material
+  solver
+  sys
+  # This one should be last as other parts link to these utilities
+  tasmet_src_src
+  )
+
  
 # set_source_files_properties(swig/nonlin.i
 #   PROPERTIES CPLUSPLUS ON)

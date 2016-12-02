@@ -1881,6 +1881,7 @@ Create a PhaseConstraint object:
 \end_layout
 
 \begin_layout Verbatim
+
 	pc=PhaseConstraint(Varnr, freqnr, left)
 \end_layout
 
@@ -1889,6 +1890,7 @@ Apply this contraint to a segment which can accept them, for example a Tube:
 \end_layout
 
 \begin_layout Verbatim
+
 	t1.setPhaseConstraint(pc)
 \end_layout
 
@@ -3768,15 +3770,100 @@ Momentum equation (prescribes pressure
 \end_layout
 
 \begin_layout Standard
-And
+And the boundary condition for the temperature is computed assuming adiabatic
+ compression-expansion.
+ Currently, this is implemented for thermally perfect gases only:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-T_{p}=T_{0}\left(\frac{p_{0}+p_{p}}{p_{0}}\right)^{\frac{\gamma_{0}-1}{\gamma_{0}}}
+c_{p}\left(T\right)\mathrm{d}T=\frac{\mathrm{d}p}{\rho}
+\end{equation}
+
+\end_inset
+
+FIlling in the perfect gas law and a bit of bookkeeping results in
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{1}{R_{s}}\int\limits _{T_{0}}^{T_{p}}\frac{c_{p}\left(T\right)}{T}\mathrm{d}T-\ln\left(\frac{p_{p}-p_{0}}{p_{0}}\right)=0
+\end{equation}
+
+\end_inset
+
+Note that in general, to solve this equation for the temperature requires
+ a numerical integration, however for the currently implemented gases, 
+\begin_inset Formula $c_{p}$
+\end_inset
+
+ is a polynomial function of 
+\begin_inset Formula $T$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{equation}
+c_{p}(T)=\sum_{i=0}^{N_{c_{p}}}c_{p,i}T^{i}
+\end{equation}
+
+\end_inset
+
+In that case
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{1}{R_{s}}\left(c_{p,0}\ln\left(\frac{T_{p}}{T_{0}}\right)+\sum_{i=1}^{N_{c_{p}}}\frac{c_{p,i}\left(T_{p}-T_{0}\right)^{i}}{i}\right)-\ln\left(\frac{p_{p}-p_{0}}{p_{0}}\right)=0.\label{eq:T-p-adiabatic}
 \end{equation}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:T-p-adiabatic"
+
+\end_inset
+
+ is solved using a one-dimensional root finding algorithm (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:One-dimensional-function-solvers"
+
+\end_inset
+
+).
+ Note that for an ideal gas an explicit formula is available:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+T_{p,\mathrm{ideal}}=T_{0}\left(\frac{p_{0}+p_{p}}{p_{0}}\right)^{\frac{\gamma_{0}-1}{\gamma_{0}}}.\label{eq:ideal-gas-isentropic-p-T}
+\end{equation}
+
+\end_inset
+
+Looking closely at Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ideal-gas-isentropic-p-T"
+
+\end_inset
+
+, we find that 
+\begin_inset Formula $T_{p,\mathrm{ideal}}$
+\end_inset
+
+ provides a good guess for the final solution.
 \end_layout
 
 \begin_layout Subsection
@@ -5044,8 +5131,45 @@ Minor loss
 Systems
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
+Solvers
+\end_layout
 
+\begin_layout Section
+One-dimensional function solvers
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:One-dimensional-function-solvers"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient-based
+\end_layout
+
+\begin_layout Subsection
+Gradient free
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Gradient-free"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As a gradient free one-dimensional function solver, we use Brent's mehhod.
+ Brent's method combines root bracketing, bisection and inverse quadratic
+ interpolation to find the root of the function without using the gradient.
+ See Wikipedia for more information.
+\end_layout
+
+\begin_layout Section
+Minimizers
 \end_layout
 
 \end_body

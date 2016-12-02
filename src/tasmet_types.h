@@ -29,7 +29,7 @@ typedef size_t us;		  /* Size type I always use */
 // To change the whole code to 32-bit floating points, change this to
 // float.
 #if TASMET_FLOAT == 32
-// typedef float d;		/* Shortcut for double */			
+typedef float d;		/* Shortcut for double */			
 #elif TASMET_FLOAT == 64
 typedef double d;		/* Shortcut for double */			
 #else
@@ -67,6 +67,10 @@ const c sqmI=sqrt(-1.0*I);
 const c minI(0,-1); //Minus complex unity
 const d number_pi=arma::datum::pi; // The number 3.14159265359..
 
+template<size_t i>
+using vdi = arma::Col<d>::fixed<i>;
+template<size_t i>
+using vci = arma::Col<c>::fixed<i>;
 
 typedef arma::Col<d> vd;		  /* Column vector of doubles */		
 typedef arma::Col<c> vc;	  /* Column vector of complex numbers */	

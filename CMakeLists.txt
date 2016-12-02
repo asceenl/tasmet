@@ -69,7 +69,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native -mtune=native")
 
 
 # For importing find directives for Cmake
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/common/cmake_tools)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_tools)
 
 # ##########################
 # Python #####################
@@ -91,20 +91,6 @@ MESSAGE("Python major version: ${TaSMET_PY_MAJOR_VERSION}")
 # Find the site_packages directory of python
 execute_process(COMMAND python${TaSMET_PY_MAJOR_VERSION} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-# ################################
-# Initialize swig
-# ################################
-
-find_package(SWIG REQUIRED)
-include(${SWIG_USE_FILE})
-
-SET(CMAKE_SWIG_FLAGS  -Wall -DSWIG_PYTHON)
-if(${TaSMET_PY_MAJOR_VERSION}=="3")
-  SET(CMAKE_SWIG_FLAGS  ${CMAKE_SWIG_FLAGS} -py${TaSMET_PY_MAJOR_VERSION})  
-endif(${TaSMET_PY_MAJOR_VERSION}=="3")
-
-include_directories(common/src)
-
 # Armadillo
 find_package(Armadillo REQUIRED)
 add_definitions(-DARMA_USE_SUPERLU -DARMA_USE_CXX11)
@@ -114,26 +100,13 @@ add_definitions(-DARMA_USE_SUPERLU -DARMA_USE_CXX11)
 # This is the common code (gas and solid libs, etc)
 # link_directories(common)
 
-aux_source_directory(common/src/gas gas)
 include_directories(
-  ${PYTHON_INCLUDE_DIRS}  
-  common/src/swig
-  common/src/gas
+  ${PYTHON_INCLUDE_DIRS}
+  src
+  src/solver
+  src/material
   )
 # Add the code subdirectory
 add_subdirectory(src)
+add_subdirectory(testing)
 
-
-# set_source_files_properties( ${swig_generated_file_fullname}
-  # PROPERTIES COMPILE_FLAGS "${SWIG_COMMON_COMPILE_FLAGS} ")
-
-
-# ================================== Installation
-
-# Install common files
-install(FILES ${PROJECT_SOURCE_DIR}/common/__init__.py
-  DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME}/common)
-install(FILES ${PROJECT_SOURCE_DIR}/common/common.py
-  DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME}/common)
-
-# Rest of the files is installed from src/CMakeLists.txt

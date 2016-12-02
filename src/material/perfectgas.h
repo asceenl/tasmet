@@ -2,8 +2,11 @@
 //
 // Author: J.A. de Jong 
 //
-// Description:
-//
+// Description: A thermally perfect gas obeys the ideal-gas law
+// equation of state (p=rho*R*T) but has TEMPERATURE-DEPENDENT and
+// PRESSURE-DEPENDENT specific heat constants. Our definition of a
+// perfect gas has only temperature-dependent specific heat, viscosity
+// and thermal conductivity values.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #ifndef PERFECTGAS_H
@@ -28,33 +31,33 @@ protected:
     // Not implemented for a perfect gas:
     // mu, kappa, h, cp, Rs
 
+public:
     virtual d Rs() const=0;
 
-public:
+    // Vector of polynomial coefficients to compute the
+    // specific heat at constant pressure
+    virtual const vd& cpc() const=0;
+    
     ~PerfectGas(){}
 
-    vd rho(const vd&T,const vd&p) const {
-        checkzero(T);
-        return p/Rs()/T;
+    d h(d T,d p) const {
+        const vd& cpc_ = this->cpc();
+        us nfac = cpc_.size();
+        vd powfac(nfac);
+        
+        for(us i=0;i<nfac;i++)
+            powfac(i) = pow(T,i)/(1+i);
+        
+        return dot(cpc_,powfac);
     }
-    vd p(const vd& T,const vd& rho) const {
-        return rho%(Rs()*T);
-    }
-    vd cv(const vd& T,const vd& p) const {
-        return cp(T,p)-Rs();
-    }
-    vd e(const vd& T,const vd& p) const {
-        return h(T,p)-Rs()*T;
-    }
-    d beta(d T,d p) const {
-        checkzero(T);
-        return 1/T;
-    }
-    vd beta(const vd& T,const vd& p) const {
-        return 1/T;
-    }
-    vd cm(const vd& T,const vd& p) const {
-        return sqrt(gamma(T,p)*Rs()%T);
+    d cp(d T,d p) const {
+        const vd& cpc_ = this->cpc();
+        us nfac = cpc_.size();
+        vd powfac(nfac);
+        
+        for(us i=0;i<nfac;i++)
+            powfac(i) = pow(T,i);
+        return dot(cpc_,powfac);
     }
     d rho(d T,d p) const {
         checkzero(T);
@@ -72,6 +75,7 @@ public:
     }
     
 };
+
 
 #endif // PERFECTGAS_H
 //////////////////////////////////////////////////////////////////////

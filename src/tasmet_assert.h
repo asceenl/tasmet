@@ -8,11 +8,20 @@
 #pragma once
 #ifndef TASMET_ASSERT_H
 #define TASMET_ASSERT_H
-
-#ifndef TASMET_DEBUG
 #include <type_traits>
+#ifndef TASMET_DEBUG
+
 static_assert(false, "TASMET_DEBUG macro not defined. Please set it to 1 or 0");
+
 #endif
+
+// Compile-time type checking for template instantiation.
+template<class T, class U>
+struct is_same : std::false_type {};
+ 
+template<class T>
+struct is_same<T, T> : std::true_type {};
+
 
 #if TASMET_DEBUG == 1
 #include <cassert>
