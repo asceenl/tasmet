@@ -57,7 +57,10 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
 
     d fa = system.residual(a);    
     d fb = system.residual(b);
-
+    if((fb) == 0) {
+        TRACE(15,"Found root during bracketing");
+        return;
+    }
     d c = a;
     d fc = fa;
 
@@ -85,7 +88,7 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
 
         if((fa!=fc) && (fb!=fc)){
             // Inverse quadratic interpolation
-            TRACE(15,"IQI");
+            TRACE(5,"IQI");
             t = a*fb*fc/((fa-fb)*(fa-fc));
             u = b*fa*fc/((fb-fa)*(fb-fc));
             v = c*fa*fb/((fc-fa)*(fc-fb));
@@ -94,7 +97,7 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
         }
         else {
             // Secant method
-            TRACE(15,"Secant");
+            TRACE(5,"Secant");
             s = b-fb*(b-a)/(fb-fa);
         }
 
@@ -104,19 +107,19 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
         d absbmc = abs(b-c);
         d abscmd = abs(c-d_);
         
-        VARTRACE(15,s);
+        VARTRACE(5,s);
 
         if((bisec_flag |= (!is_between(s,(3*a+b)/4,b)))) goto bflag;
-        TRACE(15,"Survived 1");
+        TRACE(5,"Survived 1");
         if(bisec_flag |= (mflag && (abssmb >= absbmc/2))) goto bflag;
-        TRACE(15,"Survived 2");
+        TRACE(5,"Survived 2");
         if(bisec_flag |= ((!mflag) && (abssmb >= abscmd/2))) goto bflag;
-        TRACE(15,"Survived 3");
+        TRACE(5,"Survived 3");
         if(bisec_flag |= (mflag && (absbmc < abs(_reltol)))) goto bflag;;
-        TRACE(15,"Survived 4");
+        TRACE(5,"Survived 4");
     bflag:
         if(bisec_flag || ((!mflag) && (abscmd < abs(_reltol)))) {
-            TRACE(15,"Bisection");
+            TRACE(5,"Bisection");
             s = (a+b)/2;
             mflag = true;
         }
@@ -148,14 +151,14 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
         progress.rel_err = abs(b-a);
         progress.iteration++;
 
-        VARTRACE(15,s);
-        VARTRACE(15,a);
-        VARTRACE(15,b); 
-        VARTRACE(15,c);
-        VARTRACE(15,fa);
-        VARTRACE(15,fb); 
-        VARTRACE(15,fc);
-        VARTRACE(15,fs);
+        VARTRACE(5,s);
+        VARTRACE(5,a);
+        VARTRACE(5,b); 
+        VARTRACE(5,c);
+        VARTRACE(5,fa);
+        VARTRACE(5,fb); 
+        VARTRACE(5,fc);
+        VARTRACE(5,fs);
 
         SolverAction action = (*callback)(progress);
 

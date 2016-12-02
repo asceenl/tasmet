@@ -45,7 +45,8 @@ public:
     ~Variable(){}
 
     void setGc(const gc_ptr&);
-    const GlobalConf& getGc() const {return *_gc;}
+    const gc_ptr& getGc() const {return _gc;}
+
     void updateNf();
     
     // Get methods
@@ -56,7 +57,7 @@ public:
 
     // Extract data
     const vd& tdata() const  {return _tdata; } //Get time data
-    const vd& adata() const  {return _adata; } //Get time data                                                 //vector
+    const vd& adata() const  {return _adata; } //Get amplitude data                                                 //vector
 
     // Obtain a time response vector
     vd timeResponse(us nperiod=2,us ninst=100) const;

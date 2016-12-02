@@ -12,6 +12,9 @@
 #include "helium.h"
 #include "nitrogen.h"
 #include "air.h"
+#include "globalconf.h"
+#include "tasmet_variable.h"
+#include "adiabatictemp.h"
 
 SolverAction solver_callback(SolverProgress p){
 
@@ -62,6 +65,9 @@ int main(){
     Air air(293.15,101325);
 
 
+    gc_ptr gc(new GlobalConf(10,100));
+    Variable pressure(gc,10*101325);
+    Variable temperature = adiabaticTemp(air,pressure);
 }
 
 

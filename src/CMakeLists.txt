@@ -24,30 +24,38 @@ include_directories(
   # volume
   )
 
-add_subdirectory(funcs)
-add_subdirectory(material)
-# add_subdirectory(duct)
-# add_subdirectory(mech)
-# add_subdirectory(seg)
-add_subdirectory(solver)
-add_subdirectory(sys)
-# add_subdirectory(var)
-
-add_library(tasmet_src_src
+add_library(tasmet_src
   tasmet_tracer.cpp
   tasmet_exception.cpp
   tasmet_assert.cpp
-  )
-add_library(tasmet_src)
-target_link_libraries(tasmet_src
-  funcs
-  material
-  solver
-  sys
-  # This one should be last as other parts link to these utilities
-  tasmet_src_src
-  )
 
+  funcs/bessel.cpp
+  funcs/cbessj.cpp
+  funcs/rottfuncs.cpp
+  funcs/skewsine.cpp
+  funcs/sph_j.cpp
+
+  solver/solver.cpp
+  solver/system.cpp
+  solver/newton_raphson.cpp
+  solver/brent.cpp
+
+  material/gas.cpp
+  material/air.cpp
+  material/helium.cpp
+  material/nitrogen.cpp
+  material/solid.cpp
+  material/adiabatictemp.cpp
+
+  # sys/enginesystem.cpp
+  sys/globalconf.cpp
+  sys/tasmet_variable.cpp
+  sys/jaccol.cpp
+  sys/jacobian.cpp
+  sys/jacrow.cpp
+  # sys/tasystem.cpp
+  sys/triplets.cpp
+)
  
 # set_source_files_properties(swig/nonlin.i
 #   PROPERTIES CPLUSPLUS ON)

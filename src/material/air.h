@@ -28,8 +28,6 @@ protected:
 public:
     Air(d T0,d p0):PerfectGas(air,T0,p0){}
     const vd& cpc() const {return _cpc;}
-    d cp(d T,d p) const;
-    d h(d T,d p) const;
     d mu(d T,d p) const;
     d kappa(d T,d p) const;
     ~Air(){}

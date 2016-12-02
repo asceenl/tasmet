@@ -5,10 +5,11 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-
+#include "tasmet_tracer.h"
 #include "solver.h"
 #include "tasmet_exception.h"
 #include <chrono>
+
 
 template<typename system_T,typename result_T>
 static void SolverThread(Solver<system_T,result_T>* solver,
@@ -44,19 +45,19 @@ void Solver<system_T,result_T>::start(progress_callback* callback,bool wait){
 
     assert(_solver_thread == nullptr);
 
-    this->_solver_thread = new std::thread(SolverThread<system_T,result_T>,
-                                           this,
-                                           _sys,
-                                           callback);
-    if(!_solver_thread)
-        throw TasMETBadAlloc();
+    if(!wait) {
+        this->_solver_thread = new std::thread(SolverThread<system_T,result_T>,
+                                               this,
+                                               _sys,
+                                               callback);
+        if(!_solver_thread)
+            throw TasMETBadAlloc();
+    }
+    else {
 
-    if(wait){
-        while (_running){
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-        // Cleanup resources
-        stop();
+        TRACE(15,"Waiting for solver...");
+        start_implementation(*_sys,callback);
+
     }
 }
 
@@ -64,6 +65,7 @@ template<typename system_T,typename result_T>
 void Solver<system_T,result_T>::stop() {
 
     _running = false;
+
     if(_solver_thread){
 
         _solver_thread->join();
@@ -73,12 +75,15 @@ void Solver<system_T,result_T>::stop() {
     }
 }
 template<typename system_T,typename result_T>
-result_T Solver<system_T,result_T>::getSolution() const{
+result_T Solver<system_T,result_T>::getSolution() {
+
     if(_running){
         throw TaSMETError("Solver is running");
     }
+
     // Cleanup thread resources
     stop();
+
     return _sys->getSolution();
 }
 template<typename system_T,typename result_T>
@@ -94,7 +99,7 @@ void SolverThread(Solver<system_T,result_T>* solver,system_T* system,progress_ca
 }
 
 
-// Explicit instantiation for a
+// Explicit instantiation for some types of systems and results
 template class Solver<NoGradientNonlinearSystem<vd>,vd>;
 template class Solver<GradientNonlinearSystem,vd>;
 template class Solver<NoGradientNonlinearSystem<d>,d>;

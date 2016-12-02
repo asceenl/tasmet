@@ -12,7 +12,7 @@
 
 JacCol::JacCol(const Variable& thevar):
     coldof_(thevar.getDofNr()),
-    data_(thevar.getGc().Ns(),thevar.getGc().Ns(),fillwith::zeros)
+    data_(thevar.getGc()->Ns(),thevar.getGc()->Ns(),fillwith::zeros)
 {  }
 JacCol::JacCol(us coldof,const GlobalConf& gc):
     coldof_(coldof),

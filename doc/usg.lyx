@@ -1881,7 +1881,6 @@ Create a PhaseConstraint object:
 \end_layout
 
 \begin_layout Verbatim
-
 	pc=PhaseConstraint(Varnr, freqnr, left)
 \end_layout
 
@@ -1890,7 +1889,6 @@ Apply this contraint to a segment which can accept them, for example a Tube:
 \end_layout
 
 \begin_layout Verbatim
-
 	t1.setPhaseConstraint(pc)
 \end_layout
 
@@ -3817,7 +3815,7 @@ In that case
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\frac{1}{R_{s}}\left(c_{p,0}\ln\left(\frac{T_{p}}{T_{0}}\right)+\sum_{i=1}^{N_{c_{p}}}\frac{c_{p,i}\left(T_{p}-T_{0}\right)^{i}}{i}\right)-\ln\left(\frac{p_{p}-p_{0}}{p_{0}}\right)=0.\label{eq:T-p-adiabatic}
+\frac{1}{R_{s}}\left(c_{p,0}\ln\left(\frac{T_{p}}{T_{0}}\right)+\sum_{i=1}^{N_{c_{p}}}\frac{c_{p,i}\left(T_{p}^{i}-T_{0}^{i}\right)}{i}\right)-\ln\left(\frac{p_{p}-p_{0}}{p_{0}}\right)=0.\label{eq:T-p-adiabatic}
 \end{equation}
 
 \end_inset

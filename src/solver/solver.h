@@ -49,7 +49,7 @@ public:
     void stop();        // Stops the solver
 
     // Returns the solution of the problem
-    result_T getSolution() const;
+    result_T getSolution();
 
     virtual ~Solver();
     template<typename Y,typename rT>

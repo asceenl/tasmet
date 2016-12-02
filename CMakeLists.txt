@@ -105,6 +105,7 @@ include_directories(
   src
   src/solver
   src/material
+  src/sys
   )
 # Add the code subdirectory
 add_subdirectory(src)

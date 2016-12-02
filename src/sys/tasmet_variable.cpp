@@ -44,6 +44,7 @@ Variable Variable::operator*(const Variable& Variable2) const { // Multiply two
     return Variable(this->_gc,_tdata%Variable2._tdata,false);
 }
 //***************************************** The Variable class
+Variable::Variable(const gc_ptr& gc): Variable(gc,0){}
 Variable::Variable(const gc_ptr& gc,double initval): _gc(gc)
 {
     TRACE(0,"Variable::Variable(us ndofs, double initval)");
