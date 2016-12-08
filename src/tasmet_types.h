@@ -74,6 +74,7 @@ using vci = arma::Col<c>::fixed<i>;
 
 typedef arma::Col<d> vd;		  /* Column vector of doubles */		
 typedef arma::Col<c> vc;	  /* Column vector of complex numbers */	
+typedef arma::Col<us> vus;	  /* Column vector of unsigned integers */	
 typedef arma::Mat<d> dmat; /* (Dense) Matrix of doubles */		
 typedef arma::Mat<c> cmat;	  /* (Dense) matrix of complex numbers */	
 

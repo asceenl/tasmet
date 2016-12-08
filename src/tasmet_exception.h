@@ -11,10 +11,12 @@
 
 #include <string>
 #include <stdexcept>
+#include <sstream>              // stringstream
 
 class TaSMETError : public std::runtime_error {
 public:
     TaSMETError(const std::string& msg = "") : std::runtime_error(msg) {}
+    TaSMETError(const std::stringstream& stream) : std::runtime_error(stream.str()){}
 };
 
 class TasMETBadAlloc: public std::bad_alloc {

@@ -19,7 +19,7 @@ add_definitions(-DTASMET_DEBUG=1)
 #====================================================
 
 # Always required make flags in case of both compilers
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -fPIC -Wfatal-errors -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
 
 
 # Stop letting Numpy complain about its API

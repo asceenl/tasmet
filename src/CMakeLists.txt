@@ -53,7 +53,7 @@ add_library(tasmet_src
   sys/jaccol.cpp
   sys/jacobian.cpp
   sys/jacrow.cpp
-  # sys/tasystem.cpp
+  sys/tasystem.cpp
   sys/triplets.cpp
 )
  

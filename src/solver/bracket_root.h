@@ -24,7 +24,13 @@ inline std::pair<d,d> bracket_root(NoGradientNonlinearSystem<d>& sys,const d gue
     d xa = guess;
     d fa = sys.residual(xa);
 
+    if(fa == 0) {
+        // Guess was exactly right
+        return std::make_pair(xa,xa);
+    }
+    
     d fb = fa;
+
     // We add here a small amount, such that, in case the first guess
     // is 0, we 
     d xb = xa+std::numeric_limits<d>::epsilon();

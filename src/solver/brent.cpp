@@ -6,7 +6,7 @@
 // Brent's root finding algorithm as implemented from Wikipedia:
 // https://en.wikipedia.org/wiki/Brent's_method
 //////////////////////////////////////////////////////////////////////
-
+#define TRACERPLUS (10)
 #include "brent.h"
 #include "tasmet_tracer.h"
 #include "tasmet_exception.h"
@@ -56,6 +56,11 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
     d b = brackets.second;
 
     d fa = system.residual(a);    
+    if((fa) == 0) {
+        TRACE(15,"Found root during bracketing");
+        return;
+    }
+    
     d fb = system.residual(b);
     if((fb) == 0) {
         TRACE(15,"Found root during bracketing");

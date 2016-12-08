@@ -63,11 +63,11 @@ int main(){
 
     Nitrogen nit(293.15,101325);
     Air air(293.15,101325);
-
+    Helium helium(293.15,101325);
 
     gc_ptr gc(new GlobalConf(10,100));
     Variable pressure(gc,10*101325);
-    Variable temperature = adiabaticTemp(air,pressure);
+    Variable temperature = adiabaticTemp(helium,pressure);
 }
 
 
