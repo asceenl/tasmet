@@ -51,17 +51,17 @@ int main(){
 
     INITTRACE(5);
     
-    TestFunction t(100);
-    Brent solver(t);
+    // TestFunction t(100);
+    // Brent solver(t);
     
-    std::function<SolverAction(SolverProgress)> p = solver_callback;
-    solver.start(&p);
+    // std::function<SolverAction(SolverProgress)> p = solver_callback;
+    // solver.start(&p);
 
-    d res = solver.getSolution();
+    // d res = solver.getSolution();
     
-    cout << "Final solution: x = " << res << endl;
+    // cout << "Final solution: x = " << res << endl;
 
-    Nitrogen nit(293.15,101325);
+    // Nitrogen nit(293.15,101325);
     Air air(293.15,101325);
     Helium helium(293.15,101325);
 

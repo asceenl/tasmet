@@ -30,12 +30,12 @@ protected:
     TaSystem& operator=(const TaSystem& other)=delete;
     TaSystem(const TaSystem& o);
 public:
-    TaSystem(const GlobalConf& g,Gas::GasType gastype);
+    TaSystem(const GlobalConf& gc,const Gas& g);
 
     // Set globalconf configuration. Applies updateNf as well.
     void setGc(const GlobalConf& gc);
     const Gas& getGas() const {return *_gas;}
-    void setGas(Gas::GasType gastype);
+    void setGas(const Gas& g);
     
     // Set and get the mass in the system. If the mass is not set
     // before initializing, the mass is computed from the segment's

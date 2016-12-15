@@ -6,6 +6,12 @@ nonlinPYTHON_wrap.cxx
 *.a
 *.dll
 *.pyd
+*.moc
+*.moc_parameters
+ui_*.h
+moc_*.cpp
+*.pb.*
+*_automoc.cpp
 __pycache__
 cmake_install.cmake
 doc/html

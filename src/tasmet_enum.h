@@ -46,6 +46,8 @@ inline void SplitEnumArgs(const char* szArgs, std::string Array[], int nMax)
 };
 #define DECLARE_ENUM(ename, ...) \
     enum ename { __VA_ARGS__, MAX_NUMBER_OF_##ename }; \
+    const ename ename##_vec[] = { __VA_ARGS__ };\
+    \
     static std::string ename##Strings[MAX_NUMBER_OF_##ename]; \
     inline const char* ename##ToString(ename e) { \
         if (ename##Strings[0].empty()) { SplitEnumArgs(#__VA_ARGS__, ename##Strings, MAX_NUMBER_OF_##ename); } \

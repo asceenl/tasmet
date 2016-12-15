@@ -1,20 +1,19 @@
-// constants.h
+// tasmet_constants.h
 //
 // Author: J.A. de Jong 
 //
 // Description:
-// Definition of important constants
-//////////////////////////////////////////////////////////////////////
+// Definition of code constants
 #pragma once
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef TASMET_CONSTANTS_H
+#define TASMET_CONSTANTS_H
 #include "tasmet_enum.h"
 #include "tasmet_types.h"
 
 template<typename T>
-T max(T t1,T t2) { return t1>t2?t1:t2;}
+T max(T& t1,T& t2) { return t1>t2?t1:t2;}
 template<typename T>
-T min(T t1,T t2) { return t1>t2?t2:t1;}
+T min(T& t1,T& t2) { return t1>t2?t2:t1;}
 
 // Variables and their names
 // Unfortunately to let the code compile with Swig v 2.0, strongly
@@ -40,7 +39,7 @@ DECLARE_ENUM(Varnr,
              mEkin	       // Kinetic energy flow (Watts)
              );
 
-DECLARE_ENUM(Pos,left=0,right=1);
+DECLARE_ENUM(Pos,posleft,posright);
 
 DECLARE_ENUM(EqType,
              Con,			// Continuity
@@ -63,9 +62,10 @@ namespace constants {
 
     typedef unsigned us;
 
-    const us mingp=4;              // Minimum number of gridpoints
-    const us maxgp=3000;           // Maximum number of gridpoints
-
+    const us min_ngp=4;              // Minimum number of gridpoints
+    const us max_ngp=3000;           // Maximum number of gridpoints
+    const us default_ngp = 100;
+    
     const us maxNf=100;              // Maximum number of frequencies
     const d minomg=1e-3;            // Minimal oscillation frequency
     const d maxomg=1e5;
@@ -73,13 +73,31 @@ namespace constants {
     const int maxsegs=30;           // Maximum number of segments in a TaSystem
     const int maxndofs=600000;      // Maximum number of DOFS
 
-    const d minp=1e0;
-    const d maxp=1e7;
-    const d minT=2;                 // Minimal temperature
-    const d maxT=2000;              // Maximal temperature
 
-    const d p0=101325;            // Reference pressure [Pa]
-    const d T0=293.15;            // Reference temperature [K]
+    const d min_p0=1e0;
+    const d max_p0=1e7;
+    const d default_p0=101325;            // Reference pressure [Pa]
+
+    const d min_T0 = 2;                 // Minimal temperature
+    const d max_T0 = 2000;              // Maximal temperature
+    const d default_T0=293.15;            // Reference temperature [K]
+
+
+
+    const d min_funtol = 1e-16;
+    const d default_funtol = 1e-6;
+    const d max_funtol = 1e-1;
+    const us funtol_decimals = 10;
+
+    const us default_maxiter = 1000;
+    const us min_maxiter = 1;
+    const us max_maxiter = 100000000;
+
+    const us field_decimals = 10;
+    
+    const d default_L = 1.0;
+    const d min_L = 1e-9;
+    const d max_L = 1e6;
 
     // These variable numbers are important, as they determine the
     // position of these variables in the array in cell.h
@@ -94,4 +112,4 @@ namespace constants {
   
 } // namespace constants
 
-#endif // CONSTANTS_H
+#endif // TASMET_CONSTANTS_H

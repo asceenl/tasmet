@@ -24,7 +24,7 @@ protected:
     d Rs() const {return 297;}
 public:
     Nitrogen(d T0,d p0):PerfectGas(nitrogen,T0,p0){}
-    
+    Nitrogen* copy() const { return new Nitrogen(T0(),p0());}  
     const vd& cpc() const { return _cpc; }
     d mu(d T,d p) const;
     d kappa(d T,d p) const;

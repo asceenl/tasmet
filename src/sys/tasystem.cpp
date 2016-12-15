@@ -13,15 +13,15 @@
 #include "tasmet_exception.h"
 #include "tasmet_constants.h"
 
-TaSystem::TaSystem(const GlobalConf& gc,Gas::GasType gastype):
+TaSystem::TaSystem(const GlobalConf& gc,const Gas& g):
     _gc(new GlobalConf(gc)),
-    _gas(Gas::newGas(gastype))
+    _gas(g.copy())
 {
     TRACE(14,"TaSystem::TaSystem(gc,gastype)");
 }
 TaSystem::TaSystem(const TaSystem& o):
     _gc(o._gc),                 // Share a ptr to the Global conf
-    _gas(Gas::newGas(Gas::GasType(*o._gas)))
+    _gas(o._gas->copy())
 {
     TRACE(25,"TaSystem::TaSystem(TaSystem&) copy");
 

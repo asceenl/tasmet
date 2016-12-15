@@ -31,6 +31,8 @@ public:
     d mu(d T,d p) const;
     d kappa(d T,d p) const;
     ~Air(){}
+
+    Air* copy() const { return new Air(T0(),p0());}
 };
 
   

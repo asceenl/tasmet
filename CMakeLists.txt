@@ -1,5 +1,5 @@
 # CMakeList.txt for TaSMET
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.6)
 project(TaSMET)
 set(PACKAGE_VERSION 0.1)
 message("Running Cmake for TaSMET version ${PACKAGE_VERSION}")
@@ -19,12 +19,24 @@ add_definitions(-DTASMET_DEBUG=1)
 #====================================================
 
 # Always required make flags in case of both compilers
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -fPIC -Wfatal-errors -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wfatal-errors -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
+#========Qt5 Stuff ==================================
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Protobuf REQUIRED)
+# Add the include directories for the Qt 5 Widgets module to
+# the compile lines.
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
+# Use the compile definitions defined in the Qt 5 Widgets module
+add_definitions(${Qt5Widgets_DEFINITIONS})
 
-# Stop letting Numpy complain about its API
-add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_4_API_VERSION)
-
+# Add compiler flags for building executables (-fPIE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
 #==================================================
 # Optimized code flags *******************************************
 #==================================================
@@ -75,6 +87,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_tools)
 # Python #####################
 # ##########################
 
+include_directories(/usr/include/PythonQt)
+
+
 if(TaSMET_PY_VERSION)
   # Find major version from version string
   set(PYTHON_LIBRARY "/usr/lib/libpython${TaSMET_PY_VERSION}.so")
@@ -110,4 +125,8 @@ include_directories(
 # Add the code subdirectory
 add_subdirectory(src)
 add_subdirectory(testing)
+
+# add_executable(tasmet src/main.cpp src/main.moc)
+add_executable(tasmet src/main.cpp)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets)
 

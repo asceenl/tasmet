@@ -1,0 +1,50 @@
+syntax = "proto2";
+package pb;
+
+enum SolidType {
+     Stainless = 0;
+     Copper = 1;
+}
+enum GridType {
+     Linear = 0;
+     BlGrid = 1;
+}
+enum HeatTransferModel {
+     Isentropic = 0;
+     LaminarHeatTransfer = 1;
+}
+enum DragModel {
+     Inviscid = 0;
+     LaminarDrag = 1;
+}
+enum Cshape {
+     Blapprox = 0;
+     Circ = 1;
+     VertPlates = 2;
+}
+message Geom {
+}
+enum SolidTemperatureModel {
+     Prescribed = 0;
+     HeatBalance = 1;
+}
+
+message Duct {
+    required uint32 id = 1;
+    required string name = 2;
+    required double length = 3 [default = 1];
+    optional uint32 ngp = 4 [default = 100];
+    optional double dxb = 5 [default = 0.1];
+    optional double dxmid = 6 [default = 0.01];
+    required GridType gridtype = 8 [default = Linear];
+    required string area = 9 [default="1+0*x/L"];
+    required string phi = 10 [default = "1+0*x/L"];
+    optional string rh = 11 [default = ""];
+    required Cshape cshape = 12;
+    required SolidType solidtype = 13;
+    required HeatTransferModel htmodel = 14;
+    required DragModel dragmodel = 15 [default = Inviscid];
+    required string stempfunc = 16 [default = "293.15+x*x/L"];
+    required SolidTemperatureModel stempmodel = 17 [default = Prescribed];
+
+}

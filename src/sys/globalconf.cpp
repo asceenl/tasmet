@@ -1,3 +1,10 @@
+// globalconf.cpp
+//
+// last-edit-by: J.A. de Jong 
+// 
+// Description:
+//
+//////////////////////////////////////////////////////////////////////
 #include "globalconf.h"
 #include "tasmet_constants.h"
 #include "tasmet_exception.h"
@@ -65,4 +72,5 @@ void GlobalConf::setomg(d omg){
 
 }
 
+//////////////////////////////////////////////////////////////////////
 

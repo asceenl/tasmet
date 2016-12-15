@@ -29,7 +29,7 @@ static_assert(false,"TRACER macro not defined");
 #define POS FILEWITHOUTPATH << ":" << __LINE__ <<  ": "
 // End not so interesting part
 
-#define RAWWARNING(a) std::cout << red << a << def << "\n";
+#define RAWWARNING(a) std::cout << RED_COLOR << a << DEFAULT_COLOR << "\n";
 #define WARN(a) RAWWARNING(POS << "WARNING: " << a)
 
 // SHOULD NOT BE USED IN A LIBRARY!!
@@ -58,7 +58,8 @@ static_assert(false,"TRACER macro not defined");
 #define BUILDINTRACELEVEL (-10)
 #endif
 
-extern int tasmet_tracer_level;
+#include <atomic>
+extern std::atomic<int> tasmet_tracer_level;
 // Use this preprocessor command to introduce one tasmet_tracer_level integer per unit
 /* Introduce one static logger */
 // We trust that the compiler will eliminate 'dead code', which means

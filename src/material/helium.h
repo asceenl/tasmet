@@ -23,6 +23,7 @@ public:
     d mu(d T,d p) const;
 
     d kappa(d T,d p) const;
+    Helium* copy() const { return new Helium(T0(),p0());}
 
     virtual ~Helium(){}
 };

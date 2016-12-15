@@ -6,10 +6,9 @@
 #include "tasmet_enum.h"
 
 
+DECLARE_ENUM(SolidType,stainless,stainless_hopkins,copper,kapton);
+
 class Solid{
-public:
-    DECLARE_ENUM(SolidType,stainless,stainless_hopkins,copper,kapton);
-private:
     SolidType _solidtype;
 protected:
     Solid(const SolidType);

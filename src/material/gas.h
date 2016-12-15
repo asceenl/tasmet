@@ -20,9 +20,11 @@
         varname_ = varname(T(i),p(i));\
     return varname_
 
+DECLARE_ENUM(GasType,air,helium,nitrogen);
+
 class Gas{
 public:
-    DECLARE_ENUM(GasType,air,helium,nitrogen);
+
 private:    
     GasType _gastype;
 protected:
@@ -35,10 +37,9 @@ public:
     virtual ~Gas(){}
 
     // Static method to generate a Gas
+    virtual Gas* copy() const = 0;
 
-
-    static Gas* newGas(const GasType gastype,d T0=constants::T0,
-                     d p0=constants::p0);
+    static Gas* newGas(const GasType gastype,d T0, d p0);
 
     operator GasType() { return _gastype;}
 

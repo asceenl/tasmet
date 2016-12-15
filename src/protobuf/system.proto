@@ -1,0 +1,24 @@
+syntax = "proto2";
+package pb;
+
+import duct;
+
+enum SystemType {
+    TaSystem = 0;
+}
+enum GasType {
+     air = 0;
+     helium = 1;
+     nitrogen = 2;
+}
+message System {
+    required SystemType systemtype = 1;
+    required uint32 Nf = 2;
+    required double freq = 3;
+    required GasType gastype = 4;
+    required double p0 = 5;
+    required double T0 = 6;
+
+    repeated Duct ducts = 7;
+
+}

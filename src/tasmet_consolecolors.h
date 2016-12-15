@@ -10,12 +10,9 @@
 #define CONSOLECOLORS_H
 #include <iostream>
 
-#ifndef SWIG
-#define red "\e[31m"
-#define green "\e[32m"
-#define def " \e[39m"
-
-#endif  // SWIG
+#define RED_COLOR "\e[31m"
+#define GREEN_COLOR "\e[32m"
+#define DEFAULT_COLOR " \e[39m"
 
 // Command to clear the content of a console
 inline void clearConsole(){

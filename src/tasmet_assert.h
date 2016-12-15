@@ -29,12 +29,13 @@ struct is_same<T, T> : std::true_type {};
 
 void tasmet_assertfailed(const char* filename,size_t linenr,const char* statement);
 
-#define tasmet_assert(assertion,txt) \
-    if (!(assertion))                                                \
-        {                                                            \
+#define tasmet_assert(assertion,txt)                                  \
+{                                                                     \
+    if (!(assertion))                                                 \
+        {                                                             \
             tasmet_assertfailed(__FILE__, __LINE__, txt );            \
         }                                                             \
-    }                                                                 \
+}                                                                     
 
 #else
 #define tasmet_assert(assertion,txt)
