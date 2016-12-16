@@ -18,6 +18,8 @@
 #include "tasmet_tracer.h"
 #include "add_duct_dialog.h"
 
+const QString default_name = "Unnamed segment";
+
 TaSMETMainWindow::TaSMETMainWindow():
     window(new Ui::MainWindow())
 {
@@ -48,8 +50,7 @@ TaSMETMainWindow::TaSMETMainWindow():
     window->p0->setValidator(new QDoubleValidator(constants::min_p0,
                                                   constants::max_p0,
                                                   constants::field_decimals));
-    
-
+    window->name->setText(default_name);
 
 }
 TaSMETMainWindow::~TaSMETMainWindow(){
@@ -68,9 +69,44 @@ void TaSMETMainWindow::closeEvent(QCloseEvent *event) {
 }
 void TaSMETMainWindow::on_addsegment_clicked() {
 
-    AddDuctDialog dialog(0,"hola",this);
+    us id = window->segmentid_add->value();
+    string name = window->name->text().toStdString();
+    VARTRACE(15,name);
+    bool edit = false;
 
-    int rv = dialog.exec();
+    AddDuctDialog dialog(name,this);
 
+    auto& ductmap = *_system.mutable_ducts();
+    if(ductmap.find(id) != ductmap.end()) {
+        dialog.set(ductmap[id]);
+    }
+
+    int code = dialog.exec();
+    if(code == QDialog::Accepted) {
+
+        VARTRACE(15,dialog.get().name());
+        ductmap[id] = dialog.get();
+        window->segmentid_add->setValue(id+1);
+
+    }
+
+    
+}
+void TaSMETMainWindow::on_segmentid_add_valueChanged(int id) {
+
+    auto& ductmap = *_system.mutable_ducts();
+    if(ductmap.find(id) != ductmap.end()) {
+        window->name->setText(QString::fromStdString(ductmap[id].name()));
+     }
+}
+void TaSMETMainWindow::on_name_textEdited() {
+
+    auto& ductmap = *_system.mutable_ducts();
+    int id = window->segmentid_add->value();
+    
+    if(ductmap.find(id) != ductmap.end()) {
+        ductmap[id].set_name(window->name->text().toStdString());
+        
+    }
 }
 //////////////////////////////////////////////////////////////////////

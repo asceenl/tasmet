@@ -23,7 +23,7 @@ DECLARE_ENUM(PreviewShow,CSArea,Porosity,HydraulicRadius,SolidTemperatureFunctio
 
 
 
-AddDuctDialog::AddDuctDialog(const us id,const std::string& name,QWidget* parent):
+AddDuctDialog::AddDuctDialog(const std::string& name,QWidget* parent):
     QDialog(parent),
     _dialog(new Ui::add_duct_dialog),
     _duct(pb::Duct::default_instance())
@@ -32,7 +32,6 @@ AddDuctDialog::AddDuctDialog(const us id,const std::string& name,QWidget* parent
     _blocked = true;
     _dialog->setupUi(this);
 
-    _duct.set_id(id);
     _duct.set_name(name);
 
     QString title = "Add/edit duct segment '";
@@ -93,11 +92,13 @@ AddDuctDialog::AddDuctDialog(const us id,const std::string& name,QWidget* parent
     _dialog->gridtype->setCurrentIndex(0);
 
     // create a single graph in the QCP
+    QCPScatterStyle scatter;
+    scatter.setShape(QCPScatterStyle::ssDiamond);
     _plot->addGraph();
-
+    _plot->graph(0)->setLineStyle(QCPGraph::lsLine);
+    _plot->graph(0)->setScatterStyle(scatter);    
     
     _duct.set_length(constants::default_L);
-    _duct.set_name("Unnamed");
     _duct.set_dxb(0.01);
     _duct.set_dxmid(0.1);
     _duct.set_gridtype(pb::Linear);

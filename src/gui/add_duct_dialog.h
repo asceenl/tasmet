@@ -27,8 +27,12 @@ class AddDuctDialog: public QDialog {
     pb::Duct _duct;
     bool _blocked = false;
 public:
-    AddDuctDialog(const us id,const std::string& name,QWidget* parent = nullptr);
+    AddDuctDialog(const std::string& name,QWidget* parent = nullptr);
     ~AddDuctDialog();
+
+    void set(const pb::Duct&);
+    const pb::Duct& get() const {return _duct; }
+
 private slots:
     void accept();
     void reject();
@@ -50,11 +54,10 @@ private slots:
     void on_stempmodel_currentIndexChanged(int) {changed();}
 
     void on_previewshow_currentIndexChanged(int) {changed();}    
+
 private:
     // Called whenever the user changes a field
     void changed();
-    void set(const pb::Duct&);
-    const pb::Duct& get() const {return _duct; }
     
 
 };

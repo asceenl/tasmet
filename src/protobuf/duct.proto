@@ -30,7 +30,6 @@ enum SolidTemperatureModel {
 }
 
 message Duct {
-    required uint32 id = 1;
     required string name = 2;
     required double length = 3 [default = 1];
     optional uint32 ngp = 4 [default = 100];

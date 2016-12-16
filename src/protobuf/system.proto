@@ -19,6 +19,6 @@ message System {
     required double p0 = 5;
     required double T0 = 6;
 
-    repeated Duct ducts = 7;
+    map<uint32,Duct> ducts = 7;
 
 }
