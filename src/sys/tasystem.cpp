@@ -68,17 +68,17 @@ int TaSystem::getArbitrateMassEq(const vus& neqs) const {
     }
     return arbitrateMassEq;
 }
-TaSystem& TaSystem::operator+=(const Segment& s){
+TaSystem& TaSystem::add(const us id,const Segment& s){
 
-    TRACE(24,"TaSystem::operator+=(Seg)");
+    // TRACE(24,"TaSystem::add(id,Seg)");
 
-    if(_segs.find(s.getid())!=_segs.end()){
-        std::stringstream error;
-        error << "Segment with id " << s.getid() <<
-            "already present in the system";
-        throw TaSMETError(error);
-    }
-    _segs[s.getid()]=s.copy();
+    // if(_segs.find(s.getid())!=_segs.end()){
+    //     std::stringstream error;
+    //     error << "Segment with id " << s.getid() <<
+    //         "already present in the system";
+    //     throw TaSMETError(error);
+    // }
+    _segs[id]=s.copy();
     return *this;
 }
 void TaSystem::updateSolution(const vd& sol) {

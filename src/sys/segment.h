@@ -23,15 +23,12 @@ class TaSystem;
 
 class Segment{
 
-    us _id; // Unique number for each segment in a
-    // TaSystem
-
     // User identifier
     std::string _name;
 
 protected:
-    Segment(us id,const std::string& name): _id(id),_name(name) {}
-    Segment(const Segment& o): Segment(o._id,o._name){}
+    Segment(const std::string& name): _name(name) {}
+    Segment(const Segment& o): Segment(o._name){}
     Segment& operator=(const Segment&)=delete;
 public:
     virtual ~Segment(){}
@@ -40,9 +37,7 @@ public:
     
     // Get and set name
     const std::string& getName() const{return _name;} // This one is just the name
-    us getid() const{return _id;} // This one is just the name
     void setName(const std::string& name){ _name = name; } // This one is just the name
-    void setid(const us id){ _id=id;} // Set ID
     
     // Tell a TaSystem whether this Segment arbitrates Mass or
     // not. The special return value of -1 tells it does not. If it

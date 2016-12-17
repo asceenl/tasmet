@@ -11,7 +11,8 @@ enum GridType {
 }
 enum HeatTransferModel {
      Isentropic = 0;
-     LaminarHeatTransfer = 1;
+     NoHeatTransfer = 1;     
+     LaminarHeatTransfer = 2;
 }
 enum DragModel {
      Inviscid = 0;

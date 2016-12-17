@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "ui_add_duct_dialog.h"
 #include "add_duct_dialog.h"
-#include <PythonQt.h>
+
 #include <QSignalBlocker>
 #include <qcustomplot.h>
 #include "tasmet_constants.h"
@@ -18,6 +18,7 @@
 #include "duct/grid.h"
 #include <QVector>
 #include "tasmet_qt.h"
+#include "geom.h"
 
 DECLARE_ENUM(PreviewShow,CSArea,Porosity,HydraulicRadius,SolidTemperatureFunction)
 
@@ -148,59 +149,6 @@ void AddDuctDialog::set(const pb::Duct& duct) {
     _dialog->stempfunc->setText(QString::fromStdString(duct.stempfunc()));
 }
 
-class PyEvaluate {
-    PythonQtObjectPtr _context;
-    PythonQt* _pyqt;
-public:
-    PyEvaluate(const std::string& fun_return) {
-
-        _pyqt = PythonQt::self();
-        if(_pyqt->hadError()) {
-            TRACE(15,"Previous error in script");
-            _pyqt->handleError();
-            _pyqt->clearError();
-        }
-
-        _context = _pyqt->getMainModule();
-        
-
-        std::stringstream script;
-        // script << "print(\"hoi\")\n";
-        script << "def myfun(x,L):\n    return ";
-        script << fun_return << "\n";
-
-        _context.evalScript(QString::fromStdString(script.str()));
-
-        if(_pyqt->hadError()) {
-            _pyqt->clearError();
-            throw TaSMETError("Script error");
-        }
-
-    }
-    vd operator()(const d L,const vd& x) {
-
-        vd y(x.size());
-
-        QVariant res;
-
-        for(us i=0;i<x.size();i++) {
-
-            QVariantList args;
-            args << x(i) << L;
-
-            res = _context.call("myfun",args);
-            y(i) = res.toDouble();
-            
-            if(_pyqt->hadError()) {
-                _pyqt->clearError();
-                throw TaSMETError("Script error");
-            }
-        }
-        return y;
-    }
-};
-
-
 
 void AddDuctDialog::changed(){
     TRACE(15,"AddDuctDialog::changed()");
@@ -226,77 +174,56 @@ void AddDuctDialog::changed(){
     // Empty the graph
     _plot->graph(0)->setData(QVector<d>(),QVector<d>());
 
-    std::unique_ptr<Grid> grid;
-
     switch (_duct.gridtype()) {
     case pb::Linear:
-        try {
-            grid = std::unique_ptr<Grid>(new LinearGrid(_duct.ngp(),_duct.length()));
-        }
-        catch(...) {
-            return;
-        }
         _dialog->ngp->setEnabled(true);        
         _dialog->dxb->setEnabled(false);
         _dialog->dxmid->setEnabled(false);
         break;
     case pb::BlGrid:
-        
-        try {
-            grid = std::unique_ptr<Grid>(new BlGrid(_duct.length(),
-                                                    _duct.dxb(),
-                                                    _duct.dxmid()));
-        }
-        catch(...) {
-            return;
-        }
-        _duct.clear_ngp();
         _dialog->ngp->setEnabled(false);        
         _dialog->dxb->setEnabled(true);
         _dialog->dxmid->setEnabled(true);
         break;
     default:
+        tasmet_assert(false,"Invalid grid type");
         return;
         break;
     }
 
-    vd x = grid->getx();
-    vd y;
-
+    
     PreviewShow pshow = (PreviewShow) _dialog->previewshow->currentIndex();
     
-    std::string pyeval_return_type;
+    std::unique_ptr<Geom> geom;
+    try {
+        geom = std::unique_ptr<Geom>(new Geom(_duct));
+    }
+    catch(TaSMETError& e) {
+        return;
+    }
+    vd x = geom->x;
+    vd y;
 
     switch (pshow) {
     case CSArea:
-        pyeval_return_type = _duct.area();
         _plot->yAxis->setLabel("S [m^2]");
+        y = geom->S;
         break;
     case Porosity:
-        pyeval_return_type = _duct.phi();
         _plot->yAxis->setLabel("phi [-]");
+        y = geom->phi;
         break;
     case HydraulicRadius:
-        pyeval_return_type = _duct.rh();
-        _plot->yAxis->setLabel("rh [m]");        
+        _plot->yAxis->setLabel("rh [m]");
+        y = geom->rh;
         break;
     case SolidTemperatureFunction:
-        pyeval_return_type = _duct.stempfunc();
-        _plot->yAxis->setLabel("Ts [K]");        
+        _plot->yAxis->setLabel("Ts [K]");
+        y = geom->rh;
         break;
     default:
         tasmet_assert(false,"Unhandled PreviewShow case");
         break;
-    }
-
-    try {
-        PyEvaluate pyeval(pyeval_return_type);
-        y = pyeval(_duct.length(),x);
-
-    }
-    catch(TaSMETError& e) {
-        
-        return;
     }
 
     QVector<d> qx = from_arma(x);

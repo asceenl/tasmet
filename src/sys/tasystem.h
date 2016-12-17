@@ -48,7 +48,7 @@ public:
 
     us nSegments() const {return _segs.size();}
 
-    TaSystem& operator+=(const Segment& s);	// Add a segment to the
+    TaSystem& add(const us id,const Segment& s);	// Add a segment to the
     // system. It creates a copy
 
     dmat showJac();

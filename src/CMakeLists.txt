@@ -7,7 +7,7 @@ include_directories(
   ${ARMADILLO_INCLUDE_DIRS}
   .
   protobuf
-  # duct
+  duct
   # duct/cell
   # duct/connectors
   # duct/eq
@@ -29,8 +29,10 @@ add_library(tasmet_src
   tasmet_tracer.cpp
   tasmet_exception.cpp
   tasmet_assert.cpp
+  tasmet_pyeval.cpp
 
   duct/grid.cpp
+  duct/geom.cpp
 
   funcs/bessel.cpp
   funcs/cbessj.cpp

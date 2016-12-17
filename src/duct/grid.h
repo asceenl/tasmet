@@ -14,7 +14,7 @@ public:
 
 class LinearGrid: public Grid{
     us ngp;
-    d L;			// Length of the Duct
+    d L; // Length of the Duct
 public:
     LinearGrid(us ngp,d L);
     LinearGrid(const LinearGrid& g):LinearGrid(g.ngp,g.L){}
@@ -26,7 +26,7 @@ public:
 // dxb: boundary layer grid spacing (minimal grid spacing)
 // xb: boundary layer tickness
 // dxmid: spacing in the middle part
-  
+
 
 class BlGrid:public Grid{
     d L,dxb,dxmid;

@@ -20,15 +20,15 @@ LinearGrid::LinearGrid(us ngp,d L):
         throw TaSMETError(error);
     }
     if(L<=0){
-        throw TaSMETError("Illegal length chosen.");
+        throw TaSMETError("LinearGrid: illegal length chosen.");
     }
 }
 BlGrid::BlGrid(d L,d dxb,d dxmid):
     L(L),dxb(dxb),dxmid(dxmid)
 {
     TRACE(15,"BlGrid::BlGrid()");
-    if(L<=0 || dxb<=0 || dxmid < dxb){
-        throw TaSMETError("Illegal length chosen.");
+    if(L<=0 || dxb<=0 || dxmid <= dxb){
+        throw TaSMETError("BlGrid: illegal length chosen.");
     }
     
 }
@@ -45,6 +45,5 @@ vd BlGrid::getx() const {
     vd xi=linspace(0,1,N);
     
     return L*0.5*(1+tanh(delta*(xi-0.5))/tanh(delta/2));
-
     
 }
