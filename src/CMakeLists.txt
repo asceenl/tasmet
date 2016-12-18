@@ -33,6 +33,7 @@ add_library(tasmet_src
 
   duct/grid.cpp
   duct/geom.cpp
+  duct/duct.cpp
 
   funcs/bessel.cpp
   funcs/cbessj.cpp

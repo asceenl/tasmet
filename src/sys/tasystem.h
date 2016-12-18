@@ -16,14 +16,12 @@
 #include <map>
 
 // Inherit all global configuration members
-class TaSystem : public GradientNonlinearSystem {
+class TaSystem : public GradientNonlinearSystem, public GlobalConf {
 protected:
 
     d _mass = -1;
     
     std::map<us,Segment*> _segs;		
-
-    gc_ptr _gc;
 
     Gas* _gas = nullptr;
     
@@ -68,7 +66,7 @@ public:
     void updateNf(us);
 
     // Reset amplitude data in higher harmonics
-    void resetHarmonics();
+    // void resetHarmonics();
 
     // void delseg(us n); // Not yet implemented.  Delete a segment
     // from the system (we have to determine how elaborated the API

@@ -14,13 +14,13 @@
 #include "tasmet_constants.h"
 
 TaSystem::TaSystem(const GlobalConf& gc,const Gas& g):
-    _gc(new GlobalConf(gc)),
+    GlobalConf(gc)),
     _gas(g.copy())
 {
     TRACE(14,"TaSystem::TaSystem(gc,gastype)");
 }
 TaSystem::TaSystem(const TaSystem& o):
-    _gc(o._gc),                 // Share a ptr to the Global conf
+    GlobalConf(o),                 // Share a ptr to the Global conf
     _gas(o._gas->copy())
 {
     TRACE(25,"TaSystem::TaSystem(TaSystem&) copy");
@@ -206,7 +206,7 @@ void TaSystem::show(us detailnr){
 
     cout << "########################## Showing TaSystem...\n";
     cout << "Showing Global configuration...\n";
-    _gc->show();
+    GlobalConf::show();
     
     if(detailnr>0){
         for(auto seg:_segs){
@@ -272,11 +272,11 @@ sdmat TaSystem::jacobian() const {
     TRACE(14,"TaSystem::Jac()");
     return jacTriplets();            // Implicitly converts to sdmat
 }
-void TaSystem::resetHarmonics(){
-    for(auto seg: _segs) {
-        seg.second->resetHarmonics();
-    }
-}
+// void TaSystem::resetHarmonics(){
+//     for(auto seg: _segs) {
+//         seg.second->resetHarmonics();
+//     }
+// }
 dmat TaSystem::showJac(){
 
     TRACE(15,"TaSystem::showJac()");

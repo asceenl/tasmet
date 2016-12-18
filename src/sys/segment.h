@@ -46,8 +46,8 @@ public:
     virtual int arbitrateMassEq() const {return -1;}
     virtual void residual(const TaSystem&,vd&,const us insertion_start) const=0;
 
-    virtual void updateSolution(const TaSystem&,const vd&) const = 0;
-    virtual vd getSolution(const TaSystem&,vd& sol,const us insertion_start) const = 0;
+    virtual void updateSolution(const TaSystem&,const vd&) = 0;
+    virtual getSolution(const TaSystem&,vd& sol,const us insertion_start) const = 0;
 
     // Return the total number of equations in this segment
     virtual us getNEqs(const TaSystem&) const { return 0;}
@@ -61,7 +61,7 @@ public:
     virtual void show(const TaSystem&,us verbosity_level) const=0;
 
     // Reset amplitude data in higher harmonics
-    void resetHarmonics();
+    // virtual void resetHarmonics() = 0;
 
     // Fill Jacobian with values from the equations in this
     // segment/connector.
