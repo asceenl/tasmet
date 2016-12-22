@@ -21,7 +21,7 @@ template<typename system_T,typename result_T>
 Solver<system_T,result_T>::Solver(const system_T& sys){
     _sys = sys.copy();
     if(!_sys)
-        throw TasMETBadAlloc();
+        throw TaSMETBadAlloc();
     _running = false;
 }
 
@@ -51,7 +51,7 @@ void Solver<system_T,result_T>::start(progress_callback* callback,bool wait){
                                                _sys,
                                                callback);
         if(!_solver_thread)
-            throw TasMETBadAlloc();
+            throw TaSMETBadAlloc();
     }
     else {
 

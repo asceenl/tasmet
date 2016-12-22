@@ -15,22 +15,25 @@
 #include <QVariantList>
 #include <sstream>
 
-inline void getError(PythonQt* pyqt) {
+inline void getError(PythonQt* pyqt,string err_msg) {
     if(pyqt->hadError()) {
         pyqt->handleError();
         pyqt->clearError();
 
-        throw TaSMETError("Script error");
+        throw TaSMETError(err_msg);
     }
 }
 
 
-EvaluateFun::EvaluateFun(const string& fun_return) {
+EvaluateFun::EvaluateFun(const string& fun_return,
+                         const string& err_msg):
+    _err_msg(err_msg)
+{
 
     _pyqt = PythonQt::self();
 
     try {
-        getError(_pyqt);
+        getError(_pyqt,_err_msg);
     }
     catch(TaSMETError& e){
         cerr << "Uncleared error in script" << endl;
@@ -46,12 +49,12 @@ EvaluateFun::EvaluateFun(const string& fun_return) {
     context.evalScript(QString::fromStdString(script.str()));
 
     // See if we have an error. If so, throw
-    getError(_pyqt);
+    getError(_pyqt,_err_msg);
 
 }
 EvaluateFun::~EvaluateFun() {
     try {
-        getError(_pyqt);
+        getError(_pyqt,_err_msg);
     }
     catch(...) {
 
@@ -72,7 +75,7 @@ void EvaluateFun::addGlobalDef(const string& name,const d value) {
         
     context.evalScript(QString::fromStdString(script.str()));        
 
-    getError(_pyqt);
+    getError(_pyqt,_err_msg);
 
 }
 vd EvaluateFun::operator()(const vd& x) {
@@ -91,7 +94,7 @@ vd EvaluateFun::operator()(const vd& x) {
         res = context.call("myfun",args);
         y(i) = res.toDouble();
             
-        getError(_pyqt);
+        getError(_pyqt,_err_msg);
     }
     return y;
 }

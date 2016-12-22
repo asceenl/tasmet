@@ -9,11 +9,14 @@
 #ifndef _TASYSTEM_H_
 #define _TASYSTEM_H_
 #include "system.h"
-#include "segment.h"
 #include "globalconf.h"
 #include "triplets.h"
 #include "gas.h"
+#include "protobuf/system.pb.h"
 #include <map>
+#include <memory>
+
+class Segment;
 
 // Inherit all global configuration members
 class TaSystem : public GradientNonlinearSystem, public GlobalConf {
@@ -23,17 +26,17 @@ protected:
     
     std::map<us,Segment*> _segs;		
 
-    Gas* _gas = nullptr;
+    std::unique_ptr<Gas> _gas;
+
+    vd _solution;
+    vus _startdof;              // Store the start DOFS for each segment
     
     TaSystem& operator=(const TaSystem& other)=delete;
     TaSystem(const TaSystem& o);
 public:
-    TaSystem(const GlobalConf& gc,const Gas& g);
+    TaSystem(const pb::System&);
 
-    // Set globalconf configuration. Applies updateNf as well.
-    void setGc(const GlobalConf& gc);
-    const Gas& getGas() const {return *_gas;}
-    void setGas(const Gas& g);
+    const Gas& gas() const {return *_gas;}
     
     // Set and get the mass in the system. If the mass is not set
     // before initializing, the mass is computed from the segment's
@@ -46,17 +49,17 @@ public:
 
     us nSegments() const {return _segs.size();}
 
-    TaSystem& add(const us id,const Segment& s);	// Add a segment to the
-    // system. It creates a copy
-
     dmat showJac();
     virtual void show(us detailnr=0);
 
     vd residual() const; 
 
     vd getSolution() const;
+
+    // Obtain the solution vector for the Segment with given id
+    const arma::subview_col<d> getSolution(const us seg_id) const;
     
-    virtual void updateSolution(const vd& resvec);	// Update the solution
+    virtual void updateSolution(const vd& sol) {_solution = sol; }	// Update the solution
 
     // Compute Jacobian matrix. The dampfac value is used in an
     // EngineSystem
@@ -79,7 +82,8 @@ public:
 protected:
     virtual int getArbitrateMassEq(const vus& neqs) const;
     virtual TripletList jacTriplets() const;
-
+private:
+    void cleanup();
 }; // class System
   
 

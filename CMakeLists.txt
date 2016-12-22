@@ -14,6 +14,7 @@ add_definitions(-DTRACER=1)
 
 add_definitions(-DTASMET_FLOAT=64)
 add_definitions(-DTASMET_DEBUG=1)
+add_definitions(-DARMA_DONT_USE_WRAPPER)
 #====================================================
 # Compiler settings ************************************************
 #====================================================
@@ -48,11 +49,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native -mtune=native")
 # set(CMAKE_CLANG "${CMAKE_GCC} -march=native -mtune=native -fopenmp")
 
+
 # To disable bound checking on std::vector, and to disable assertions
 # add_definitions(-DNDEBUG)
 
 # To increase speed on Armadillo
 # add_definitions(-DARMA_NO_DEBUG)
+
 
 # Disable traces
 # add_definitions(-DTRACER=0)
@@ -128,5 +131,5 @@ add_subdirectory(testing)
 
 # add_executable(tasmet src/main.cpp src/main.moc)
 add_executable(tasmet src/main.cpp)
-target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets openblas)
 

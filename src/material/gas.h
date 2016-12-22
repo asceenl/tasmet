@@ -14,13 +14,20 @@
 #include "tasmet_types.h"
 #include "tasmet_constants.h"
 
+#include "protobuf/gas.pb.h"
+
+using pb::GasType;
+using pb::air;
+using pb::helium;
+using pb::nitrogen;
+
 #define element_wise(varname) \
     vd varname_(T.size());     \
     for(us i=0;i<T.size();i++) \
         varname_ = varname(T(i),p(i));\
     return varname_
 
-DECLARE_ENUM(GasType,air,helium,nitrogen);
+
 
 class Gas{
 public:

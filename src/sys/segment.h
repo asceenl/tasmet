@@ -23,18 +23,23 @@ class TaSystem;
 
 class Segment{
 
-    // User identifier
+protected:
+    // ID
+    us _id;
+    // Name
     std::string _name;
 
-protected:
-    Segment(const std::string& name): _name(name) {}
-    Segment(const Segment& o): Segment(o._name){}
+
+    Segment(const us id,const std::string& name): _id(id),_name(name) {}
+    Segment(const Segment& o): Segment(o._id,o._name){}
     Segment& operator=(const Segment&)=delete;
 public:
     virtual ~Segment(){}
 
     virtual Segment* copy() const = 0;
     
+    virtual vd initialSolution(const TaSystem&) const = 0;
+
     // Get and set name
     const std::string& getName() const{return _name;} // This one is just the name
     void setName(const std::string& name){ _name = name; } // This one is just the name
@@ -44,13 +49,14 @@ public:
     // does, the derived class should return which equation should be
     // overwritten with the mass arbitration equation.
     virtual int arbitrateMassEq() const {return -1;}
-    virtual void residual(const TaSystem&,vd&,const us insertion_start) const=0;
+    virtual void residual(const TaSystem&,
+                          arma::subview_col<d>&& residual // Here we store the residual
+                          ) const=0;
 
-    virtual void updateSolution(const TaSystem&,const vd&) = 0;
-    virtual getSolution(const TaSystem&,vd& sol,const us insertion_start) const = 0;
 
     // Return the total number of equations in this segment
     virtual us getNEqs(const TaSystem&) const { return 0;}
+    
     // Return the total number of DOFS in this segment
     virtual us getNDofs(const TaSystem&) const { return 0;}
 

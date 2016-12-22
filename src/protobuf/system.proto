@@ -2,14 +2,10 @@ syntax = "proto2";
 package pb;
 
 import "duct.proto";
+import "gas.proto";
 
 enum SystemType {
     TaSystem = 0;
-}
-enum GasType {
-     air = 0;
-     helium = 1;
-     nitrogen = 2;
 }
 message System {
     required SystemType systemtype = 1;
@@ -18,7 +14,7 @@ message System {
     required GasType gastype = 4;
     required double p0 = 5;
     required double T0 = 6;
-
     map<uint32,Duct> ducts = 7;
+    repeated double solution = 8;
 
 }

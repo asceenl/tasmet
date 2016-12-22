@@ -12,12 +12,44 @@
 #include "tasmet_assert.h"
 #include "tasmet_exception.h"
 #include "tasmet_constants.h"
+#include "duct.h"
 
-TaSystem::TaSystem(const GlobalConf& gc,const Gas& g):
-    GlobalConf(gc)),
-    _gas(g.copy())
+TaSystem::TaSystem(const pb::System& sys):
+    GlobalConf(sys.nf(),sys.freq())
 {
-    TRACE(14,"TaSystem::TaSystem(gc,gastype)");
+    TRACE(14,"TaSystem::TaSystem()");
+
+    if(sys.systemtype() != pb::TaSystem) {
+        throw TaSMETError("Invalid system type for TaSystem");
+    }
+
+    // Checking parameters T0 and p0 also happens in newGas method
+    _gas = std::unique_ptr<Gas>(Gas::newGas(sys.gastype(),sys.t0(),sys.p0()));
+    if(!_gas) throw  TaSMETBadAlloc();
+
+    // Create all ducts
+    for(const auto& d : sys.ducts()) {
+        try {
+            _segs[d.first] = new Duct(d.first,d.second);
+            if(!_segs[d.first]) throw TaSMETBadAlloc();
+        }
+        catch(TaSMETError e) {
+            // Cleanup the already successfully created Ducts
+            cleanup();
+        }
+    }
+    
+    // Copy solution vector, if valid
+    const auto& sol = sys.solution();
+    us size = sol.size(), i=0;
+    if(size>0) {
+        _solution = vd(size);
+        for(auto& val: sol) {
+            _solution(i) = val;
+            i++;
+        }
+    }
+
 }
 TaSystem::TaSystem(const TaSystem& o):
     GlobalConf(o),                 // Share a ptr to the Global conf
@@ -30,8 +62,8 @@ TaSystem::TaSystem(const TaSystem& o):
 
     for(auto& seg: _segs){
         seg.second = seg.second->copy();
+        if(!seg.second) throw TaSMETBadAlloc();
     }
-
 }
 int TaSystem::getArbitrateMassEq(const vus& neqs) const {
     // Tells the TaSystem which Dof should be overwritten with the
@@ -68,78 +100,20 @@ int TaSystem::getArbitrateMassEq(const vus& neqs) const {
     }
     return arbitrateMassEq;
 }
-TaSystem& TaSystem::add(const us id,const Segment& s){
-
-    // TRACE(24,"TaSystem::add(id,Seg)");
-
-    // if(_segs.find(s.getid())!=_segs.end()){
-    //     std::stringstream error;
-    //     error << "Segment with id " << s.getid() <<
-    //         "already present in the system";
-    //     throw TaSMETError(error);
-    // }
-    _segs[id]=s.copy();
-    return *this;
-}
-void TaSystem::updateSolution(const vd& sol) {
-    TRACE(15,"TaSystem::updateSolution()");
-
-    us firstdof = 0;
-    us ndofs;
-    Segment* seg;
-    for(auto& seg_: _segs) {
-        seg = seg_.second;
-        ndofs = seg->getNDofs(*this);
-
-        firstdof += ndofs;
-
-        seg->updateSolution(*this,sol.subvec(firstdof,firstdof+ndofs-1));
-    }
-}
-vd TaSystem::getSolution() const {
-    us firstdof = 0,i=0;
-    vus ndofs = getNDofs();
-    us total_ndofs = arma::sum(ndofs);
-    vd sol(total_ndofs);
-
-    #ifdef TASMET_DEBUG
-    sol.zeros();
-    #endif
-
-    Segment* seg;
-    for(auto& seg_: _segs) {
-        seg = seg_.second;
-        seg->getSolution(*this,sol,firstdof);
-        firstdof += ndofs(i);
-        i++;
-    }
-    return sol;
-}
 vd TaSystem::residual() const {
     TRACE(15,"TaSystem::residual()");
 
     vus neqs = getNEqs();
     us total_neqs = arma::sum(neqs);
-    vus eqstart(neqs.size());
-
-    us i=0;
-
-    for(us& eqs : neqs) {
-
-        if(i>0) {
-            eqstart(i) = eqstart(i-1) + eqs;
-        }
-        else {
-            eqstart(i) = 0;
-        }
-        i++;                 
-    }
-    assert(i==_segs.size()-1);
 
     if(total_neqs>constants::maxndofs)      {
         throw TaSMETError("Too many DOFS required."
                           " Problem too large.");
     }
+
+    // This vector of indices stores the last equation number + 1 for
+    // each equation set in a Segment
+    vus eqsend = arma::cumsum(neqs);
 
     int arbitrateMassEq = getArbitrateMassEq(neqs);
 
@@ -148,18 +122,23 @@ vd TaSystem::residual() const {
     d mass=0;
     
     VARTRACE(25,total_neqs);
-    VARTRACE(25,eqstart);
+    VARTRACE(25,eqsend);
 
     vd residual(total_neqs);
 
-    i=0;
+    us i=0;
     const Segment* seg;
     for(auto seg_: _segs) {
 
         seg = seg_.second;
 
-        // Put the residual of the segment in the over-all residual
-        seg->residual(*this,residual,eqstart(i));
+        if(i==0) {
+            // Put the residual of the segment in the over-all residual
+            seg->residual(*this,residual.subvec(0,eqsend(0)-1));
+        }
+        else {
+            seg->residual(*this,residual.subvec(eqsend(i-1),eqsend(i)-1));
+        }
 
         // Count the mass, add it
         if(arbitrateMassEq!=-1) {
@@ -180,7 +159,51 @@ vd TaSystem::residual() const {
 
     return residual;
 }
+vd TaSystem::getSolution() const {
 
+    if(_solution.size() == 0) {
+        // Create the initial solution from the segments
+        // and store it here
+
+        vus ndofs = getNDofs();
+        vus dofend = arma::cumsum(ndofs);
+        us total_dofs = arma::sum(ndofs);
+        vd solution = vd(total_dofs);
+
+        us i=0;
+        const Segment* seg;
+        for(auto& seg_: _segs) {
+            seg = seg_.second;
+
+            if(ndofs(i)>0) {
+                if(i==0) {
+                    solution.subvec(0,ndofs(0)-1) =
+                        seg->initialSolution(*this);
+                }
+                else {
+                    solution.subvec(dofend(i-1),dofend(i)-1) =
+                        seg->initialSolution(*this);
+                }
+                i++;
+            }
+        }
+        return solution;
+    } // if the solution did not yet exist
+
+    return _solution;
+}
+const arma::subview_col<d> TaSystem::getSolution(const us seg_id) const {
+
+    vus ndofs = getNDofs();
+    vus dofsend = arma::cumsum(ndofs);
+
+    if(seg_id == 0) {
+        return _solution.subvec(0,dofsend(0)-1);
+    }
+    else {
+        return _solution.subvec(dofsend(seg_id-1),dofsend(seg_id)-1);
+    }
+}
 vus TaSystem::getNDofs() const  {
     TRACE(0,"TaSystem::getNDofs()");
     vus Ndofs(_segs.size());
@@ -215,7 +238,6 @@ void TaSystem::show(us detailnr){
         }
     } // detailnr>0
 }
-
 TripletList TaSystem::jacTriplets() const {
 
     TRACE(14,"TaSystem::jacobian()");
@@ -286,12 +308,14 @@ dmat TaSystem::showJac(){
 
 TaSystem::~TaSystem() {
     TRACE(25,"~TaSystem()");
+    cleanup();
+}
+void TaSystem::cleanup() {
 
     for(auto& seg: _segs){
         delete seg.second;
     }
-    delete _gas;
-}
 
+}
 
 //////////////////////////////////////////////////////////////////////

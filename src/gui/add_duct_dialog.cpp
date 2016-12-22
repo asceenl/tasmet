@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "ui_add_duct_dialog.h"
 #include "add_duct_dialog.h"
+#include "ui_add_duct_dialog.h"
 
 #include <QSignalBlocker>
 #include <qcustomplot.h>
@@ -15,11 +16,9 @@
 #include "tasmet_tracer.h"
 #include "tasmet_assert.h"
 #include "tasmet_exception.h"
-#include "duct/grid.h"
-#include <QVector>
+#include "duct/duct.h"
 #include "tasmet_qt.h"
-#include "geom.h"
-
+#include <QMessageBox>
 DECLARE_ENUM(PreviewShow,CSArea,Porosity,HydraulicRadius,SolidTemperatureFunction)
 
 
@@ -125,6 +124,20 @@ AddDuctDialog::~AddDuctDialog(){
 }
 void AddDuctDialog::accept(){
     
+    try {
+        std::unique_ptr<Duct> duct (new Duct(0,_duct));
+    }
+    catch(TaSMETError& e) {
+
+ 	QMessageBox msg(QMessageBox::Warning,
+                        "Input parsing error",
+                        e.what());
+
+        msg.exec();
+
+        // Do not finally accept until we do not have any errors
+        return;
+    }
     QDialog::accept();
 }
 void AddDuctDialog::reject(){
@@ -194,14 +207,14 @@ void AddDuctDialog::changed(){
     
     PreviewShow pshow = (PreviewShow) _dialog->previewshow->currentIndex();
     
-    std::unique_ptr<Geom> geom;
+    std::unique_ptr<Duct> duct;
     try {
-        geom = std::unique_ptr<Geom>(new Geom(_duct));
+        duct = std::unique_ptr<Duct>(new Duct(0,_duct));
     }
     catch(TaSMETError& e) {
         return;
     }
-    vd x = geom->x;
+    vd x = duct->x;
     vd y;
 
     switch (pshow) {

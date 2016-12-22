@@ -31,11 +31,12 @@ TaSMETMainWindow::TaSMETMainWindow():
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());        
         
+
     for(const SystemType& t: SystemType_vec){
         window->systemtype->addItem(SystemTypeToString(t));
     }
-    for(const GasType& t: GasType_vec){
-        window->gastype->addItem(GasTypeToString(t));
+    for(int gastype = pb::GasType_MIN;gastype<=pb::GasType_MAX;gastype++){
+        window->gastype->addItem(QString::fromStdString(GasType_Name((pb::GasType) gastype)));
     }
     for(const SegmentType& t: SegmentType_vec){
         window->segmenttype->addItem(SegmentTypeToString(t));
@@ -81,8 +82,9 @@ void TaSMETMainWindow::on_addsegment_clicked() {
         dialog.set(ductmap[id]);
     }
 
-    int code = dialog.exec();
-    if(code == QDialog::Accepted) {
+    int exitcode = dialog.exec();
+    
+    if(exitcode == QDialog::Accepted) {
 
         VARTRACE(15,dialog.get().name());
         ductmap[id] = dialog.get();

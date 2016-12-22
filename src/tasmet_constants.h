@@ -10,11 +10,6 @@
 #include "tasmet_enum.h"
 #include "tasmet_types.h"
 
-template<typename T>
-T max(T& t1,T& t2) { return t1>t2?t1:t2;}
-template<typename T>
-T min(T& t1,T& t2) { return t1>t2?t2:t1;}
-
 // Variables and their names
 // Unfortunately to let the code compile with Swig v 2.0, strongly
 // typed enums are not supported. Therefore this is a normal

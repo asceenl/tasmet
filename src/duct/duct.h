@@ -19,28 +19,31 @@ class TaSystem;
 
 class Duct : public Segment, public Geom {
 
-    Duct(const Duct& other);
-
     // Drag* _drag = nullptr;
     // Heat* _heat = nullptr;
     std::vector<Equation*> _eqs;
+    vd _Tsprescribed;
 
-    std::vector<Variable> _rho;
-    std::vector<Variable> _u;
-    std::vector<Variable> _T;
-    std::vector<Variable> _p;
-    std::vector<Variable> _Ts;
-
+protected:
+    Duct(const Duct&);
 public:
-    Duct(const pb::Duct&);
+    Duct(const us id,const pb::Duct&);
+    ~Duct();
+
+    vd Tsprescribed() const { return _Tsprescribed;}
+
+    // Initialize the solution to something sensible
+    vd initializeSolution(const TaSystem& sys);
+
     virtual Duct* copy() const;
     const Geom& geom() const;
     
     // Solving
-    virtual void residual(const TaSystem&,vd&,const us insertion_start) const;
+    virtual void residual(const TaSystem&,arma::subview_col<d>&& residual) const;
 
-    virtual void updateSolution(const TaSystem&,const vd&);
-    virtual getSolution(const TaSystem&,vd& sol,const us insertion_start) const;
+    vd initialSolution(const TaSystem&) const;
+
+    // virtual void getSolution(const TaSystem&,const us insertion_start) const;
 
     // Return the total number of equations in this segment
     virtual us getNEqs(const TaSystem&) const;

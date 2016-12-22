@@ -16,8 +16,9 @@ class PythonQt;
 class EvaluateFun {
 
     PythonQt* _pyqt;
+    string _err_msg;
 public:
-    EvaluateFun(const string& fun_return);
+    EvaluateFun(const string& fun_return,const string& err_msg = "Script error");
     
     // Add a global definition to the namespace
     void addGlobalDef(const string& name,

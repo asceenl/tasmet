@@ -1,0 +1,9 @@
+
+syntax = "proto2";
+package pb;
+
+enum GasType {
+     air = 0;
+     helium = 1;
+     nitrogen = 2;
+}

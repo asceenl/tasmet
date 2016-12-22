@@ -8,13 +8,14 @@ LinearGrid::LinearGrid(us ngp,d L):
     ngp(ngp),
     L(L)
 {
-    std::stringstream error;
     if(ngp<constants::min_ngp) {
+        std::stringstream error;
         error << "Number of gridpoints is lower than minimum. Minimum is: ";
         error << constants::min_ngp;
         throw TaSMETError(error);
     }
     else if(ngp>constants::max_ngp) {
+        std::stringstream error;
         error << "Maximum number of gridpoints exceeded. Maximum is: ";
         error << constants::max_ngp;
         throw TaSMETError(error);

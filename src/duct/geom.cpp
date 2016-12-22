@@ -34,24 +34,32 @@ Geom::Geom(const pb::Duct& duct) {
     // Store x
     x = grid->getx();
 
-    EvaluateFun Sfun(duct.area());
+    const char* invS = "Invalid cross-sectional area function";
+    EvaluateFun Sfun(duct.area(),invS);
     Sfun.addGlobalDef("L",duct.length());
     S = Sfun(x);
 
-    for(auto& Si:S) {
-        if(Si <=0){
-            throw TaSMETError("Invalid cross-sectional area function");
-        }
+    if(min(S) <= 0) {
+        throw TaSMETError(invS);
     }
+    
 
-
-    EvaluateFun phifun(duct.phi());
+    const char* invpor = "Invalid porosity function";
+    EvaluateFun phifun(duct.phi(),invpor);
     Sfun.addGlobalDef("L",duct.length());
     phi = Sfun(x);
 
-    EvaluateFun rhfun(duct.rh());
+    if(min(phi) <= 0 || max(phi) > 1) {
+        throw TaSMETError(invpor);
+    }
+
+    const char* invrh = "Invalid hydraulic radius function";
+    EvaluateFun rhfun(duct.rh(),invrh);
     Sfun.addGlobalDef("L",duct.length());
     rh = Sfun(x);
+    if(min(rh) <= 0 ) {
+        throw TaSMETError(invrh);
+    }
 
     cshape = duct.cshape();
 }
