@@ -38,6 +38,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 #==================================================
 # Optimized code flags *******************************************
 #==================================================
@@ -129,7 +130,6 @@ include_directories(
 add_subdirectory(src)
 add_subdirectory(testing)
 
-# add_executable(tasmet src/main.cpp src/main.moc)
-add_executable(tasmet src/main.cpp)
+add_executable(tasmet src/main.cpp src/gui/tasmet_resources.qrc)
 target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets openblas)
 

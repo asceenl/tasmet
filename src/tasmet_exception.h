@@ -12,6 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <sstream>              // stringstream
+#include <QMessageBox>
 
 class TaSMETError : public std::runtime_error {
     std::string _msg;
@@ -28,6 +29,8 @@ public:
     }
     void setContext(const std::string& ctx);
     virtual const char* what() const throw ();
+    virtual void show_user(const std::string& window_title,
+                           QMessageBox::Icon = QMessageBox::Warning);
 };
 
 class TaSMETBadAlloc: public std::bad_alloc {

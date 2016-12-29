@@ -1,0 +1,22 @@
+syntax = "proto2";
+package pb;
+
+enum DuctBcType {
+     PressureBc = 0;
+     AdiabaticWall = 1;
+     IsoTWall = 2;
+}
+enum DuctSide {
+     left = 0;
+     right = 1;
+}
+message DuctBc {
+    required DuctBcType type = 1;
+    required DuctSide side = 2;
+    required uint32 duct_id = 3;
+    optional string pressure = 4;
+    optional string temperature = 5;
+    optional bool isentropic = 6;
+    required string name = 7;
+
+}

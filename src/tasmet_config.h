@@ -18,7 +18,7 @@ const QString company = "None";
 // DECLARE_ENUM(SYSTEM_TYPE,DrivenSystem,EngineSystem)
 DECLARE_ENUM(SystemType,Driven)
 
-DECLARE_ENUM(SegmentType,Duct)
+DECLARE_ENUM(SegmentType,Duct,DuctBc)
 
 DECLARE_ENUM(SolverType,NewtonRaphson)
 

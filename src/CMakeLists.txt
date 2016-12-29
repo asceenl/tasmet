@@ -8,6 +8,7 @@ include_directories(
   .
   protobuf
   duct
+  ductbc
   # duct/cell
   # duct/connectors
   # duct/eq
@@ -34,6 +35,9 @@ add_library(tasmet_src
   duct/grid.cpp
   duct/geom.cpp
   duct/duct.cpp
+
+  ductbc/ductbc.cpp
+  ductbc/pressurebc.cpp
 
   funcs/bessel.cpp
   funcs/cbessj.cpp
@@ -65,3 +69,4 @@ add_library(tasmet_src
 
 add_subdirectory(gui) 
 add_subdirectory(protobuf)
+target_link_libraries(tasmet_src Qt5::Widgets)

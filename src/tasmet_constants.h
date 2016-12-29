@@ -61,11 +61,11 @@ namespace constants {
     const us max_ngp=3000;           // Maximum number of gridpoints
     const us default_ngp = 100;
     
-    const us maxNf=100;              // Maximum number of frequencies
-    const d minomg=1e-3;            // Minimal oscillation frequency
-    const d maxomg=1e5;
+    const us max_Nf=20;              // Maximum number of frequencies
+    const d min_omg=1e-3;            // Minimal oscillation frequency
+    const d max_omg=1e5;
 
-    const int maxsegs=30;           // Maximum number of segments in a TaSystem
+    const int max_segs=30;           // Maximum number of segments in a TaSystem
     const int maxndofs=600000;      // Maximum number of DOFS
 
 
@@ -105,6 +105,8 @@ namespace constants {
     const int nvars_reserve=7;
     const int neqs_reserve=7;
   
+    const char* const system_fileext = ".tasmet";
+
 } // namespace constants
 
 #endif // TASMET_CONSTANTS_H

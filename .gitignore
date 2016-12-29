@@ -20,3 +20,4 @@ doc/usg.pdf
 *.pyc
 brent_test
 tasmet
+tasmet_automoc.dir

@@ -129,11 +129,7 @@ void AddDuctDialog::accept(){
     }
     catch(TaSMETError& e) {
 
- 	QMessageBox msg(QMessageBox::Warning,
-                        "Input parsing error",
-                        e.what());
-
-        msg.exec();
+        e.show_user("Input parsing error");
 
         // Do not finally accept until we do not have any errors
         return;
@@ -220,19 +216,19 @@ void AddDuctDialog::changed(){
     switch (pshow) {
     case CSArea:
         _plot->yAxis->setLabel("S [m^2]");
-        y = geom->S;
+        y = duct->S;
         break;
     case Porosity:
         _plot->yAxis->setLabel("phi [-]");
-        y = geom->phi;
+        y = duct->phi;
         break;
     case HydraulicRadius:
         _plot->yAxis->setLabel("rh [m]");
-        y = geom->rh;
+        y = duct->rh;
         break;
     case SolidTemperatureFunction:
         _plot->yAxis->setLabel("Ts [K]");
-        y = geom->rh;
+        y = duct->rh;
         break;
     default:
         tasmet_assert(false,"Unhandled PreviewShow case");

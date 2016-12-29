@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
 
     TaSMETMainWindow win;
 
-    win.setWindowTitle("TaSMET UI");
     win.show();
     
     return app.exec();

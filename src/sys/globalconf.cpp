@@ -16,7 +16,7 @@ GlobalConf::GlobalConf(us Nf,d freq):
 
     TRACE(10,"GlobalConf constructor done");
 
-    if(Nf>=constants::maxNf)
+    if(Nf>=constants::max_Nf)
         throw TaSMETError("Too large number of frequencies given");
 
 
@@ -60,7 +60,7 @@ void GlobalConf::setomg(d omg){
     _DDTfd=zeros<dmat>(Ns(),Ns());
 
     // Sanity checks
-    if(omg<constants::minomg && omg>constants::maxomg)
+    if(omg<constants::min_omg && omg>constants::max_omg)
         throw TaSMETError("Illegal frequency given");
 
     this->_omg=omg;

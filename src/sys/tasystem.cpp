@@ -9,10 +9,12 @@
 #include "tasystem.h"
 #include "triplets.h"
 #include "jacobian.h"
+#include "tasmet_utils.h"
 #include "tasmet_assert.h"
 #include "tasmet_exception.h"
 #include "tasmet_constants.h"
 #include "duct.h"
+#include "ductbc.h"
 
 TaSystem::TaSystem(const pb::System& sys):
     GlobalConf(sys.nf(),sys.freq())
@@ -29,13 +31,33 @@ TaSystem::TaSystem(const pb::System& sys):
 
     // Create all ducts
     for(const auto& d : sys.ducts()) {
+        // d.first: id
+        // d.second: duct description
         try {
             _segs[d.first] = new Duct(d.first,d.second);
             if(!_segs[d.first]) throw TaSMETBadAlloc();
         }
         catch(TaSMETError e) {
-            // Cleanup the already successfully created Ducts
+            // Cleanup the already successfully created Ducts and rethrow
             cleanup();
+            throw e;
+        }
+    }
+    // Create all ducts
+    for(const auto& d : sys.ductbcs()) {
+        // d.first: id
+        // d.second: duct description
+        try {
+            _segs[d.first] = DuctBc::newDuctBc(d.first,
+                                               *this,
+                                               d.second);
+
+            if(!_segs[d.first]) throw TaSMETBadAlloc();
+        }
+        catch(TaSMETError e) {
+            // Cleanup the already successfully created Ducts and rethrow
+            cleanup();
+            throw e;
         }
     }
     
@@ -311,11 +333,7 @@ TaSystem::~TaSystem() {
     cleanup();
 }
 void TaSystem::cleanup() {
-
-    for(auto& seg: _segs){
-        delete seg.second;
-    }
-
+    purge(_segs);
 }
 
 //////////////////////////////////////////////////////////////////////
