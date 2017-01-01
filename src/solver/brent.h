@@ -12,9 +12,9 @@
 
 class Brent: public Solver<NoGradientNonlinearSystem<d>,d> {
     d _reltol;
-    us _maxiter;
+
 public:    
-    Brent(const NoGradientNonlinearSystem<d>& sys,us maxiter=10000,d reltol=1e-6);
+    Brent(const NoGradientNonlinearSystem<d>& sys,d reltol=1e-6);
 protected:
     void start_implementation(NoGradientNonlinearSystem<d>& sys,progress_callback*);
 };

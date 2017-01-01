@@ -20,69 +20,27 @@ static void SolverThread(Solver<system_T,result_T>* solver,
 template<typename system_T,typename result_T>
 Solver<system_T,result_T>::Solver(const system_T& sys){
     _sys = sys.copy();
-    if(!_sys)
-        throw TaSMETBadAlloc();
-    _running = false;
+    if(!_sys) throw TaSMETBadAlloc();
 }
 
 template<typename system_T,typename result_T>
 Solver<system_T,result_T>::~Solver(){
 
-    stop();
-    assert(!_running);
-    assert(!_solver_thread);
     delete _sys;
     
 }
 
 template<typename system_T,typename result_T>
-void Solver<system_T,result_T>::start(progress_callback* callback,bool wait){
-
-    if(_running){
-        assert(_solver_thread);
-        throw TaSMETError("Solver already running");
-    }
-
-    assert(_solver_thread == nullptr);
-
-    if(!wait) {
-        this->_solver_thread = new std::thread(SolverThread<system_T,result_T>,
-                                               this,
-                                               _sys,
-                                               callback);
-        if(!_solver_thread)
-            throw TaSMETBadAlloc();
-    }
-    else {
+void Solver<system_T,result_T>::start(progress_callback* callback){
 
         TRACE(15,"Waiting for solver...");
         start_implementation(*_sys,callback);
 
-    }
 }
 
-template<typename system_T,typename result_T>
-void Solver<system_T,result_T>::stop() {
 
-    _running = false;
-
-    if(_solver_thread){
-
-        _solver_thread->join();
-        delete _solver_thread;
-        _solver_thread = nullptr;
-
-    }
-}
 template<typename system_T,typename result_T>
 result_T Solver<system_T,result_T>::getSolution() {
-
-    if(_running){
-        throw TaSMETError("Solver is running");
-    }
-
-    // Cleanup thread resources
-    stop();
 
     return _sys->getSolution();
 }

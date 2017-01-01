@@ -54,7 +54,7 @@ private slots:
     void on_addsegment_clicked();
     void on_removesegment_clicked();
     void on_segmentid_valueChanged(int i);
-    void on_name_textEdited();
+    void on_segmentname_textEdited();
 
     // Couple slots to functions
     void on_actionNew_triggered() { newModel();}

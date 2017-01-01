@@ -26,7 +26,7 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
     SolverProgress progress;
     SolverAction action;
     
-    while (_running && progress.iteration<=_maxiter) {
+    while (true) {
         
         sdmat jac=system.jacobian();
 

@@ -7,26 +7,30 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "mainwindow.h"
-#include "tasmet_config.h"
 #include "ui_mainwindow.h"
+
+#include <sstream>
+
 #include <QString>
 #include <QSettings>
 #include <QWidget>
 #include <QDoubleValidator>
 #include <QIntValidator>
-#include "gas.h"
+#include <QFileDialog>
+#include <QStandardPaths>
+
+#include "tasmet_config.h"
 #include "tasmet_tracer.h"
 #include "tasmet_assert.h"
+#include "tasmet_exception.h"
 #include "add_duct_dialog.h"
 #include "add_ductbc_dialog.h"
 #include "tasystem.h"
-#include "tasmet_exception.h"
-#include <QFileDialog>
-#include <QStandardPaths>
-#include <sstream>
-#include "about_dialog.h"
-#include <google/protobuf/text_format.h>
 
+#include "about_dialog.h"
+#include "solver_dialog.h"
+
+#include <google/protobuf/text_format.h>
 using google::protobuf::TextFormat;
 
 const QString default_system_name = QString("Unsaved TaSMET Model") +
@@ -426,7 +430,7 @@ void TaSMETMainWindow::on_segmentid_valueChanged(int id) {
     _window->removesegment->setEnabled(is_segment);
 
 }
-void TaSMETMainWindow::on_name_textEdited() {
+void TaSMETMainWindow::on_segmentname_textEdited() {
 
     auto& ductmap = *_system.mutable_ducts();
     auto& ductbcmap = *_system.mutable_ductbcs();
@@ -444,8 +448,22 @@ void TaSMETMainWindow::on_name_textEdited() {
 
 void TaSMETMainWindow::on_actionSolve_triggered() {
     TRACE(15,"actionSolve()");
-    TaSystem sys(_system);
+    
+    SolverDialog *d;
+    try {
+        d = new SolverDialog(this,_system);
+    }
+    catch(TaSMETError &e) {
+        e.show_user("Solver failed to initialize");
+        return;
+    }
+    d->exec();
 
+    // Solution is put in system, system updated from solver
+    // dialog. Therefore we are now probably dirty
+    changed();
+
+    delete d;
 }
 bool TaSMETMainWindow::isDirty() const {
     TRACE(15,"isDirty()");

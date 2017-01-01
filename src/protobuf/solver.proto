@@ -1,0 +1,16 @@
+syntax = "proto2";
+package pb;
+
+enum SolverType {
+    NewtonRaphson = 0;
+}
+
+// Parameters the solver requires to operate
+message SolverParams {
+    optional SolverType solvertype = 1 [default=NewtonRaphson];
+    optional double reltol = 3 [default = 1e-6];
+    optional double funtol = 4 [default = 1e-6];
+    optional double fun_err = 5 [default = 1e0];
+    optional double rel_err = 2 [default = 1e0];
+    optional uint32 iteration = 6 [default = 0];
+}

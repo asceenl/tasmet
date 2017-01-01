@@ -17,16 +17,15 @@
 
 const d eps = std::numeric_limits<d>::epsilon();
 
-Brent::Brent(const NoGradientNonlinearSystem<d>& sys,us maxiter,d reltol):
+Brent::Brent(const NoGradientNonlinearSystem<d>& sys,d reltol):
     Solver(sys),
-    _reltol(reltol),
-    _maxiter(maxiter)
+    _reltol(reltol)
 {
 
     TRACE(15,"Brent::Brent");
     #ifdef TASMET_DEBUG
     bool ok=true;
-    ok&=(maxiter>0);
+
     ok&=(reltol >= eps);
 
     if(!ok){
@@ -89,7 +88,7 @@ void Brent::start_implementation(NoGradientNonlinearSystem<d>& system,
     bool bisec_flag;
     SolverProgress progress;
 
-    while(_running && progress.iteration <=_maxiter) {
+    while(true) {
 
         if((fa!=fc) && (fb!=fc)){
             // Inverse quadratic interpolation

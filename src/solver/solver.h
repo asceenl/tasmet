@@ -21,10 +21,11 @@
 struct SolverProgress
 {
     size_t iteration = 0;
-    d fun_err;
-    d rel_err;
+    d fun_err = 1e0;
+    d rel_err = 1e0;
     bool done = false;
 };
+
 
 enum SolverAction{
     Continue=0,
@@ -38,22 +39,17 @@ class Solver {
 
 protected:
     system_T* _sys = nullptr;
-    std::thread* _solver_thread = nullptr;
-    std::atomic<bool> _running;
 public:
     Solver(const system_T& sys);
     Solver(const Solver&)=delete;
     Solver& operator=(const Solver&)=delete;
     
-    void start(progress_callback* callback=nullptr,bool wait=true);
-    void stop();        // Stops the solver
+    void start(progress_callback* callback);
 
     // Returns the solution of the problem
     result_T getSolution();
 
     virtual ~Solver();
-    template<typename Y,typename rT>
-    friend void SolverThread(Solver<Y,rT>*,Y*,progress_callback*);
 protected:
     virtual void start_implementation(system_T& sys,progress_callback*)=0;
 };

@@ -347,6 +347,8 @@
      <string>Solver</string>
     </property>
     <addaction name="actionSolve"/>
+    <addaction name="actionReinitialize_solver"/>
+    <addaction name="actionPosprocess_model"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSolver"/>
@@ -417,6 +419,16 @@
   <action name="actionSolve">
    <property name="text">
     <string>Solve...</string>
+   </property>
+  </action>
+  <action name="actionReinitialize_solver">
+   <property name="text">
+    <string>Reinitialize solver</string>
+   </property>
+  </action>
+  <action name="actionPosprocess_model">
+   <property name="text">
+    <string>Posprocess model...</string>
    </property>
   </action>
  </widget>

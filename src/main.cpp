@@ -45,22 +45,17 @@ int main(int argc, char *argv[]) {
     // Q_INIT_RESOURCE(application);
     INITTRACE(15);
 
-    std::cout << "hoid" << std::endl;
     // Initialize PythonQt
     // PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut);
     PythonQt::init();
-    std::cout << "hoid" << std::endl;
+
     PythonQt* pyqt = PythonQt::self();
     PythonQtObjectPtr context = pyqt->getMainModule();
-    std::cout << "hoid" << std::endl;    
+
     QVariant rv = context.evalScript("from math import *\n");
     if(pyqt->hadError()) {
         return -1;
     }
-    std::cout << "hoid" << std::endl;    
-    // std::cout << rv.typeName() << std::endl;
-    std::cout << (rv.isNull()?"true": "false") << std::endl;
-    std::cout << "hoid" << std::endl;    
     
     QApplication app(argc, argv);
     

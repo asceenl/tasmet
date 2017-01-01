@@ -19,7 +19,10 @@ class NoGradientNonlinearSystem{
 public:
     virtual T residual() const=0;
 
-    virtual T residual(const T& guess) { updateSolution(guess); return residual();}
+    virtual T residual(const T& guess) {
+        updateSolution(guess);
+        return residual();
+    }
     
     // Obtain an initial guess of the solution
     virtual T getSolution() const=0;
