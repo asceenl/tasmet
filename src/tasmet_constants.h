@@ -82,7 +82,7 @@ namespace constants {
     const d min_funtol = 1e-16;
     const d default_funtol = 1e-6;
     const d max_funtol = 1e-1;
-    const us funtol_decimals = 10;
+
 
     const us default_maxiter = 1000;
     const us min_maxiter = 1;

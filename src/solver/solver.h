@@ -29,7 +29,7 @@ struct SolverProgress
 
 enum SolverAction{
     Continue=0,
-    Stop = 1
+    Stop=1
 };
 
 typedef std::function<SolverAction(SolverProgress)> progress_callback;

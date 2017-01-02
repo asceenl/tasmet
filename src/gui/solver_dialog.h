@@ -20,16 +20,21 @@ namespace Ui {
     class solver_dialog;
 }
 class QCustomPlot;
+class QCPGraph;
 class SolverWorker;
+class SolverProgress;
+
 class SolverDialog: public QDialog {
     Q_OBJECT
 
     pb::System& _sys;           // Reference to system
-    pb::SolverParams _sparams;
 
     Ui::solver_dialog* _dialog;
 
+    bool _init = true;
+
     QCustomPlot* _plot;
+    QCPGraph *_funer,*_reler,*_funtol,*_reltol;
 
     SolverWorker* _solver_worker = nullptr;
 
@@ -41,12 +46,12 @@ public:
     ~SolverDialog();
 
     void set(const pb::SolverParams&);
-
-
+public slots:
+    void solver_progress(const SolverProgress&);
 private slots:
     // Connected to the signal from the solver thread. Reactivates the
     // buttons
-    void solver_stopped();
+    void solver_stopped(bool converged);
 
     void on_solve_clicked();
     void on_singleiteration_clicked();
@@ -58,7 +63,7 @@ private slots:
 private:
     // Called whenever the user changes input values
     void changed();
-
+    void setEnabled(bool);
 };
     
 

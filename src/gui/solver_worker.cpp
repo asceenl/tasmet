@@ -13,7 +13,9 @@
 #include <QThread>
 #include <qcustomplot.h>
 SolverWorker::SolverWorker(pb::System& sys):
-    _run(false)
+    _run(false),
+    _reltol(sys.solverparams().reltol()),
+    _funtol(sys.solverparams().funtol())
 {
 
 }
@@ -35,55 +37,35 @@ void SolverWorker::solver_start() {
 
     SolverProgress p;
     // For testing purposes
+
+    SolverAction action;
     while(true) {
         TRACE(15,"Solver start virtual iteration");
 
         
         SolverAction action = callback(p);
-        if(action == Stop) break;
+        if(action != Continue) break;
         sleep(1);
 
         p.fun_err/=10;
         p.rel_err/=10;
         p.iteration++;
+
     }
 
-    emit solver_stopped();
+    emit solver_stopped(_converged);
 }
 SolverAction SolverWorker::pg_callback(SolverProgress pg) {
     TRACE(15,"pg_callback");
 
     if(!_run) return Stop;
 
+    emit progress(pg);
 
-    // QCPGraph *_funer,*_reler,*_funtol,*_reltol;
-
-    // _funer = _plot->addGraph();
-    // _reler = _plot->addGraph();
-
-    TRACE(15,"SolverWorker::pg_callback()");
-
-    // VARTRACE(15,progress.fun_err);
-    // VARTRACE(15,progress.iteration);
-    // _funer->addData(progress.iteration,progress.fun_err);
-    // _reler->addData(progress.iteration,progress.rel_err);    
-
-    // _plot->xAxis->setRange(0,progress.iteration);
-
-    // _plot->replot();
-
-    // if(progress.done) {
-    //     // We are done!
-
-    //     QString m = "Solver reached a converged solution.";
-
-    //     QMessageBox::information(this,
-    //                              "Solver done",
-    //                              m);
-
-        
-    // }
-
+    if(pg.fun_err <= _funtol && pg.rel_err <= _reltol) {
+        _converged = true;
+        return Stop;
+    }
 
     return Continue;
 

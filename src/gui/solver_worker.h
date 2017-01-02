@@ -25,6 +25,8 @@ class SolverWorker: public QObject {
 
     std::atomic<bool> _run;
     Solver<GradientNonlinearSystem,vd>* _solver;
+    bool _converged = false;
+    d _funtol,_reltol;
 public:
 
     SolverWorker(pb::System& sys);
@@ -36,8 +38,8 @@ public slots:
 signals:
     
     // This signal is emitted when the solver is stopped
-    void solver_stopped();
-    void progress(SolverProgress);
+    void solver_stopped(bool converged);
+    void progress(const SolverProgress&);
 private:
     SolverAction pg_callback(SolverProgress pg);
 
