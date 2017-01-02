@@ -53,8 +53,8 @@ private slots:
     void closeEvent(QCloseEvent *event);
     void on_addsegment_clicked();
     void on_removesegment_clicked();
-    void on_segmentid_valueChanged(int i);
-    void on_segmentname_textEdited();
+    void on_segmentid_valueChanged(int i) {changed();}
+    void on_segmentname_textChanged();
 
     // Couple slots to functions
     void on_actionNew_triggered() { newModel();}

@@ -14,7 +14,7 @@ Duct::Duct(const us id,const pb::Duct& duct):
     Segment(id,duct.name()),
     Geom(duct)
 {
-
+    TRACE(15,"Duct::Duct()");
     const char* invTsfun = "Invalid solid-temperature prescribing function";
     EvaluateFun Tsfun(duct.stempfunc(),invTsfun);
     Tsfun.addGlobalDef("L",duct.length());

@@ -29,9 +29,7 @@
 
 #include "about_dialog.h"
 #include "solver_dialog.h"
-
-#include <google/protobuf/text_format.h>
-using google::protobuf::TextFormat;
+#include "system_tools.h"
 
 const QString default_system_name = QString("Unsaved TaSMET Model") +
     constants::system_fileext;
@@ -41,41 +39,6 @@ const QString start_file_location = QStandardPaths::
 const QString filetype = QString("TaSMET Model files (*") + constants::system_fileext + ")";
 const QString window_title_part = "TaSMET Model Builder - ";
 namespace {
-    pb::System loadSystem(const string& filepath) {
-
-        TRACE(15,"loadSystem()");
-        VARTRACE(15,filepath);
-        std::ifstream myfile(filepath);
-        
-        if(!myfile.good()) {
-            string error = "Read error on ";
-            error += filepath;
-            throw TaSMETError(error);
-        
-        }
-
-        pb::System sys;
-
-        std::stringstream strStream;
-        strStream << myfile.rdbuf(); //read the file
-        string data = strStream.str();//str holds the content of the file        
-        VARTRACE(15,data);
-        
-        if(!TextFormat::ParseFromString(data,&sys)) {
-            string error = "Invalid TaSMET Model file: ";
-            error += filepath;
-            throw TaSMETError(error);
-        }
-        
-        return sys;
-
-
-    }
-    
-    // // Returns true when the two systems are equal
-    bool compareSys(const pb::System& s1,const pb::System& s2) {
-        return (s1.SerializeAsString()==s2.SerializeAsString());
-    }
 
     int saveFileFirstQuestion(QWidget* parent) {
 
@@ -127,7 +90,7 @@ TaSMETMainWindow::TaSMETMainWindow():
     _window->p0->setValidator(new QDoubleValidator(constants::min_p0,
                                                   constants::max_p0,
                                                   constants::field_decimals));
-    _window->segmentname->setText(default_system_name);
+    _window->segmentname->setText(default_segment_name);
 
     _window->segmentid->setMaximum(constants::max_segs);
 
@@ -160,9 +123,9 @@ void TaSMETMainWindow::loadModel() {
     QString title = tr("Open existing TaSMET model file");
 
     QString filepath = QFileDialog::getOpenFileName(this,
-                                                title,
-                                                start_file_location,
-                                                filetype);
+                                                    title,
+                                                    start_file_location,
+                                                    filetype);
     string filepath_s = filepath.toStdString();
     if(filepath.size()!=0) {
         try {
@@ -190,35 +153,16 @@ void TaSMETMainWindow::saveModel(string* filepath) {
         else if(filepath == nullptr) {
             filepath = &_filepath;
         }
-
-        std::ofstream sfile(*filepath);
-        if(!sfile.good()){
-
-            QMessageBox::warning(this,
-                                "File error",
-                                "Could not open file for saving");
-            return;
-        }
-        string data;
-        if(TextFormat::PrintToString(_system,&data)) {
-            // Can maybe assign to itself. Which is no problem
-            // according to C++ docs
-            TRACE(15,"Saving file succeeded");
-            VARTRACE(15,data);
-            sfile << data;
-            // Close file here, such that in can be opened to compare
-            // whether the file is still dirty 
-            sfile.close();
+        try {
+            saveSystem(*filepath,_system);
             _filepath = *filepath;
             changed();
         }
-        else {
-            QMessageBox::warning(this,
-                                "File error",
-                                "Could not save model to file");
+        catch(TaSMETError &e) {
+
+            e.show_user("Saving file failed");
 
         }
-
     }
 
 }
@@ -276,8 +220,27 @@ void TaSMETMainWindow::changed() {
     _window->segoverview->setPlainText(QString::fromStdString(_system.DebugString()));
 
     // Update stuff based on the segments
-    int value = _window->segmentid->value();
-    on_segmentid_valueChanged(value);
+    int segid = _window->segmentid->value();
+
+    bool is_segment = false;
+
+    auto& ductmap = *_system.mutable_ducts();
+    auto& ductbcmap = *_system.mutable_ductbcs();
+
+    if(ductmap.find(segid) != ductmap.end()) {
+        _window->segmentname->setText(QString::fromStdString(ductmap[segid].name()));
+        _window->segmenttype->setCurrentIndex((int) Duct);
+        is_segment = true;
+    }
+    if(ductbcmap.find(segid) != ductbcmap.end()) {
+        _window->segmentname->setText(QString::fromStdString(ductbcmap[segid].name()));
+        _window->segmenttype->setCurrentIndex((int) DuctBc);
+        is_segment = true;        
+    }
+
+    _window->removesegment->setEnabled(is_segment);
+    _window->segmenttype->setEnabled(!is_segment);
+
 
 }
 void TaSMETMainWindow::set(const pb::System& sys) {
@@ -388,11 +351,11 @@ void TaSMETMainWindow::on_addsegment_clicked() {
     }
 
    if(exitcode == QDialog::Accepted) {
-       _window->segmentid->setValue(id+1);
        changed();
    }
 
 }
+
 void TaSMETMainWindow::on_removesegment_clicked() {
     TRACE(15,"on_remove");
     QString question = "Are you you wish to delete segment ";
@@ -411,27 +374,8 @@ void TaSMETMainWindow::on_removesegment_clicked() {
     }
 }
 
-void TaSMETMainWindow::on_segmentid_valueChanged(int id) {
-
-    auto& ductmap = *_system.mutable_ducts();
-    auto& ductbcmap = *_system.mutable_ductbcs();
-
-    bool is_segment = false;
-
-    if(ductmap.find(id) != ductmap.end()) {
-        _window->segmentname->setText(QString::fromStdString(ductmap[id].name()));
-        is_segment = true;
-    }
-    if(ductbcmap.find(id) != ductbcmap.end()) {
-        _window->segmentname->setText(QString::fromStdString(ductbcmap[id].name()));
-        is_segment = true;
-    }
-
-    _window->removesegment->setEnabled(is_segment);
-
-}
-void TaSMETMainWindow::on_segmentname_textEdited() {
-
+void TaSMETMainWindow::on_segmentname_textChanged() {
+    if(_init) return;
     auto& ductmap = *_system.mutable_ducts();
     auto& ductbcmap = *_system.mutable_ductbcs();
 
@@ -443,7 +387,7 @@ void TaSMETMainWindow::on_segmentname_textEdited() {
     if(ductbcmap.find(id) != ductbcmap.end()) {
         ductbcmap[id].set_name(_window->segmentname->text().toStdString());
     }
-
+    changed();
 }
 
 void TaSMETMainWindow::on_actionSolve_triggered() {

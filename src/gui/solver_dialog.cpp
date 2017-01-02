@@ -80,16 +80,23 @@ SolverDialog::SolverDialog(QWidget* parent,
     QSharedPointer<QCPAxisTicker> ticker(new QCPAxisTickerLog());
     _plot->yAxis->setTicker(ticker);
 
+
+    // Toggle legend
     _plot->legend->setVisible(true);
 
-    
     _plot->replot();
     set(_sys.solverparams());
+
+    setEnabled(true);
+
     _init = false;
+
 }
 SolverDialog::~SolverDialog() {
-    if(_solver_worker)
+    if(_solver_worker) {
+        // deleteLater is called on this one, so no delete here
         _solver_worker->solver_stop();
+    }
 }
 void SolverDialog::set(const pb::SolverParams& sol) {
     TRACE(15,"set");
@@ -104,6 +111,7 @@ void SolverDialog::set(const pb::SolverParams& sol) {
     
 }
 void SolverDialog::changed() {
+    TRACE(15,"changed");
     if(_init) return;
     _sys.mutable_solverparams()->set_funtol(_dialog->funtol->text().toDouble());
     _sys.mutable_solverparams()->set_reltol(_dialog->reltol->text().toDouble());
@@ -112,7 +120,6 @@ void SolverDialog::changed() {
 void SolverDialog::solver_progress(const SolverProgress& progress){
 
     TRACE(15,"SolverDialog::solver_progress()");
-
 
     // VARTRACE(15,progress.fun_err);
     // VARTRACE(15,progress.iteration);
@@ -140,6 +147,14 @@ void SolverDialog::on_solve_clicked() {
 
     // Disable buttons
     setEnabled(false);
+
+    // Clear figure data
+    QVector<double> empty;
+    _funer->setData(empty,empty);
+    _reler->setData(empty,empty);
+    _funtol->setData(empty,empty);
+    _reltol->setData(empty,empty);
+
 
     assert(!_solver_worker);
 

@@ -32,6 +32,8 @@ add_library(tasmet_src
   tasmet_assert.cpp
   tasmet_pyeval.cpp
 
+  protobuf/system_tools.cpp
+
   duct/grid.cpp
   duct/geom.cpp
   duct/duct.cpp
