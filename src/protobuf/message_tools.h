@@ -21,7 +21,7 @@ void saveMessage(const string& filepath,const T& sys);
 
 // Returns true when the two systems are equal
 template<typename T>
-bool compareSys(const T& s1,const T& s2);
+bool compareMessage(const T& s1,const T& s2);
 
 
 

@@ -9,11 +9,8 @@
 #ifndef PRESSUREBC_H
 #define PRESSUREBC_H
 #include "segment.h"
-
+#include "ductbc.pb.h"
 class TaSystem;
-namespace pb{
-    class DuctBc;
-}
 class Variable;
 
 class PressureBc: public Segment {

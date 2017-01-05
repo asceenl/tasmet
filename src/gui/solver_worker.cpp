@@ -9,13 +9,17 @@
 #include "solver_worker.h"
 #include <functional>
 #include "tasmet_tracer.h"
+
 #include "system.pb.h"
+#include "solver.pb.h"
+
 #include <QThread>
-#include <qcustomplot.h>
-SolverWorker::SolverWorker(pb::System& sys):
+
+
+SolverWorker::SolverWorker(const pb::System& sys,const pb::SolverParams& sparams):
     _run(false),
-    _reltol(sys.solverparams().reltol()),
-    _funtol(sys.solverparams().funtol())
+    _reltol(sparams.reltol()),
+    _funtol(sparams.funtol())
 {
 
 }

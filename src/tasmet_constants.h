@@ -105,7 +105,7 @@ namespace constants {
     const int nvars_reserve=7;
     const int neqs_reserve=7;
   
-    const char* const system_fileext = ".tasmet";
+    const char* const model_fileext = ".tasmet";
 
 } // namespace constants
 

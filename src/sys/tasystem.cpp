@@ -62,15 +62,15 @@ TaSystem::TaSystem(const pb::System& sys):
     }
     
     // Copy solution vector, if valid
-    const auto& sol = sys.solution();
-    us size = sol.size(), i=0;
-    if(size>0) {
-        _solution = vd(size);
-        for(auto& val: sol) {
-            _solution(i) = val;
-            i++;
-        }
-    }
+    // const auto& sol = sys.solution();
+    // us size = sol.size(), i=0;
+    // if(size>0) {
+    //     _solution = vd(size);
+    //     for(auto& val: sol) {
+    //         _solution(i) = val;
+    //         i++;
+    //     }
+    // }
 
 }
 TaSystem::TaSystem(const TaSystem& o):

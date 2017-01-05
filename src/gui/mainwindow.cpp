@@ -54,8 +54,8 @@ namespace {
 
 TaSMETMainWindow::TaSMETMainWindow():
     _window(new Ui::MainWindow()),
-    _model(pb::Model::default_instance())
-    _system(*_model.mutable_sytem())
+    _model(pb::Model::default_instance()),
+    _system(*_model.mutable_system())
 {
 
     if(!_window) throw TaSMETBadAlloc();
@@ -224,7 +224,7 @@ void TaSMETMainWindow::changed() {
         windowtitle += QString::fromStdString(_filepath);
     }
     else {
-        windowtitle += default_system_name;
+        windowtitle += default_model_name;
     }
 
     setWindowTitle(windowtitle);
@@ -254,10 +254,11 @@ void TaSMETMainWindow::changed() {
 
 
 }
-void TaSMETMainWindow::set(const pb::System& sys) {
+void TaSMETMainWindow::set(const pb::Model& model) {
     TRACE(15,"set()");
     _init = true;
 
+    const pb::System& sys = model.system();
     _window->nf->setValue(sys.nf());
     _window->freq->setText(QString::number(sys.freq()));
     _window->p0->setText(QString::number(sys.p0()));
@@ -265,7 +266,8 @@ void TaSMETMainWindow::set(const pb::System& sys) {
     _window->systemtype->setCurrentIndex((int) sys.systemtype());
     _window->gastype->setCurrentIndex((int) sys.gastype());
 
-    _system = sys;
+    _model = model;
+    _system = *_model.mutable_system();
     _init = false;
 
     changed();
@@ -406,7 +408,7 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
     
     SolverDialog *d;
     try {
-        d = new SolverDialog(this,_system);
+        d = new SolverDialog(this,_system,*_model.mutable_sparams());
     }
     catch(TaSMETError &e) {
         e.show_user("Solver failed to initialize");
@@ -425,8 +427,8 @@ bool TaSMETMainWindow::isDirty() const {
     if(_filepath.size()==0) return true;
 
     try {
-        pb::System filesys = loadSystem(_filepath);
-        bool dirty = !compareSys(filesys,_system);
+        pb::Model filemodel = loadMessage<pb::Model>(_filepath);
+        bool dirty = !compareMessage<pb::Model>(filemodel,_model);
         VARTRACE(15,dirty);
         return dirty;
     }

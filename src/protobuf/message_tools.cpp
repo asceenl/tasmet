@@ -7,7 +7,6 @@
 //////////////////////////////////////////////////////////////////////
 #include "message_tools.h"
 #include <fstream>
-#include <google/protobuf/text_format.h>
 #include "tasmet_types.h"
 #include "tasmet_io.h"
 #include "tasmet_exception.h"
@@ -77,9 +76,14 @@ bool compareMessage(const T& s1,const T& s2) {
     return (s1.SerializeAsString()==s2.SerializeAsString());
 }
 
-template <>
+// Explicit instantiation for pb::Model
+template
 bool compareMessage<pb::Model>(const pb::Model& s1,const pb::Model& s2);
-template <>
+
+template
 pb::Model loadMessage(const string& filepath);
+
+template
+void saveMessage<pb::Model>(const string& filepath,const pb::Model& model);
 //////////////////////////////////////////////////////////////////////
 

@@ -16,6 +16,7 @@
 #include <QObject>
 namespace pb{
     class System;
+    class SolverParams;
 }
 
 Q_DECLARE_METATYPE(SolverProgress);
@@ -28,8 +29,7 @@ class SolverWorker: public QObject {
     bool _converged = false;
     d _funtol,_reltol;
 public:
-
-    SolverWorker(pb::System& sys);
+    SolverWorker(const pb::System& sys,const pb::SolverParams& sparams);
     ~SolverWorker();
     void solver_stop();
                       

@@ -9,6 +9,8 @@
 #include "solver_dialog.h"
 #include "ui_solver_dialog.h"
 #include "system.pb.h"
+#include "solver.pb.h"
+
 #include "tasmet_exception.h"
 #include "tasmet_constants.h"
 #include "tasmet_tracer.h"
@@ -20,9 +22,11 @@
 #include <qcustomplot.h>
 
 SolverDialog::SolverDialog(QWidget* parent,
-                           pb::System& sys):
+                           pb::System& sys,
+                           pb::SolverParams& sparams):
     QDialog(parent),
     _sys(sys),
+    _sparams(sparams),
     _dialog(new Ui::solver_dialog())
 {
     
@@ -85,7 +89,7 @@ SolverDialog::SolverDialog(QWidget* parent,
     _plot->legend->setVisible(true);
 
     _plot->replot();
-    set(_sys.solverparams());
+    set(_sparams);
 
     setEnabled(true);
 
@@ -113,9 +117,9 @@ void SolverDialog::set(const pb::SolverParams& sol) {
 void SolverDialog::changed() {
     TRACE(15,"changed");
     if(_init) return;
-    _sys.mutable_solverparams()->set_funtol(_dialog->funtol->text().toDouble());
-    _sys.mutable_solverparams()->set_reltol(_dialog->reltol->text().toDouble());
-    _sys.mutable_solverparams()->set_solvertype((pb::SolverType) _dialog->solvertype->currentIndex());
+    _sparams.set_funtol(_dialog->funtol->text().toDouble());
+    _sparams.set_reltol(_dialog->reltol->text().toDouble());
+    _sparams.set_solvertype((pb::SolverType) _dialog->solvertype->currentIndex());
 }
 void SolverDialog::solver_progress(const SolverProgress& progress){
 
@@ -123,8 +127,8 @@ void SolverDialog::solver_progress(const SolverProgress& progress){
 
     // VARTRACE(15,progress.fun_err);
     // VARTRACE(15,progress.iteration);
-    d funtol = _sys.solverparams().funtol();
-    d reltol = _sys.solverparams().reltol();
+    d funtol = _sparams.funtol();
+    d reltol = _sparams.reltol();
 
     _funer->addData(progress.iteration,progress.fun_err);
     _reler->addData(progress.iteration,progress.rel_err);    
@@ -160,7 +164,7 @@ void SolverDialog::on_solve_clicked() {
 
     qRegisterMetaType<SolverProgress>();
 
-    _solver_worker = new SolverWorker(_sys);
+    _solver_worker = new SolverWorker(_sys,_sparams);
     QThread* thread = new QThread;
 
     _solver_worker->moveToThread(thread);

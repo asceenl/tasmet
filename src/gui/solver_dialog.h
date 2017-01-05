@@ -15,10 +15,12 @@
 
 namespace pb {
     class System;
+    class SolverParams;
 }
 namespace Ui {
     class solver_dialog;
 }
+
 class QCustomPlot;
 class QCPGraph;
 class SolverWorker;
@@ -28,6 +30,7 @@ class SolverDialog: public QDialog {
     Q_OBJECT
 
     pb::System& _sys;           // Reference to system
+    pb::SolverParams& _sparams;
 
     Ui::solver_dialog* _dialog;
 
@@ -41,11 +44,11 @@ class SolverDialog: public QDialog {
 public:
 
     SolverDialog(QWidget* parent,
-                 pb::System& sys);
+                 pb::System& sys,
+                 pb::SolverParams& sparams);
     
     ~SolverDialog();
 
-    void set(const pb::SolverParams&);
 public slots:
     void solver_progress(const SolverProgress&);
 private slots:
@@ -64,6 +67,7 @@ private:
     // Called whenever the user changes input values
     void changed();
     void setEnabled(bool);
+    void set(const pb::SolverParams&);
 };
     
 

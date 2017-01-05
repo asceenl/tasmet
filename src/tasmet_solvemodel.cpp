@@ -5,11 +5,11 @@
 // Description:
 // Program which can be used to solve a TaSMET Model from the CLI
 //////////////////////////////////////////////////////////////////////
-#include "protobuf/system_tools.h"       // loadSystem, saveSystem
+#include "protobuf/message_tools.h"       // loadSystem, saveSystem
 #include "tasmet_io.h"
 #include "tasmet_exception.h"
 #include "sys/tasystem.h"
-
+#include "protobuf/model.pb.h"
 // For using python from within Qt
 #include <PythonQt.h>
 
@@ -39,11 +39,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    pb::System sys;
+    pb::Model model;
     
     string filename = argv[1];
     try {
-        sys = loadSystem(filename);
+        model = loadMessage<pb::Model>(filename);
     }
     catch(TaSMETError &e) {
         cerr << e.what() << endl;
@@ -51,12 +51,12 @@ int main(int argc, char *argv[]) {
     }
 
     cout << "Loaded model: " << endl;
-    cout << sys.DebugString();
+    cout << model.system().DebugString();
 
     TaSystem* system;
 
     try {
-        system = new TaSystem(sys);
+        system = new TaSystem(model.system());
     }
     catch(TaSMETError &e) {
         cerr << "Model initialization error: " << endl;
