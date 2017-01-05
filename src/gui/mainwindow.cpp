@@ -165,7 +165,7 @@ void TaSMETMainWindow::saveModel(string* filepath) {
             filepath = &_filepath;
         }
         try {
-            saveMessage(*filepath,_model);
+            saveMessage<pb::Model>(*filepath,_model);
             _filepath = *filepath;
             changed();
         }
@@ -252,6 +252,8 @@ void TaSMETMainWindow::changed() {
     _window->removesegment->setEnabled(is_segment);
     _window->segmenttype->setEnabled(!is_segment);
 
+    QString backlog = _window->backlog->toPlainText();
+    *_model.mutable_backlog() = backlog.toStdString();
 
 }
 void TaSMETMainWindow::set(const pb::Model& model) {
@@ -265,6 +267,8 @@ void TaSMETMainWindow::set(const pb::Model& model) {
     _window->T0->setText(QString::number(sys.t0()));
     _window->systemtype->setCurrentIndex((int) sys.systemtype());
     _window->gastype->setCurrentIndex((int) sys.gastype());
+
+    _window->backlog->setPlainText(QString::fromStdString(model.backlog()));
 
     _model = model;
     _system = *_model.mutable_system();

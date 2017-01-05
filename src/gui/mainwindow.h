@@ -72,6 +72,9 @@ private slots:
     void on_T0_textEdited() {changed();}
     void on_p0_textEdited() {changed();}
     void on_systemtype_currentIndexChanged(int) {changed();}
+
+    void on_backlog_textChanged() {changed();}
+
 };
 
 
