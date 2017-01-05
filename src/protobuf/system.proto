@@ -18,6 +18,4 @@ message System {
     required double T0 = 6 [default = 293.15];
     map<uint32,Duct> ducts = 7;
     map<uint32,DuctBc> ductbcs = 8;
-    repeated double solution = 9;
-    optional SolverParams solverparams = 10;
 }

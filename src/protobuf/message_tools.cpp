@@ -1,24 +1,26 @@
-// system_tools.cpp
+// message_tools.cpp
 //
 // last-edit-by: J.A. de Jong 
 // 
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-#include "system_tools.h"
+#include "message_tools.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
 #include "tasmet_types.h"
 #include "tasmet_io.h"
 #include "tasmet_exception.h"
+#include "model.pb.h"
 
 #include <google/protobuf/text_format.h>
 
 using google::protobuf::TextFormat;
 
-pb::System loadSystem(const string& filepath) {
+template<typename T>
+T loadMessage(const string& filepath) {
 
-    TRACE(15,"loadSystem()");
+    TRACE(15,"loadMessage()");
     VARTRACE(15,filepath);
     std::ifstream myfile(filepath,ios::binary);
         
@@ -29,7 +31,7 @@ pb::System loadSystem(const string& filepath) {
         
     }
 
-    pb::System sys;
+    T sys;
 
     std::stringstream strStream;
     strStream << myfile.rdbuf(); //read the file
@@ -45,7 +47,8 @@ pb::System loadSystem(const string& filepath) {
 
 
 }
-void saveSystem(const string& filepath,const pb::System& sys) {
+template<typename T>
+void saveMessage(const string& filepath,const T& sys) {
 
     std::ofstream sfile(filepath,ios::binary);
     if(!sfile.good()){
@@ -67,10 +70,16 @@ void saveSystem(const string& filepath,const pb::System& sys) {
         
     }
 }
-// // Returns true when the two systems are equal
-bool compareSys(const pb::System& s1,const pb::System& s2) {
+
+// // Returns true when the two messages are equal
+template<typename T>
+bool compareMessage(const T& s1,const T& s2) {
     return (s1.SerializeAsString()==s2.SerializeAsString());
 }
 
+template <>
+bool compareMessage<pb::Model>(const pb::Model& s1,const pb::Model& s2);
+template <>
+pb::Model loadMessage(const string& filepath);
 //////////////////////////////////////////////////////////////////////
 

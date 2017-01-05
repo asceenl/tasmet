@@ -20,7 +20,7 @@ add_definitions(-DARMA_DONT_USE_WRAPPER)
 #====================================================
 
 # Always required make flags in case of both compilers
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wfatal-errors -pipe -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable  ")
 #========Qt5 Stuff ==================================
 find_package(Qt5Widgets)
@@ -47,7 +47,7 @@ set(CMAKE_AUTORCC ON)
 # set(CMAKE_CXX_FLAGS  "${CMAKE_CXX)FLAGS} -g -ggdb")
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native -mtune=native")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native -mtune=native")
 # set(CMAKE_CLANG "${CMAKE_GCC} -march=native -mtune=native -fopenmp")
 
 
@@ -132,5 +132,5 @@ add_subdirectory(testing)
 
 add_executable(tasmet src/main.cpp src/gui/tasmet_resources.qrc)
 add_executable(tasmet_solvemodel src/tasmet_solvemodel.cpp)
-target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets openblas)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets openblas tcmalloc)
 target_link_libraries(tasmet_solvemodel tasmet_src messages PythonQt openblas)

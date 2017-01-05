@@ -1,0 +1,18 @@
+syntax = "proto2";
+package pb;
+
+import "system.proto";
+import "solver.proto";
+
+message Model {
+
+    required System system = 1;
+    required SolverParams sparams = 2;
+
+    optional string backlog = 3 [default="Type your info here"];
+
+    repeated double solution = 4;
+
+
+
+}

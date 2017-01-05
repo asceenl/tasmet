@@ -43,19 +43,32 @@ AddDuctDialog::AddDuctDialog(const std::string& name,QWidget* parent):
     _plot = _dialog->plot;
 
     // Put validators on pure numeric fields
-    _dialog->L->setValidator(new QDoubleValidator(constants::min_L,
-                                                  constants::max_L,
-                                                  constants::field_decimals));
-    _dialog->ngp->setValidator(new QIntValidator(constants::min_ngp,
-                                                 constants::max_ngp
-                                                 ));
-    _dialog->dxb->setValidator(new QDoubleValidator(1e-16,
-                                                    1e6,
-                                                    constants::field_decimals));
+    QValidator* l_validator = new QDoubleValidator(constants::min_L,
+                                                   constants::max_L,
+                                                   constants::field_decimals);
+    if(!l_validator) throw TaSMETBadAlloc();
+    l_validator->setParent(this);
+    _dialog->L->setValidator(l_validator);
+
+    QValidator* ngp_validator = new QIntValidator(constants::min_ngp,
+                                                  constants::max_ngp);
+    ngp_validator->setParent(this);
+    _dialog->ngp->setValidator(ngp_validator);
+
+
+    QValidator* dxb_validator = new QDoubleValidator(1e-16,
+                                                     1e6,
+                                                     constants::field_decimals);
+    if(!dxb_validator) throw TaSMETBadAlloc();
+    dxb_validator->setParent(this);
+    _dialog->dxb->setValidator(dxb_validator);
     
-    _dialog->dxmid->setValidator(new QDoubleValidator(1e-16,
-                                                      1e6,
-                                                      constants::field_decimals));
+    QValidator* dxmid_validator = new QDoubleValidator(1e-16,
+                                                       1e6,
+                                                       constants::field_decimals);
+    if(!dxmid_validator) throw TaSMETBadAlloc();
+    dxmid_validator->setParent(this);
+    _dialog->dxmid->setValidator(dxmid_validator);
     
     
     for(const PreviewShow& t: PreviewShow_vec){

@@ -32,7 +32,7 @@ add_library(tasmet_src
   tasmet_assert.cpp
   tasmet_pyeval.cpp
 
-  protobuf/system_tools.cpp
+  protobuf/message_tools.cpp
 
   duct/grid.cpp
   duct/geom.cpp
@@ -40,6 +40,7 @@ add_library(tasmet_src
 
   ductbc/ductbc.cpp
   ductbc/pressurebc.cpp
+  ductbc/adiabaticwall.cpp
 
   funcs/bessel.cpp
   funcs/cbessj.cpp

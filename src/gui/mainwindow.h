@@ -10,7 +10,7 @@
 #define MAINWINDOW_H
 #include "tasmet_config.h"
 #include <QMainWindow>
-#include "protobuf/system.pb.h"
+#include "protobuf/model.pb.h"
 #include "tasmet_types.h"
 
 namespace Ui{
@@ -23,8 +23,9 @@ class TaSMETMainWindow: public QMainWindow {
 
     Ui::MainWindow *_window;
 
-    // In-memory system
-    pb::System _system;
+    // In-memory model
+    pb::Model _model;
+    pb::System& _system;
 
     // Where the file is stored
     string _filepath = "";
@@ -43,7 +44,7 @@ private:
     // When the user interacts, we call this function to update the
     // internal state and set the widget status accordingly
     void changed();
-    void set(const pb::System&);
+    void set(const pb::Model&);
 
     // Check whether the filepath contents agree with the system in
     // memory

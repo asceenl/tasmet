@@ -10,6 +10,7 @@
 #include "tasmet_tracer.h"
 #include "tasmet_assert.h"
 #include "pressurebc.h"
+#include "adiabaticwall.h"
 
 Segment* DuctBc::newDuctBc(const us id,
                           const TaSystem& sys,
@@ -20,6 +21,10 @@ Segment* DuctBc::newDuctBc(const us id,
     switch (dbc.type()) {
     case pb::PressureBc: {
         return new PressureBc(id,sys,dbc);
+        break;
+    }
+    case pb::AdiabaticWall: {
+        return new AdiabaticWall(id,sys,dbc);
         break;
     }
     default:

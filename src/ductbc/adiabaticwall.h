@@ -1,33 +1,36 @@
-// pressurebc.h
+// adiabaticwall.h
 //
 // Author: J.A. de Jong 
 //
 // Description:
-// Pressure boundary condition on a side of the duct
+// Adiabatic wall boundary condition on one side of the duct
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#ifndef PRESSUREBC_H
-#define PRESSUREBC_H
+#ifndef ADIABATICWALL_H
+#define ADIABATICWALL_H
 #include "segment.h"
+#include "ductbc.pb.h"
 
 class TaSystem;
-namespace pb{
-    class DuctBc;
-}
 class Variable;
 
-class PressureBc: public Segment {
-    Variable *_p,*_T,*_Ts;
-    us _duct_id;                /**< ID of Duct for this b.c. */
+/**
+ * The adiabaticWall class represents a Duct boundary condition, which
+ * blocks the flow and does not allow any axial heat conduction.
+ */
+
+class AdiabaticWall: public Segment {
     pb::DuctSide _side;         /**< Duct side at which this b.c. works */
+    us _duct_id;                /**< ID of Duct for this b.c. */
+
 protected:
-    PressureBc(const PressureBc&);
+    AdiabaticWall(const AdiabaticWall&);
 public:
-    PressureBc(const us id,
+    AdiabaticWall(const us id,
                const TaSystem& sys,
                const pb::DuctBc&);
-    ~PressureBc();
-    PressureBc* copy() const;
+    ~AdiabaticWall();
+    AdiabaticWall* copy() const;
 
     vd initialSolution(const TaSystem&) const;
 
@@ -53,6 +56,5 @@ public:
 
 };
 
-
-#endif // PRESSUREBC_H
+#endif // ADIABATICWALL_H
 //////////////////////////////////////////////////////////////////////

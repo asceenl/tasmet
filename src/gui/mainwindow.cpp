@@ -29,14 +29,14 @@
 
 #include "about_dialog.h"
 #include "solver_dialog.h"
-#include "system_tools.h"
+#include "message_tools.h"
 
-const QString default_system_name = QString("Unsaved TaSMET Model") +
-    constants::system_fileext;
+const QString default_model_name = QString("Unsaved TaSMET Model") +
+    constants::model_fileext;
 const QString default_segment_name = "Unnamed segment";
 const QString start_file_location = QStandardPaths::
     writableLocation(QStandardPaths::DocumentsLocation);
-const QString filetype = QString("TaSMET Model files (*") + constants::system_fileext + ")";
+const QString filetype = QString("TaSMET Model files (*") + constants::model_fileext + ")";
 const QString window_title_part = "TaSMET Model Builder - ";
 namespace {
 
@@ -54,7 +54,8 @@ namespace {
 
 TaSMETMainWindow::TaSMETMainWindow():
     _window(new Ui::MainWindow()),
-    _system(pb::System::default_instance())
+    _model(pb::Model::default_instance())
+    _system(*_model.mutable_sytem())
 {
 
     if(!_window) throw TaSMETBadAlloc();
@@ -76,20 +77,30 @@ TaSMETMainWindow::TaSMETMainWindow():
     }
 
     // TODO: change from omg to freq
-    _window->freq->setValidator(new QDoubleValidator(constants::min_omg,
-                                                    constants::max_omg,
-                                                    constants::field_decimals));
+    QValidator *omg_validator = new QDoubleValidator(constants::min_omg,
+                                                     constants::max_omg,
+                                                     constants::field_decimals);
+    if(!omg_validator) throw TaSMETBadAlloc();
+    omg_validator->setParent(this);
+    _window->freq->setValidator(omg_validator);
 
 
+    QValidator* T0_validator = new QDoubleValidator(constants::min_T0,
+                                                    constants::max_T0,
+                                                    constants::field_decimals);
+    if(!T0_validator) throw TaSMETBadAlloc();
+    T0_validator->setParent(this);
+    _window->T0->setValidator(T0_validator);
     _window->T0->setText(QString::number(constants::default_T0));
-    _window->T0->setValidator(new QDoubleValidator(constants::min_T0,
-                                                  constants::max_T0,
-                                                  constants::field_decimals));
 
+    QValidator *p0_validator = new QDoubleValidator(constants::min_p0,
+                                                    constants::max_p0,
+                                                   constants::field_decimals); 
+    if(!p0_validator) throw TaSMETBadAlloc();
+    p0_validator->setParent(this);
+    _window->p0->setValidator(p0_validator);
     _window->p0->setText(QString::number(constants::default_p0));
-    _window->p0->setValidator(new QDoubleValidator(constants::min_p0,
-                                                  constants::max_p0,
-                                                  constants::field_decimals));
+
     _window->segmentname->setText(default_segment_name);
 
     _window->segmentid->setMaximum(constants::max_segs);
@@ -108,9 +119,9 @@ TaSMETMainWindow::~TaSMETMainWindow(){
 
 void TaSMETMainWindow::newModel() {
     TRACE(15,"newModel");
-    _system = pb::System::default_instance();
+    _model = pb::Model::default_instance();
     _filepath = "";
-    set(_system);
+    set(_model);
 }
 void TaSMETMainWindow::loadModel() {
     TRACE(15,"loadModel");
@@ -129,9 +140,9 @@ void TaSMETMainWindow::loadModel() {
     string filepath_s = filepath.toStdString();
     if(filepath.size()!=0) {
         try {
-            TRACE(15,"Setting loaded system");
+            TRACE(15,"Setting loaded model");
             _filepath = filepath_s;
-            set(loadSystem(filepath_s));
+            set(loadMessage<pb::Model>(filepath_s));
         }
         catch(TaSMETError &e) {
             _filepath = "";
@@ -154,7 +165,7 @@ void TaSMETMainWindow::saveModel(string* filepath) {
             filepath = &_filepath;
         }
         try {
-            saveSystem(*filepath,_system);
+            saveMessage(*filepath,_model);
             _filepath = *filepath;
             changed();
         }
@@ -172,7 +183,7 @@ void TaSMETMainWindow::saveAsModel() {
     QString suggested_file;
 
     if(_filepath.size()==0) {
-        suggested_file = QDir(start_file_location).filePath(default_system_name);
+        suggested_file = QDir(start_file_location).filePath(default_model_name);
     }
     else {
         suggested_file.fromStdString(_filepath);

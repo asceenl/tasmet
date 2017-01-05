@@ -8,18 +8,20 @@
 #pragma once
 #ifndef SYSTEM_TOOLS_H
 #define SYSTEM_TOOLS_H
-#include "system.pb.h"
 #include "tasmet_tracer.h"
 #include "tasmet_types.h"
 
 // Load a system from a filepath
-pb::System loadSystem(const string& filepath);
+template<typename T>
+T loadMessage(const string& filepath);
 
 // Save a system to a filepath
-void saveSystem(const string& filepath,const pb::System& sys);
+template<typename T>
+void saveMessage(const string& filepath,const T& sys);
 
 // Returns true when the two systems are equal
-bool compareSys(const pb::System& s1,const pb::System& s2);
+template<typename T>
+bool compareSys(const T& s1,const T& s2);
 
 
 
