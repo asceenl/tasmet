@@ -126,11 +126,14 @@ include_directories(
   src/material
   src/sys
   )
+
+link_directories(/usr/lib/chaiscript)
+
 # Add the code subdirectory
 add_subdirectory(src)
 add_subdirectory(testing)
 
 add_executable(tasmet src/main.cpp src/gui/tasmet_resources.qrc)
 add_executable(tasmet_solvemodel src/tasmet_solvemodel.cpp)
-target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets openblas tcmalloc)
-target_link_libraries(tasmet_solvemodel tasmet_src messages PythonQt openblas)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets chaiscript_stdlib-5.7.0 openblas)
+target_link_libraries(tasmet_solvemodel tasmet_src messages PythonQt openblas chaiscript_stdlib-5.7.0)

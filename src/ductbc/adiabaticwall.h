@@ -9,7 +9,7 @@
 #ifndef ADIABATICWALL_H
 #define ADIABATICWALL_H
 #include "segment.h"
-#include "ductbc.pb.h"
+#include "ductbc.h"
 
 class TaSystem;
 class Variable;
@@ -19,7 +19,7 @@ class Variable;
  * blocks the flow and does not allow any axial heat conduction.
  */
 
-class AdiabaticWall: public Segment {
+class AdiabaticWall: public DuctBc {
     pb::DuctSide _side;         /**< Duct side at which this b.c. works */
     us _duct_id;                /**< ID of Duct for this b.c. */
 

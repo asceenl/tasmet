@@ -12,9 +12,9 @@
 #include "tasmet_exception.h"
 #include "model.pb.h"
 
-#include <google/protobuf/text_format.h>
-
-using google::protobuf::TextFormat;
+#include <google/protobuf/util/message_differencer.h>
+// #include <google/protobuf/text_format.h>
+// using google::protobuf::TextFormat;
 
 template<typename T>
 T loadMessage(const string& filepath) {
@@ -32,11 +32,11 @@ T loadMessage(const string& filepath) {
 
     T sys;
 
-    std::stringstream strStream;
-    strStream << myfile.rdbuf(); //read the file
-    string data = strStream.str();//str holds the content of the file        
+    // std::stringstream strStream;
+    // strStream << myfile.rdbuf(); //read the file
+    // string data = strStream.str();//str holds the content of the file        
         
-    if(!TextFormat::ParseFromString(data,&sys)) {
+    if(!sys.ParseFromIstream(&myfile)) {
         string error = "Invalid TaSMET Model file: ";
         error += filepath;
         throw TaSMETError(error);
@@ -53,27 +53,20 @@ void saveMessage(const string& filepath,const T& sys) {
     if(!sfile.good()){
         throw TaSMETError("Could not write to file");
     }
-    string data;
-    if(TextFormat::PrintToString(sys,&data)) {
-        // Can maybe assign to itself. Which is no problem
-        // according to C++ docs
+
+    // if(TextFormat::PrintToString(sys,&data)) {
+    if(sys.SerializeToOstream(&sfile)) {
         TRACE(15,"Saving file succeeded");
-        sfile << data << std::flush;
-        
-        // Close file here, such that in can be opened to compare
-        // whether the file is still dirty 
-        sfile.close();
     }
     else {
         throw TaSMETError("Could not save model to file");
-        
     }
 }
 
 // // Returns true when the two messages are equal
 template<typename T>
 bool compareMessage(const T& s1,const T& s2) {
-    return (s1.SerializeAsString()==s2.SerializeAsString());
+    return google::protobuf::util::MessageDifferencer::Equals(s1,s2);
 }
 
 // Explicit instantiation for pb::Model

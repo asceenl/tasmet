@@ -439,19 +439,6 @@ Solver
  object.
  Often, the user creates a Python scripts which has approximately the following
  shape:
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-lstinputlisting{tutorial/program_overview.py}
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard

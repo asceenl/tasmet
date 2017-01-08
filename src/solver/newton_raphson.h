@@ -10,16 +10,18 @@
 #define NEWTON_RAPHSON_H
 #include "solver.h"
 
+/**
+ * Newton Raphson Solver implementation.
+ * 
+ */
 class NewtonRaphson: public Solver<GradientNonlinearSystem,vd> {
 
-    d _dampfac = 1.0;
-    d _maxiter = 10000;
+    d _dampfac = 1.0; /**< This is the applied damping factor */
 public:
-    NewtonRaphson(const GradientNonlinearSystem&sys,d dampfac,us maxiter):
+    NewtonRaphson(const GradientNonlinearSystem&sys,d dampfac=1.0):
         Solver(sys),
-        _dampfac(dampfac),
-        _maxiter(maxiter){}
-
+        _dampfac(dampfac)
+        {}
 protected:
     void start_implementation(GradientNonlinearSystem& system,progress_callback* callback);
     

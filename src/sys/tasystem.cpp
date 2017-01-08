@@ -129,8 +129,10 @@ vd TaSystem::residual() const {
     us total_neqs = arma::sum(neqs);
 
     if(total_neqs>constants::maxndofs)      {
-        throw TaSMETError("Too many DOFS required."
-                          " Problem too large.");
+        stringstream error;
+        error << "Too many DOFS required. Problem too large. Number of equations computed: ";
+        error << total_neqs;
+        throw TaSMETError(error);
     }
 
     // This vector of indices stores the last equation number + 1 for
@@ -237,11 +239,12 @@ vus TaSystem::getNDofs() const  {
     return Ndofs;
 }
 vus TaSystem::getNEqs() const  {
-    TRACE(0,"TaSystem::getNDofs()");
+    TRACE(15,"TaSystem::getNEqs()");
     vus Neqs(_segs.size());
     us i=0;
     for (auto seg :_segs) {
         Neqs(i)=seg.second->getNEqs(*this);
+        VARTRACE(15,Neqs(i));
         i++;
     }
     return Neqs;

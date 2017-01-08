@@ -9,9 +9,10 @@
 #include "tasmet_io.h"
 #include "tasmet_exception.h"
 #include "sys/tasystem.h"
+#include "solver/newton_raphson.h"
 #include "protobuf/model.pb.h"
-// For using python from within Qt
-#include <PythonQt.h>
+#include <memory>
+
 
 void usage(const char* fn) {
     cout << "Usage: " << endl;
@@ -21,18 +22,6 @@ void usage(const char* fn) {
 int main(int argc, char *argv[]) {
 
     INITTRACE(10);
-
-    // Initialize PythonQt
-    // PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut);
-    PythonQt::init();
-    
-    PythonQt* pyqt = PythonQt::self();
-    PythonQtObjectPtr context = pyqt->getMainModule();
-
-    QVariant rv = context.evalScript("from math import *\n");
-    if(pyqt->hadError()) {
-        return -1;
-    }
 
     if(argc != 2) {
         usage(argv[0]);
@@ -53,10 +42,10 @@ int main(int argc, char *argv[]) {
     cout << "Loaded model: " << endl;
     cout << model.system().DebugString();
 
-    TaSystem* system;
+    std::unique_ptr<TaSystem> system;
 
     try {
-        system = new TaSystem(model.system());
+        system = std::unique_ptr<TaSystem>(new TaSystem(model.system()));
     }
     catch(TaSMETError &e) {
         cerr << "Model initialization error: " << endl;
@@ -64,6 +53,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    NewtonRaphson solver(*system.get());
+
+    progress_callback cb = simple_progress_callback(1e-6,1e-6);
+
+    solver.start(&cb);
 }
 
 

@@ -27,10 +27,12 @@ include_directories(
   )
 
 add_library(tasmet_src
+  chaiscript.cpp
+
   tasmet_tracer.cpp
   tasmet_exception.cpp
   tasmet_assert.cpp
-  tasmet_pyeval.cpp
+  tasmet_evalscript.cpp
 
   protobuf/message_tools.cpp
 
@@ -72,4 +74,4 @@ add_library(tasmet_src
 
 add_subdirectory(gui) 
 add_subdirectory(protobuf)
-target_link_libraries(tasmet_src Qt5::Widgets)
+target_link_libraries(tasmet_src Qt5::Widgets superlu dl pthread)

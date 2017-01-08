@@ -8,12 +8,14 @@
 #include "geom.h"
 #include "grid.h"
 #include "duct.pb.h"
-#include "tasmet_pyeval.h"
+#include "tasmet_evalscript.h"
 #include <memory>
 #include "tasmet_exception.h"
+#include "tasmet_tracer.h"
 
 Geom::Geom(const pb::Duct& duct) {
 
+    TRACE(15,"Geom::Geom");
     // Step one: create the grid
     std::unique_ptr<Grid> grid;
     switch (duct.gridtype()) {
@@ -35,28 +37,32 @@ Geom::Geom(const pb::Duct& duct) {
     x = grid->getx();
 
     const char* invS = "Invalid cross-sectional area function";
-    EvaluateFun Sfun(duct.area(),invS);
-    Sfun.addGlobalDef("L",duct.length());
-    S = Sfun(x);
-
+    {
+        EvaluateFun Sfun(duct.area(),invS);
+        Sfun.addGlobalDef("L",duct.length());
+        S = Sfun(x);
+    }
     if(min(S) <= 0) {
         throw TaSMETError(invS);
     }
     
 
     const char* invpor = "Invalid porosity function";
-    EvaluateFun phifun(duct.phi(),invpor);
-    Sfun.addGlobalDef("L",duct.length());
-    phi = Sfun(x);
-
+    {
+        EvaluateFun phifun(duct.phi(),invpor);
+        phifun.addGlobalDef("L",duct.length());
+        phi = phifun(x);
+    }
     if(min(phi) <= 0 || max(phi) > 1) {
         throw TaSMETError(invpor);
     }
 
     const char* invrh = "Invalid hydraulic radius function";
-    EvaluateFun rhfun(duct.rh(),invrh);
-    Sfun.addGlobalDef("L",duct.length());
-    rh = Sfun(x);
+    {
+        EvaluateFun rhfun(duct.rh(),invrh);
+        rhfun.addGlobalDef("L",duct.length());
+        rh = rhfun(x);
+    }
     if(min(rh) <= 0 ) {
         throw TaSMETError(invrh);
     }

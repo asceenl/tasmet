@@ -9,20 +9,19 @@
 #include "pressurebc.h"
 #include "ductbc.pb.h"
 #include "tasmet_tracer.h"
+#include "tasystem.h"
+#include "duct.h"
 
 PressureBc::PressureBc(const us id,
                        const TaSystem& sys,
                        const pb::DuctBc& dbc):
-    Segment(id,dbc.name())
+    DuctBc(id,dbc)
 {
     TRACE(15,"PressureBc(id,sys,dbc)");
 
-
-    
-
 }
 PressureBc::PressureBc(const PressureBc& o):
-    Segment(o) {
+    DuctBc(o) {
 
     TRACE(15,"PressureBc(o)");
 
@@ -46,10 +45,14 @@ void PressureBc::residual(const TaSystem&,
 
 }
 
-us PressureBc::getNEqs(const TaSystem&) const {
+us PressureBc::getNEqs(const TaSystem& sys) const {
     TRACE(15,"PressureBc::getNEqs()");    
-
-
+    // p = x
+    // T = x
+    // This one only if the duct solves for solid
+    // Ts = x => 3 equations
+    bool has_solideq = getDuct(sys).getDuctPb().stempmodel() != pb::Prescribed;
+    return sys.Ns()*(has_solideq ? 3: 2);
 }
 void PressureBc::show(const TaSystem&,us verbosity_level) const {
     TRACE(15,"PressureBc::show()");    

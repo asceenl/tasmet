@@ -11,8 +11,16 @@
 #include "tasmet_assert.h"
 #include "pressurebc.h"
 #include "adiabaticwall.h"
+#include "tasystem.h"
+#include "duct.h"
 
-Segment* DuctBc::newDuctBc(const us id,
+const Duct& DuctBc::getDuct(const TaSystem& sys) const {
+
+    return dynamic_cast<const Duct&>(sys.getSegment(_dbc.duct_id()));
+
+}
+
+DuctBc* DuctBc::newDuctBc(const us id,
                           const TaSystem& sys,
                           const pb::DuctBc& dbc) {
 

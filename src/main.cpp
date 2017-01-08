@@ -9,10 +9,6 @@
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 
-// For using python from within Qt
-#include <PythonQt.h>
-
-
 #include "tasmet_config.h"
 #include "tasmet_tracer.h"
 #include "gui/mainwindow.h"
@@ -45,18 +41,6 @@ int main(int argc, char *argv[]) {
     // Q_INIT_RESOURCE(application);
     INITTRACE(15);
 
-    // Initialize PythonQt
-    // PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut);
-    PythonQt::init();
-
-    PythonQt* pyqt = PythonQt::self();
-    PythonQtObjectPtr context = pyqt->getMainModule();
-
-    QVariant rv = context.evalScript("from math import *\n");
-    if(pyqt->hadError()) {
-        return -1;
-    }
-    
     QApplication app(argc, argv);
     
     catchUnixSignals({SIGQUIT, SIGINT, SIGTERM, SIGHUP});
@@ -73,8 +57,6 @@ int main(int argc, char *argv[]) {
 
     // if (!parser.positionalArguments().isEmpty())
     //     mainWin.loadFile(parser.positionalArguments().first());
-
-
 
     TaSMETMainWindow win;
 

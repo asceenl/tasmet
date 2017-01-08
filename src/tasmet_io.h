@@ -10,6 +10,7 @@
 #define TASMET_IO_H
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 //Spoiling global namespace with often used functions and variables 
 using std::cout; /* Output to stdout */				
@@ -20,6 +21,7 @@ using std::cin;		/* Input from stdin */
 using std::ostream; 
 using std::cerr; 
 using std::ios; 
+using std::stringstream;
 
 #endif // TASMET_IO_H
 //////////////////////////////////////////////////////////////////////

@@ -22,7 +22,10 @@ class Duct : public Segment, public Geom {
     // Drag* _drag = nullptr;
     // Heat* _heat = nullptr;
     std::vector<Equation*> _eqs;
+    pb::Duct _ductpb;
     vd _Tsprescribed;
+
+
 
 protected:
     Duct(const Duct&);
@@ -38,6 +41,8 @@ public:
     virtual Duct* copy() const;
     const Geom& geom() const;
     
+    const pb::Duct& getDuctPb() const { return _ductpb;}
+
     // Solving
     virtual void residual(const TaSystem&,arma::subview_col<d>&& residual) const;
 

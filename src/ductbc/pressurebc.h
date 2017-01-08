@@ -8,14 +8,15 @@
 #pragma once
 #ifndef PRESSUREBC_H
 #define PRESSUREBC_H
-#include "segment.h"
+#include "ductbc.h"
 #include "ductbc.pb.h"
+
 class TaSystem;
 class Variable;
 
-class PressureBc: public Segment {
+class PressureBc: public DuctBc {
     Variable *_p,*_T,*_Ts;
-    us _duct_id;                /**< ID of Duct for this b.c. */
+
     pb::DuctSide _side;         /**< Duct side at which this b.c. works */
 protected:
     PressureBc(const PressureBc&);

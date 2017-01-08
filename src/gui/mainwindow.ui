@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
+ <author>J.A. de Jong</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
@@ -7,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>683</width>
-    <height>488</height>
+    <height>554</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,21 +64,30 @@
                <item row="5" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="text">
-                  <string>System type:</string>
+                  <string>&amp;System type:</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>systemtype</cstring>
                  </property>
                 </widget>
                </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_5">
                  <property name="text">
-                  <string>Gas type:</string>
+                  <string>&amp;Gas type:</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>gastype</cstring>
                  </property>
                 </widget>
                </item>
                <item row="3" column="0">
                 <widget class="QLabel" name="label_15">
                  <property name="text">
-                  <string>Reference temperature</string>
+                  <string>&amp;Reference temperature</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>T0</cstring>
                  </property>
                 </widget>
                </item>
@@ -114,14 +124,20 @@
                <item row="4" column="0">
                 <widget class="QLabel" name="label_17">
                  <property name="text">
-                  <string>Reference pressure</string>
+                  <string>&amp;Reference pressure</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>p0</cstring>
                  </property>
                 </widget>
                </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Number of harmonics: </string>
+                  <string>&amp;Number of harmonics: </string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>nf</cstring>
                  </property>
                 </widget>
                </item>
@@ -135,7 +151,10 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>Fundamental frequency: </string>
+                  <string>&amp;Fundamental frequency: </string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>freq</cstring>
                  </property>
                 </widget>
                </item>
@@ -192,7 +211,10 @@
                <item row="0" column="0">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Segment type</string>
+                  <string>S&amp;egment type</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>segmenttype</cstring>
                  </property>
                 </widget>
                </item>
@@ -202,7 +224,10 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_10">
                  <property name="text">
-                  <string>Segment ID</string>
+                  <string>Segment &amp;ID</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>segmentid</cstring>
                  </property>
                 </widget>
                </item>
@@ -216,7 +241,10 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label_8">
                  <property name="text">
-                  <string>Segment name</string>
+                  <string>Segment &amp;name</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>segmentname</cstring>
                  </property>
                 </widget>
                </item>
@@ -237,7 +265,7 @@
                <item row="3" column="0" colspan="2">
                 <widget class="QPushButton" name="addsegment">
                  <property name="text">
-                  <string>Add/edit segment...</string>
+                  <string>&amp;Add/edit segment...</string>
                  </property>
                 </widget>
                </item>
@@ -320,7 +348,7 @@
      <x>0</x>
      <y>0</y>
      <width>683</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -432,6 +460,21 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>nf</tabstop>
+  <tabstop>freq</tabstop>
+  <tabstop>gastype</tabstop>
+  <tabstop>T0</tabstop>
+  <tabstop>p0</tabstop>
+  <tabstop>systemtype</tabstop>
+  <tabstop>segmenttype</tabstop>
+  <tabstop>segmentid</tabstop>
+  <tabstop>segmentname</tabstop>
+  <tabstop>addsegment</tabstop>
+  <tabstop>removesegment</tabstop>
+  <tabstop>backlog</tabstop>
+  <tabstop>segoverview</tabstop>
+ </tabstops>
  <resources>
   <include location="tasmet_resources.qrc"/>
  </resources>

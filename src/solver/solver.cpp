@@ -8,13 +8,32 @@
 #include "tasmet_tracer.h"
 #include "solver.h"
 #include "tasmet_exception.h"
-#include <chrono>
+#include "tasmet_io.h"
+
+SolverAction ostream_progress_callback(SolverProgress pg,std::ostream* out, d funtol,d reltol) {
+
+    // Create reference to ostream
+    std::ostream& myout = (out) ? *out : std::cout;
+
+    myout << "Iteration: " << pg.iteration;
+    myout << " , Residual: " << pg.fun_err << " . Solution error: ";
+    myout << pg.rel_err << endl;
+
+    if(pg.fun_err <= funtol && pg.rel_err <= reltol) {
+        myout << "Solution found within required tolerance" << endl;        
+        return Stop;
+    }
+    
+    return Continue;
+}
 
 
-template<typename system_T,typename result_T>
-static void SolverThread(Solver<system_T,result_T>* solver,
-                         system_T* system,
-                         progress_callback* callback);
+progress_callback simple_progress_callback(d funtol,d reltol,std::ostream* out) {
+    using namespace std::placeholders;  // for _1, _2, _3...
+    using std::bind;
+    return bind(ostream_progress_callback,_1,out,funtol,reltol);
+    
+}
 
 
 template<typename system_T,typename result_T>
@@ -33,27 +52,14 @@ Solver<system_T,result_T>::~Solver(){
 template<typename system_T,typename result_T>
 void Solver<system_T,result_T>::start(progress_callback* callback){
 
-        TRACE(15,"Waiting for solver...");
         start_implementation(*_sys,callback);
 
 }
-
 
 template<typename system_T,typename result_T>
 result_T Solver<system_T,result_T>::getSolution() {
 
     return _sys->getSolution();
-}
-template<typename system_T,typename result_T>
-void SolverThread(Solver<system_T,result_T>* solver,system_T* system,progress_callback* callback) {
-    assert(system);
-    
-    solver->_running = true;
-
-    solver->start_implementation(*system,callback);
-
-    solver->_running = false;
-
 }
 
 
