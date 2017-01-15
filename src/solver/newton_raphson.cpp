@@ -9,6 +9,8 @@
 #include "newton_raphson.h"
 #include "tasmet_tracer.h"
 
+#define DEBUG_TASMET_SYSTEM
+
 void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
                                          progress_callback* callback) {
 
@@ -22,6 +24,17 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
     vd guess = system.getSolution();
 
     vd residual=system.residual();
+
+    #ifdef DEBUG_TASMET_SYSTEM
+    cout << "Initial solution: " << endl;
+    cout << guess << endl;
+    #endif  // DEBUG_TASMET_SYSTEM
+    
+    #ifdef DEBUG_TASMET_SYSTEM
+    cout << "Initial residual: " << endl;
+    cout << residual << endl;
+    #endif  // DEBUG_TASMET_SYSTEM
+
 
     SolverProgress progress;
     SolverAction action;
@@ -40,7 +53,12 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
         system.updateSolution(guess);
 
         residual = system.residual();
-        
+        #ifdef DEBUG_TASMET_SYSTEM
+        cout << "Residual: ";
+        cout << residual << endl;
+        #endif  // DEBUG_TASMET_SYSTEM
+
+    
         progress.rel_err = norm(dx);
         progress.fun_err = norm(residual);
         progress.iteration++;

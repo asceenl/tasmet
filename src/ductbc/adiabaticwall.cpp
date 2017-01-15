@@ -44,16 +44,44 @@ void AdiabaticWall::residual(const TaSystem& sys,
                              ) const {
 
     TRACE(15,"AdiabaticWall::residual()");
+    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+    us Ns = sys.Ns();
+
+    const Duct& duct = getDuct(sys);
+    if(_side == pb::left) {
+        residual.subvec(0,Ns-1) = duct.ut(sys,0);
+        if(dpb.htmodel() != pb::Isentropic) {
+            // TODO: Put the boundary condition of zero heat flux here
+            // residual.subvec(Ns,2*Ns-1) = 
+            tasmet_assert(false,"");
+        }
+    }
+    else {
+        residual.subvec(0,Ns-1) = duct.ut(sys,-1);
+        if(dpb.htmodel() != pb::Isentropic) {
+            // TODO: Put the boundary condition of zero heat flux here
+            // residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,-1) - _T;
+            tasmet_assert(false,"");
+        }
+    }
 
 }
 
 us AdiabaticWall::getNEqs(const TaSystem& sys) const {
     TRACE(15,"AdiabaticWall::getNEqs()");    
     // u = 0
-    // dT/dx = 0
-    // dTs/dx = 0 => 3 eqs
-    bool has_solideq = getDuct(sys).getDuctPb().stempmodel() != pb::Prescribed;
-    return sys.Ns()*(has_solideq ? 3: 2);
+    // dT/dx = 0 --> if htmodel is not Isentropic
+    // dTs/dx = 0 => if stempmodel is not Prescribed
+
+    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+
+    bool has_solideq = dpb.stempmodel() != pb::Prescribed;
+
+    us neqs = sys.Ns()*(has_solideq ? 2: 1);
+    if(dpb.htmodel() != pb::Isentropic) neqs+= sys.Ns();
+
+    VARTRACE(15,neqs);
+    return neqs;
 }
 void AdiabaticWall::show(const TaSystem&,us verbosity_level) const {
     TRACE(15,"AdiabaticWall::show()");    

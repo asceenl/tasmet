@@ -48,6 +48,11 @@ GlobalConf::GlobalConf(us Nf,d freq):
     setfreq(freq);
 
 }
+vd GlobalConf::timeInstances() const {
+    us Ns = this->Ns();
+    d lastt = (Ns-1)/(Ns*getfreq());
+    return arma::linspace<vd>(0,lastt,Ns);
+}
 void GlobalConf::show() const {
     cout << "------- Global configuration ------ \n";        
     cout << "------- Number of harmonics to solve for: "<< _Nf <<"\n";

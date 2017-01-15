@@ -44,6 +44,8 @@ public:
     d getfreq() const {return _omg/2/number_pi;}
     // d meshPeclet(const Gas& gas,d dx,d u) const {return u*dx*gas.rho0()*gas().cp(T0())/gas().kappa(T0());}
 
+    vd timeInstances() const;
+
     void setfreq(d freq){setomg(2*number_pi*freq);}
     void setomg(d omg);
 

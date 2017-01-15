@@ -23,7 +23,7 @@ class EvaluateFun {
     string _err_msg;
     string _fun_return;
 public:
-    EvaluateFun(const string& fun_return,const string& err_msg = "Script error");
+    EvaluateFun(const string& fun_return,const string& err_msg = "Script error",const string& vars = "x");
     
     // Add a global definition to the namespace
     void addGlobalDef(const string& name,

@@ -66,8 +66,8 @@ int main(){
     Helium helium(293.15,101325);
 
     gc_ptr gc(new GlobalConf(10,100));
-    Variable pressure(gc,10*101325);
-    Variable temperature = adiabaticTemp(helium,pressure);
+    vd pressure(1); pressure(0) = 10*101325;
+    vd temperature = adiabaticTemp(helium,pressure);
 }
 
 

@@ -96,14 +96,11 @@ namespace constants {
 
     // These variable numbers are important, as they determine the
     // position of these variables in the array in cell.h
-    // const int rho=1;
-    // const int m=2;
-    // const int T=3;
-    // const int p=4;
-    // const int Ts=5;
-    // Number of variables
-    const int nvars_reserve=7;
-    const int neqs_reserve=7;
+    const int rho=0;
+    const int u=1;
+    const int T=2;
+    const int p=3;
+    const int Ts=4;
   
     const char* const model_fileext = ".tasmet";
 

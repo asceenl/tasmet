@@ -43,7 +43,7 @@ TaSystem::TaSystem(const pb::System& sys):
             throw e;
         }
     }
-    // Create all ducts
+    // Create all ductbcs
     for(const auto& d : sys.ductbcs()) {
         // d.first: id
         // d.second: duct description
@@ -61,6 +61,33 @@ TaSystem::TaSystem(const pb::System& sys):
         }
     }
     
+    // Create the initial solution from the segments and store it
+    // here. Please be careful not to call any virtual functions!
+    vus ndofs = getNDofs();
+    vus dofend = arma::cumsum(ndofs);
+    us total_dofs = arma::sum(ndofs);
+    vd solution = vd(total_dofs);
+
+    us i=0;
+    const Segment* seg;
+    for(auto& seg_: _segs) {
+        seg = seg_.second;
+
+        if(ndofs(i)>0) {
+            if(i==0) {
+                solution.subvec(0,ndofs(0)-1) =
+                    seg->initialSolution(*this);
+            }
+            else {
+                solution.subvec(dofend(i-1),dofend(i)-1) =
+                    seg->initialSolution(*this);
+            }
+            i++;
+        }
+    }
+    // TODO: work directly on the final solution array
+    _solution = solution;
+
     // Copy solution vector, if valid
     // const auto& sol = sys.solution();
     // us size = sol.size(), i=0;
@@ -75,7 +102,8 @@ TaSystem::TaSystem(const pb::System& sys):
 }
 TaSystem::TaSystem(const TaSystem& o):
     GlobalConf(o),                 // Share a ptr to the Global conf
-    _gas(o._gas->copy())
+    _gas(o._gas->copy()),
+    _solution(o._solution)
 {
     TRACE(25,"TaSystem::TaSystem(TaSystem&) copy");
 
@@ -150,6 +178,10 @@ vd TaSystem::residual() const {
 
     vd residual(total_neqs);
 
+    #ifdef TASMET_DEBUG
+    residual = arma::datum::nan*ones(total_neqs);
+    #endif
+
     us i=0;
     const Segment* seg;
     for(auto seg_: _segs) {
@@ -172,6 +204,8 @@ vd TaSystem::residual() const {
         i++;
     }
 
+    TRACE(15,"Obtained residual from all Segments");
+
     #ifdef TASMET_DEBUG
     assert(arbitrateMassEq< (int) total_neqs);    
     #endif // TASMET_DEBUG
@@ -185,43 +219,16 @@ vd TaSystem::residual() const {
 }
 vd TaSystem::getSolution() const {
 
-    if(_solution.size() == 0) {
-        // Create the initial solution from the segments
-        // and store it here
-
-        vus ndofs = getNDofs();
-        vus dofend = arma::cumsum(ndofs);
-        us total_dofs = arma::sum(ndofs);
-        vd solution = vd(total_dofs);
-
-        us i=0;
-        const Segment* seg;
-        for(auto& seg_: _segs) {
-            seg = seg_.second;
-
-            if(ndofs(i)>0) {
-                if(i==0) {
-                    solution.subvec(0,ndofs(0)-1) =
-                        seg->initialSolution(*this);
-                }
-                else {
-                    solution.subvec(dofend(i-1),dofend(i)-1) =
-                        seg->initialSolution(*this);
-                }
-                i++;
-            }
-        }
-        return solution;
-    } // if the solution did not yet exist
-
     return _solution;
 }
 const arma::subview_col<d> TaSystem::getSolution(const us seg_id) const {
 
     vus ndofs = getNDofs();
     vus dofsend = arma::cumsum(ndofs);
-
+    VARTRACE(15,dofsend);
+    VARTRACE(15,seg_id);
     if(seg_id == 0) {
+        VARTRACE(15,_solution.size());
         return _solution.subvec(0,dofsend(0)-1);
     }
     else {

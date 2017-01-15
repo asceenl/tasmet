@@ -91,22 +91,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_tools)
 # Python #####################
 # ##########################
 
-include_directories(/usr/include/PythonQt)
-
-
-if(TaSMET_PY_VERSION)
-  # Find major version from version string
-  set(PYTHON_LIBRARY "/usr/lib/libpython${TaSMET_PY_VERSION}.so")
-  set(PYTHON_INCLUDE_DIR "/usr/include/python${TaSMET_PY_VERSION}")  
-  set(PYTHON_INCLUDE_DIRS "/usr/include/python${TaSMET_PY_VERSION}")  
-
-endif(TaSMET_PY_VERSION)
-message("Python include dirs: ${PYTHON_INCLUDE_DIRS}")
-
-find_package(PythonLibs REQUIRED)
-string(REGEX MATCH "^." TaSMET_PY_MAJOR_VERSION ${PYTHONLIBS_VERSION_STRING})
-MESSAGE("Python major version: ${TaSMET_PY_MAJOR_VERSION}")  
-
 # Find the site_packages directory of python
 execute_process(COMMAND python${TaSMET_PY_MAJOR_VERSION} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -120,7 +104,6 @@ add_definitions(-DARMA_USE_SUPERLU -DARMA_USE_CXX11)
 # link_directories(common)
 
 include_directories(
-  ${PYTHON_INCLUDE_DIRS}
   src
   src/solver
   src/material
@@ -135,5 +118,5 @@ add_subdirectory(testing)
 
 add_executable(tasmet src/main.cpp src/gui/tasmet_resources.qrc)
 add_executable(tasmet_solvemodel src/tasmet_solvemodel.cpp)
-target_link_libraries(tasmet tasmet_gui tasmet_src messages PythonQt Qt5::Widgets chaiscript_stdlib-5.7.0 openblas)
-target_link_libraries(tasmet_solvemodel tasmet_src messages PythonQt openblas chaiscript_stdlib-5.7.0)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages Qt5::Widgets chaiscript_stdlib-5.7.0 openblas)
+target_link_libraries(tasmet_solvemodel tasmet_src messages openblas chaiscript_stdlib-5.7.0)

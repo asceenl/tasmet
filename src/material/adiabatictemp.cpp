@@ -88,15 +88,13 @@ namespace {
         }
     }
 }
-Variable adiabaticTemp(const PerfectGas& gas,
-                       const Variable& pressure) {
+vd adiabaticTemp(const PerfectGas& gas,
+                 const vd& p) {
                        
     
     TRACE(10,"adiabaticTemp()");
-    Variable temp(pressure);
-    const vd p = pressure.tdata();
 
-    vd T = temp.tdata();
+    vd T(p.size());
 
     AdiabaticTemp adt(gas,p(0)); // Equation
 
@@ -115,8 +113,7 @@ Variable adiabaticTemp(const PerfectGas& gas,
         VARTRACE(15,T(i));
 
     }
-    temp.settdata(T);
-    return temp;
+    return T;
 }
 //////////////////////////////////////////////////////////////////////
 

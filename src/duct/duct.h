@@ -11,6 +11,7 @@
 #include "segment.h"
 #include "duct.pb.h"
 #include "geom.h"
+#include "tasmet_constants.h" // For the variable nrs
 
 class Equation;
 class Drag;
@@ -43,6 +44,28 @@ public:
     
     const pb::Duct& getDuctPb() const { return _ductpb;}
 
+    // Obtain values as a function of position, for a given time
+    // instance.
+    vd rhox(const TaSystem& sys,int t) const { return getvarx(sys,constants::rho,t);}
+    vd ux(const TaSystem& sys,int t) const { return getvarx(sys,constants::u,t); }
+    vd Tx(const TaSystem& sys,int t) const { return getvarx(sys,constants::T,t); }
+    vd px(const TaSystem& sys,int t) const { return getvarx(sys,constants::p,t); }
+    vd Tsx(const TaSystem& sys,int t) const { return getvarx(sys,constants::Ts,t); }
+
+    vd rhot(const TaSystem& sys,int gp) const { return getvart(sys,constants::rho,gp); }
+    vd ut(const TaSystem& sys,int gp) const { return getvart(sys,constants::u,gp); }
+    vd Tt(const TaSystem& sys,int gp) const { return getvart(sys,constants::T,gp); }
+    vd pt(const TaSystem& sys,int gp) const { return getvart(sys,constants::p,gp); }
+    vd Tst(const TaSystem& sys,int gp) const { return getvart(sys,constants::Ts,gp); }
+
+    /// Obtain variable as a function of time for a given grid point
+    vd getvart(const TaSystem& sys,int varnr,int gp) const;
+
+    /// Obtain variable as a function of position, for a given time
+    /// instance
+    vd getvarx(const TaSystem& sys,int varnr,int t) const;
+
+    d getvartx(const TaSystem& sys,int t,int gp) const;
     // Solving
     virtual void residual(const TaSystem&,arma::subview_col<d>&& residual) const;
 

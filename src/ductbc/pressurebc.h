@@ -14,9 +14,17 @@
 class TaSystem;
 class Variable;
 
-class PressureBc: public DuctBc {
-    Variable *_p,*_T,*_Ts;
+/**
+ * A PressureBc is a Duct boundary condition, where the pressure is
+ * prescribed on one side of a Duct. Besides the pressure it is
+ * necessary to also prescribe the temperature, and if a model is used
+ * to thermally interact with the solid, also a solid temperature is
+ * prescribed.
+ */
 
+class PressureBc: public DuctBc {
+    vd _p,_T,_Ts;               /**< Prescribed values for pressure,
+                                   temperature and solid temperature */
     pb::DuctSide _side;         /**< Duct side at which this b.c. works */
 protected:
     PressureBc(const PressureBc&);

@@ -47,7 +47,8 @@ inline void wrap_eval<void>(ChaiScript* chai,const string& script) {
 }
 
 EvaluateFun::EvaluateFun(const string& fun_return,
-                         const string& err_msg):
+                         const string& err_msg,
+                         const string& vars):
     _err_msg(err_msg),
     _fun_return(fun_return)
 {
@@ -55,7 +56,7 @@ EvaluateFun::EvaluateFun(const string& fun_return,
     _chai = getChaiScriptInstance();
     if(!_chai) throw TaSMETBadAlloc();
 
-    string script = "def myfun(x) {\n";
+    string script = string("def myfun(") + vars + ") {\n";
     script += "return " + fun_return + "; }\n";
     
     wrap_eval<void>(_chai.get(),script);

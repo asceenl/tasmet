@@ -78,6 +78,16 @@ public:
         element_wise(rho);
     }
 
+    virtual d drhodT(d T,d p) const=0;
+    vd drhodT(const vd& T,const vd& p) const {
+        element_wise(drhodT);
+    }
+
+    virtual d drhodp(d T,d p) const=0;
+    vd drhodp(const vd& T,const vd& p) const {
+        element_wise(drhodp);
+    }
+
     // Adiabatic speed of sound
     virtual d cm(d T,d p) const=0;
     vd cm(const vd& T,const vd& p) const {

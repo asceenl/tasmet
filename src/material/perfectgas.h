@@ -63,6 +63,13 @@ public:
         checkzero(T);
         return p/Rs()/T;
     }
+    d drhodT(d T,d p) const {
+        return -p/Rs()/pow(T,2);
+    }
+    d drhodp(d T,d p) const {
+        return Rs()/T;
+    }
+
     d cv(d T,d p) const {
         return cp(T,p)-Rs();
     }
