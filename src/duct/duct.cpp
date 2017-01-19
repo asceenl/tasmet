@@ -237,7 +237,7 @@ us Duct::getNEqs(const TaSystem& sys) const {
     us number_eqs = 4;
 
     // When we have to solve a solid heat balance
-    number_eqs+= (_ductpb.stempmodel() == pb::HeatBalance ?  : 0);
+    number_eqs+= (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
 
     us neqs = Ns*number_eqs*(ngp()-1);
 
