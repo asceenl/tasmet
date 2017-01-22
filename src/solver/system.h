@@ -62,13 +62,28 @@ public:
 
 };
 
-class GradientNonlinearSystem: public NoGradientNonlinearSystem<vd> {
+struct ResidualJac {
+    vd residual;                // Store residual here
+    sdmat jacobian;             // Store Jacobian here
+};
+
+class GradientNonlinearSystem {
 
 public:
-    
-    virtual sdmat jacobian() const=0;
+    /** 
+     * Computes both the residual as well as the Jacobian, and stores
+     * them in the input parameter
+     *
+     */
+    virtual void residualJac(ResidualJac&) const=0;
 
-    GradientNonlinearSystem* copy() const=0;
+    virtual GradientNonlinearSystem* copy() const=0;
+
+    // Obtain an initial guess of the solution
+    virtual vd getSolution() const=0;
+
+    virtual void updateSolution(const vd& new_guess)=0;
+
 };
 
 

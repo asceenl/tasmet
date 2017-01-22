@@ -28,14 +28,24 @@ protected:
 
     std::unique_ptr<Gas> _gas;
 
-    vd _solution;
+    vd _solution;               /**< This column vector stores the
+                                   current solution. */
+
+    std::vector<vd> _dofs;      /**< This vector of column vectors
+                                   stores columns of doubles that do
+                                   not own the memory they point
+                                   to. Instead, they use the memory of
+                                   _solution.*/
+
     vus _startdof;              // Store the start DOFS for each segment
     
     TaSystem& operator=(const TaSystem& other)=delete;
-    TaSystem(const TaSystem& o);
 public:
+    TaSystem(const TaSystem& o);
     TaSystem(const pb::System&);
-
+    static TaSystem testSystem() {
+        return TaSystem(pb::System::default_instance());
+    }
     const Gas& gas() const {return *_gas;}
     
     // Set and get the mass in the system. If the mass is not set
@@ -52,7 +62,7 @@ public:
     dmat showJac();
     virtual void show(us detailnr=0);
 
-    vd residual() const; 
+    void residualJac(ResidualJac&) const;
 
     vd getSolution() const;
 
@@ -60,10 +70,6 @@ public:
     const arma::subview_col<d> getSolution(const us seg_id) const;
     
     virtual void updateSolution(const vd& sol) {_solution = sol; }	// Update the solution
-
-    // Compute Jacobian matrix. The dampfac value is used in an
-    // EngineSystem
-    sdmat jacobian() const;		// Return Jacobian matrix
 
     // Change Nf in the system, while keeping the results.
     void updateNf(us);
@@ -81,7 +87,6 @@ public:
 
 protected:
     virtual int getArbitrateMassEq(const vus& neqs) const;
-    virtual TripletList jacTriplets() const;
 private:
     void cleanup();
 }; // class System

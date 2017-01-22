@@ -34,7 +34,7 @@ TaSystem::TaSystem(const pb::System& sys):
         // d.first: id
         // d.second: duct description
         try {
-            _segs[d.first] = new Duct(d.first,d.second);
+            _segs[d.first] = new Duct(*this,d.first,d.second);
             if(!_segs[d.first]) throw TaSMETBadAlloc();
         }
         catch(TaSMETError e) {
@@ -69,6 +69,9 @@ TaSystem::TaSystem(const pb::System& sys):
     vd solution = vd(total_dofs);
 
     us i=0;
+
+
+
     const Segment* seg;
     for(auto& seg_: _segs) {
         seg = seg_.second;
@@ -76,11 +79,11 @@ TaSystem::TaSystem(const pb::System& sys):
         if(ndofs(i)>0) {
             if(i==0) {
                 solution.subvec(0,ndofs(0)-1) =
-                    seg->initialSolution(*this);
+                    seg->initialSolution();
             }
             else {
                 solution.subvec(dofend(i-1),dofend(i)-1) =
-                    seg->initialSolution(*this);
+                    seg->initialSolution();
             }
             i++;
         }
@@ -111,7 +114,7 @@ TaSystem::TaSystem(const TaSystem& o):
     _segs = o._segs;
 
     for(auto& seg: _segs){
-        seg.second = seg.second->copy();
+        seg.second = seg.second->copy(*this);
         if(!seg.second) throw TaSMETBadAlloc();
     }
 }
@@ -150,7 +153,7 @@ int TaSystem::getArbitrateMassEq(const vus& neqs) const {
     }
     return arbitrateMassEq;
 }
-vd TaSystem::residual() const {
+void TaSystem::residualJac(ResidualJac& resjac) const {
     TRACE(15,"TaSystem::residual()");
 
     vus neqs = getNEqs();
@@ -190,15 +193,15 @@ vd TaSystem::residual() const {
 
         if(i==0) {
             // Put the residual of the segment in the over-all residual
-            seg->residual(*this,residual.subvec(0,eqsend(0)-1));
+            seg->residualJac(residual.subvec(0,eqsend(0)-1));
         }
         else {
-            seg->residual(*this,residual.subvec(eqsend(i-1),eqsend(i)-1));
+            seg->residualJac(residual.subvec(eqsend(i-1),eqsend(i)-1));
         }
 
         // Count the mass, add it
         if(arbitrateMassEq!=-1) {
-            mass += seg->getMass(*this);
+            mass += seg->getMass();
         }
         
         i++;
@@ -215,7 +218,7 @@ vd TaSystem::residual() const {
         residual(arbitrateMassEq)=mass - _mass;
     }
 
-    return residual;
+    resjac.residual = residual;
 }
 vd TaSystem::getSolution() const {
 
@@ -240,7 +243,7 @@ vus TaSystem::getNDofs() const  {
     vus Ndofs(_segs.size());
     us i=0;
     for (auto seg : _segs) {
-        Ndofs(i)=seg.second->getNDofs(*this);
+        Ndofs(i)=seg.second->getNDofs();
         i++;
     }
     return Ndofs;
@@ -250,7 +253,7 @@ vus TaSystem::getNEqs() const  {
     vus Neqs(_segs.size());
     us i=0;
     for (auto seg :_segs) {
-        Neqs(i)=seg.second->getNEqs(*this);
+        Neqs(i)=seg.second->getNEqs();
         VARTRACE(15,Neqs(i));
         i++;
     }
@@ -266,78 +269,73 @@ void TaSystem::show(us detailnr){
     if(detailnr>0){
         for(auto seg:_segs){
             cout << "Showing segment with ID " << seg.first << "\n";
-            seg.second->show(*this,detailnr);
+            seg.second->show(detailnr);
         }
     } // detailnr>0
 }
-TripletList TaSystem::jacTriplets() const {
+// TripletList TaSystem::jacTriplets() const {
 
-    TRACE(14,"TaSystem::jacobian()");
-    vus ndofs=getNDofs();
-    vus neqs=getNEqs();
-    us total_ndofs = arma::sum(ndofs);
-    us total_neqs = arma::sum(neqs);
-    us i=0,dofnr=0,eqnr=0;
-    Jacobian j(total_ndofs);
+//     TRACE(14,"TaSystem::jacobian()");
+//     vus ndofs=getNDofs();
+//     vus neqs=getNEqs();
+//     us total_ndofs = arma::sum(ndofs);
+//     us total_neqs = arma::sum(neqs);
+//     us i=0,dofnr=0,eqnr=0;
+//     Jacobian j(total_ndofs);
 
-    int arbitrateMassEq = getArbitrateMassEq(neqs);
-    vd dmtotdx;
-    if(arbitrateMassEq > -1)
-        dmtotdx = vd(total_ndofs);
+//     int arbitrateMassEq = getArbitrateMassEq(neqs);
+//     vd dmtotdx;
+//     if(arbitrateMassEq > -1)
+//         dmtotdx = vd(total_ndofs);
 
-    const Segment* seg;
-    for(auto& seg_ :_segs) {
-        seg = seg_.second;
-        seg->jac(*this,j,dofnr,eqnr);
-        if(arbitrateMassEq > -1) {
-            seg->dmtotdx(*this,dmtotdx,dofnr);
-        }
-        eqnr += neqs(i);
-        dofnr += ndofs(i);
-        i++;
-    }
+//     const Segment* seg;
+//     for(auto& seg_ :_segs) {
+//         seg = seg_.second;
+//         seg->jac(*this,j,dofnr,eqnr);
+//         if(arbitrateMassEq > -1) {
+//             seg->dmtotdx(*this,dmtotdx,dofnr);
+//         }
+//         eqnr += neqs(i);
+//         dofnr += ndofs(i);
+//         i++;
+//     }
 
-    if(dofnr!=eqnr){
-        throw TaSMETError("System of equations is over/underdetermined");
-    }
+//     if(dofnr!=eqnr){
+//         throw TaSMETError("System of equations is over/underdetermined");
+//     }
     
-    // Convert to tripletlist
-    TripletList jac=j;
+//     // Convert to tripletlist
+//     TripletList jac=j;
 
-    assert(arbitrateMassEq< (int) total_neqs);
+//     assert(arbitrateMassEq< (int) total_neqs);
 
-    // Exchange equation if we need to arbitrate mass
-    if(arbitrateMassEq!=-1) {
-        // Replace this equation with global mass conservation
-        jac.zeroOutRow(arbitrateMassEq);
+//     // Exchange equation if we need to arbitrate mass
+//     if(arbitrateMassEq!=-1) {
+//         // Replace this equation with global mass conservation
+//         jac.zeroOutRow(arbitrateMassEq);
 
-        us dmtotdxsize=dmtotdx.size();
-        for(us k=0;k<dmtotdxsize;k++)
-            if(dmtotdx(k)!=0){
-                // TRACE(20,"k: " << k);
-                // TRACE(20,"dmtotdx:"<< dmtotdx(k));
-                jac.addTriplet(Triplet(arbitrateMassEq,k,dmtotdx(k)));
-            }
-    }
+//         us dmtotdxsize=dmtotdx.size();
+//         for(us k=0;k<dmtotdxsize;k++)
+//             if(dmtotdx(k)!=0){
+//                 // TRACE(20,"k: " << k);
+//                 // TRACE(20,"dmtotdx:"<< dmtotdx(k));
+//                 jac.addTriplet(Triplet(arbitrateMassEq,k,dmtotdx(k)));
+//             }
+//     }
 
-    return jac;
-}
-sdmat TaSystem::jacobian() const {
-    TRACE(14,"TaSystem::Jac()");
-    return jacTriplets();            // Implicitly converts to sdmat
-}
+//     return jac;
+// }
 // void TaSystem::resetHarmonics(){
 //     for(auto seg: _segs) {
 //         seg.second->resetHarmonics();
 //     }
 // }
-dmat TaSystem::showJac(){
+// dmat TaSystem::showJac(){
 
-    TRACE(15,"TaSystem::showJac()");
+//     TRACE(15,"TaSystem::showJac()");
 
-    return dmat(jacobian());
-}
-
+//     return dmat(jacobian());
+// }
 TaSystem::~TaSystem() {
     TRACE(25,"~TaSystem()");
     cleanup();

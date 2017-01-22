@@ -15,10 +15,10 @@
 #include "perfectgas.h"
 #include "adiabatictemp.h"
 
-PressureBc::PressureBc(const us id,
-                       const TaSystem& sys,
+PressureBc::PressureBc(const TaSystem& sys,
+                       const us id,
                        const pb::DuctBc& dbc):
-    DuctBc(id,dbc)
+    DuctBc(sys,id,dbc)
 {
     TRACE(15,"PressureBc(id,sys,dbc)");
     vd time = sys.timeInstances();
@@ -54,50 +54,51 @@ PressureBc::PressureBc(const us id,
     }
 
 }
-PressureBc::PressureBc(const PressureBc& o):
-    DuctBc(o),_p(o._p),_T(o._T) {
+PressureBc::PressureBc(const TaSystem& sys,
+                       const PressureBc& o):
+    DuctBc(sys,o),
+    _p(o._p),
+    _T(o._T) {
 
     TRACE(15,"PressureBc(o)");
-
 
 }
 PressureBc::~PressureBc() {
     
 }
-PressureBc* PressureBc::copy() const {
-    return new PressureBc(*this);
+PressureBc* PressureBc::copy(const TaSystem& sys) const {
+    return new PressureBc(sys,*this);
 }
-vd PressureBc::initialSolution(const TaSystem& sys) const {
+vd PressureBc::initialSolution() const {
     return vd();
 }
 
-void PressureBc::residual(const TaSystem& sys,
-                          arma::subview_col<d>&& residual
+void PressureBc::residualJac(arma::subview_col<d>&& residual
                           ) const {
 
     TRACE(15,"PressureBc::residual()");
 
-    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+    const pb::Duct& dpb = getDuct().getDuctPb();
     us Ns = sys.Ns();
 
-    const Duct& duct = getDuct(sys);
+    const Duct& duct = getDuct();
     if(_side == pb::left) {
-        residual.subvec(0,Ns-1) = duct.pt(sys,0) - _p;
+        residual.subvec(0,Ns-1) = duct.pt(0) - _p;
 
         if(dpb.htmodel() != pb::Isentropic) {
-            residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,0) - _T;
+            residual.subvec(Ns,2*Ns-1) = duct.Tt(0) - _T;
         }
     }
     else {
-        residual.subvec(0,Ns-1) = duct.pt(sys,-1) - _p;
+        residual.subvec(0,Ns-1) = duct.pt(-1) - _p;
 
         if(dpb.htmodel() != pb::Isentropic) {
-            residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,-1) - _T;
+            residual.subvec(Ns,2*Ns-1) = duct.Tt(-1) - _T;
         }
     }
 }
 
-us PressureBc::getNEqs(const TaSystem& sys) const {
+us PressureBc::getNEqs() const {
     TRACE(15,"PressureBc::getNEqs()");    
 
     // We provide equations for
@@ -105,7 +106,7 @@ us PressureBc::getNEqs(const TaSystem& sys) const {
     // T = prescribed, if htmodel of duct is not Isentropic
     // Ts = prescribed, if stempmodel of duct is not Prescribed
 
-    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+    const pb::Duct& dpb = getDuct().getDuctPb();
 
     bool has_solideq = dpb.stempmodel() != pb::Prescribed;
 
@@ -115,13 +116,8 @@ us PressureBc::getNEqs(const TaSystem& sys) const {
     VARTRACE(15,neqs);
     return neqs;
 }
-void PressureBc::show(const TaSystem&,us verbosity_level) const {
+void PressureBc::show(us verbosity_level) const {
     TRACE(15,"PressureBc::show()");    
 }
-void PressureBc::jac(const TaSystem&,Jacobian&,
-                     us dof_start,us eq_start) const {
 
-    TRACE(15,"PressureBc::jac()");    
-
-}
 //////////////////////////////////////////////////////////////////////

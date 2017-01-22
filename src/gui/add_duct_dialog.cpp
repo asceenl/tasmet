@@ -5,20 +5,22 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-#include "ui_add_duct_dialog.h"
 #include "add_duct_dialog.h"
 #include "ui_add_duct_dialog.h"
+#include "ui_add_duct_dialog.h"
 
-#include <QSignalBlocker>
+#include <QMessageBox>
+
 #include <qcustomplot.h>
 #include "tasmet_constants.h"
 #include "tasmet_enum.h"
 #include "tasmet_tracer.h"
 #include "tasmet_assert.h"
 #include "tasmet_exception.h"
+#include "sys/tasystem.h"
 #include "duct/duct.h"
 #include "tasmet_qt.h"
-#include <QMessageBox>
+
 DECLARE_ENUM(PreviewShow,CSArea,Porosity,HydraulicRadius,SolidTemperatureFunction)
 
 
@@ -138,7 +140,9 @@ AddDuctDialog::~AddDuctDialog(){
 void AddDuctDialog::accept(){
     
     try {
-        std::unique_ptr<Duct> duct (new Duct(0,_duct));
+        // If duct can be built without exceptions, everything is OK
+        TaSystem sys(TaSystem::testSystem());
+        Duct duct (sys,0,_duct);
     }
     catch(TaSMETError& e) {
 
@@ -216,9 +220,10 @@ void AddDuctDialog::changed(){
     
     PreviewShow pshow = (PreviewShow) _dialog->previewshow->currentIndex();
     
+    TaSystem sys = TaSystem::testSystem();
     std::unique_ptr<Duct> duct;
     try {
-        duct = std::unique_ptr<Duct>(new Duct(0,_duct));
+        duct = std::unique_ptr<Duct>(new Duct(sys,0,_duct));
     }
     catch(TaSMETError& e) {
         return;

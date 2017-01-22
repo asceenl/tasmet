@@ -24,21 +24,37 @@ class TaSystem;
 class Segment{
 
 protected:
+
+    const TaSystem& sys;
+
     // ID
     us _id;
     // Name
     std::string _name;
 
-
-    Segment(const us id,const std::string& name): _id(id),_name(name) {}
-    Segment(const Segment& o): Segment(o._id,o._name){}
+    Segment(const TaSystem& sys,
+            const us id,
+            const std::string& name): sys(sys),_id(id),_name(name) {}
+    Segment(const TaSystem& sys,const Segment& o):
+        Segment(sys,o._id,o._name){}
     Segment& operator=(const Segment&)=delete;
 public:
     virtual ~Segment(){}
 
-    virtual Segment* copy() const = 0;
+    /** 
+     * Returns a copy of the current segment, coupled to the TaSystem
+     * as given function parameter.
+     *
+     * @param sys: The new TaSystem to which this segment should be 
+     * coupled.
+     * @return the Segment copy
+     */    
+    virtual Segment* copy(const TaSystem&) const = 0;
     
-    virtual vd initialSolution(const TaSystem&) const = 0;
+    virtual vd initialSolution() const = 0;
+
+    virtual void residualJac(arma::subview_col<d>&& residual // Here we store the residual
+                             ) const=0;
 
     // Get and set name
     const std::string& getName() const{return _name;} // This one is just the name
@@ -49,29 +65,21 @@ public:
     // does, the derived class should return which equation should be
     // overwritten with the mass arbitration equation.
     virtual int arbitrateMassEq() const {return -1;}
-    virtual void residual(const TaSystem&,
-                          arma::subview_col<d>&& residual // Here we store the residual
-                          ) const=0;
-
 
     // Return the total number of equations in this segment
-    virtual us getNEqs(const TaSystem&) const { return 0;}
+    virtual us getNEqs() const { return 0;}
     
     // Return the total number of DOFS in this segment
-    virtual us getNDofs(const TaSystem&) const { return 0;}
+    virtual us getNDofs() const { return 0;}
 
     // Return the current mass in this segment
-    virtual d getMass(const TaSystem&) const = 0;
-    virtual void dmtotdx(const TaSystem&,vd& dmtotdx,us dof_start) const {}
+    virtual d getMass() const = 0;
+    virtual void dmtotdx(vd& dmtotdx,us dof_start) const {}
     
-    virtual void show(const TaSystem&,us verbosity_level) const=0;
+    virtual void show(us verbosity_level) const=0;
 
     // Reset amplitude data in higher harmonics
     // virtual void resetHarmonics() = 0;
-
-    // Fill Jacobian with values from the equations in this
-    // segment/connector.
-    virtual void jac(const TaSystem&,Jacobian&,us dof_start,us eq_start) const=0;
 
 };
 

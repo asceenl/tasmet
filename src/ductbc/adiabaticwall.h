@@ -24,27 +24,28 @@ class AdiabaticWall: public DuctBc {
     us _duct_id;                /**< ID of Duct for this b.c. */
 
 protected:
-    AdiabaticWall(const AdiabaticWall&);
+    AdiabaticWall(const TaSystem& sys,
+                  const AdiabaticWall&);
 public:
-    AdiabaticWall(const us id,
-               const TaSystem& sys,
-               const pb::DuctBc&);
+    AdiabaticWall(const TaSystem& sys,
+                  const us id,
+                  const pb::DuctBc&);
+    
     ~AdiabaticWall();
-    AdiabaticWall* copy() const;
+    AdiabaticWall* copy(const TaSystem& sys) const;
 
-    vd initialSolution(const TaSystem&) const;
+    vd initialSolution() const;
 
-    virtual void residual(const TaSystem&,
-                          arma::subview_col<d>&& residual
+    virtual void residualJac(arma::subview_col<d>&& residual
                           ) const;
 
     // Return the total number of equations in this segment
-    virtual us getNEqs(const TaSystem&) const;
+    virtual us getNEqs() const;
     
     // Return the current mass in this segment
-    virtual d getMass(const TaSystem&) const { return 0;};
+    virtual d getMass() const { return 0;};
     
-    virtual void show(const TaSystem&,us verbosity_level) const;
+    virtual void show(us verbosity_level) const;
 
     // Reset amplitude data in higher harmonics
     // virtual void resetHarmonics() = 0;

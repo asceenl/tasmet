@@ -27,35 +27,33 @@ class PressureBc: public DuctBc {
                                    temperature and solid temperature */
     pb::DuctSide _side;         /**< Duct side at which this b.c. works */
 protected:
-    PressureBc(const PressureBc&);
+    PressureBc(const TaSystem&,const PressureBc&);
 public:
-    PressureBc(const us id,
-               const TaSystem& sys,
+
+    PressureBc(const TaSystem& sys,
+               const us id,
                const pb::DuctBc&);
+    
     ~PressureBc();
-    PressureBc* copy() const;
+    
+    PressureBc* copy(const TaSystem&) const;
 
-    vd initialSolution(const TaSystem&) const;
+    vd initialSolution() const;
 
-    virtual void residual(const TaSystem&,
-                          arma::subview_col<d>&& residual
+    virtual void residualJac(arma::subview_col<d>&& residual
                           ) const;
 
     // Return the total number of equations in this segment
-    virtual us getNEqs(const TaSystem&) const;
+    virtual us getNEqs() const;
     
     // Return the current mass in this segment
-    virtual d getMass(const TaSystem&) const { return 0;};
+    virtual d getMass() const { return 0;};
     
-    virtual void show(const TaSystem&,us verbosity_level) const;
+    virtual void show(us verbosity_level) const;
 
     // Reset amplitude data in higher harmonics
     // virtual void resetHarmonics() = 0;
 
-    // Fill Jacobian with values from the equations in this
-    // segment/connector.
-    virtual void jac(const TaSystem&,Jacobian&,us dof_start,us eq_start) const;
-                  
 
 };
 

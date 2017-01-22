@@ -14,7 +14,7 @@
 #include "tasystem.h"
 #include "duct.h"
 
-const Duct& DuctBc::getDuct(const TaSystem& sys) const {
+const Duct& DuctBc::getDuct() const {
 
     return dynamic_cast<const Duct&>(sys.getSegment(_dbc.duct_id()));
 
@@ -28,13 +28,13 @@ DuctBc* DuctBc::newDuctBc(const us id,
 
     switch (dbc.type()) {
     case pb::PressureBc: {
-        return new PressureBc(id,sys,dbc);
+        return new PressureBc(sys,id,dbc);
         break;
     }
-    case pb::AdiabaticWall: {
-        return new AdiabaticWall(id,sys,dbc);
-        break;
-    }
+    // case pb::AdiabaticWall: {
+    //     return new AdiabaticWall(id,sys,dbc);
+    //     break;
+    // }
     default:
         tasmet_assert(false,"Not implemented DuctBc");
         break;

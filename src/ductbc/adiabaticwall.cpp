@@ -12,19 +12,19 @@
 #include "tasystem.h"
 #include "duct.h"
 
-AdiabaticWall::AdiabaticWall(const us id,
-                       const TaSystem& sys,
-                       const pb::DuctBc& dbc):
-    DuctBc(id,dbc)
+AdiabaticWall::AdiabaticWall(const TaSystem& sys,
+                             const us id,
+                             const pb::DuctBc& dbc):
+    DuctBc(sys,id,dbc)
     
 {
     TRACE(15,"AdiabaticWall(id,sys,dbc)");
     tasmet_assert(dbc.type() == pb::AdiabaticWall,"Wrong type given to constructor");
-
     
 }
-AdiabaticWall::AdiabaticWall(const AdiabaticWall& o):
-    DuctBc(o)
+AdiabaticWall::AdiabaticWall(const TaSystem& sys,
+                             const AdiabaticWall& o):
+    DuctBc(sys,o)
 {
     TRACE(15,"AdiabaticWall(o)");
 
@@ -32,15 +32,14 @@ AdiabaticWall::AdiabaticWall(const AdiabaticWall& o):
 AdiabaticWall::~AdiabaticWall() {
 
 }
-AdiabaticWall* AdiabaticWall::copy() const {
-    return new AdiabaticWall(*this);
+AdiabaticWall* AdiabaticWall::copy(const TaSystem& sys) const {
+    return new AdiabaticWall(sys,*this);
 }
-vd AdiabaticWall::initialSolution(const TaSystem& sys) const {
+vd AdiabaticWall::initialSolution() const {
     return vd();
 }
 
-void AdiabaticWall::residual(const TaSystem& sys,
-                             arma::subview_col<d>&& residual
+void AdiabaticWall::residualJac(arma::subview_col<d>&& residual
                              ) const {
 
     TRACE(15,"AdiabaticWall::residual()");
@@ -67,7 +66,7 @@ void AdiabaticWall::residual(const TaSystem& sys,
 
 }
 
-us AdiabaticWall::getNEqs(const TaSystem& sys) const {
+us AdiabaticWall::getNEqs() const {
     TRACE(15,"AdiabaticWall::getNEqs()");    
     // u = 0
     // dT/dx = 0 --> if htmodel is not Isentropic
@@ -83,13 +82,8 @@ us AdiabaticWall::getNEqs(const TaSystem& sys) const {
     VARTRACE(15,neqs);
     return neqs;
 }
-void AdiabaticWall::show(const TaSystem&,us verbosity_level) const {
+void AdiabaticWall::show(us verbosity_level) const {
     TRACE(15,"AdiabaticWall::show()");    
 }
-void AdiabaticWall::jac(const TaSystem&,Jacobian&,
-                     us dof_start,us eq_start) const {
 
-    TRACE(15,"AdiabaticWall::jac()");    
-
-}
 //////////////////////////////////////////////////////////////////////

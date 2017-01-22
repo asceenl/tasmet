@@ -11,8 +11,10 @@
 #include "tasmet_evalscript.h"
 #include "perfectgas.h"
 
-Duct::Duct(const us id,const pb::Duct& ductpb):
-    Segment(id,ductpb.name()),
+Duct::Duct(const TaSystem& sys,
+           const us id,
+           const pb::Duct& ductpb):
+    Segment(sys,id,ductpb.name()),
     Geom(ductpb),
     _ductpb(ductpb)
 {
@@ -38,8 +40,8 @@ Duct::Duct(const us id,const pb::Duct& ductpb):
     }
 
 }
-Duct::Duct(const Duct& other):
-    Segment(other),
+Duct::Duct(const TaSystem& sys,const Duct& other):
+    Segment(sys,other),
     Geom(other),
     _ductpb(other._ductpb),
     _Tsprescribed(other._Tsprescribed)
@@ -47,11 +49,10 @@ Duct::Duct(const Duct& other):
     // Do something with the equations here
     TRACE(15,"Duct::~Duct");
 
-    
 
 }
-Duct* Duct::copy() const {
-    return new Duct(*this);
+Duct* Duct::copy(const TaSystem& sys) const {
+    return new Duct(sys,*this);
 }
 Duct::~Duct() {
     TRACE(15,"Duct::~Duct");
@@ -59,7 +60,7 @@ Duct::~Duct() {
     //     delete eq;
     // }
 }
-void Duct::residual(const TaSystem& sys,arma::subview_col<d> && residual) const {
+void Duct::residualJac(arma::subview_col<d> && residual) const {
 
     TRACE(15,"Duct::residual()");
     
@@ -86,10 +87,10 @@ void Duct::residual(const TaSystem& sys,arma::subview_col<d> && residual) const 
 
     us gp_jump = number_eqs * Ns; // The jump per gp
     
-    rhop = getvart(sys,constants::rho,0);
-    up = getvart(sys,constants::u,0);
-    Tp = getvart(sys,constants::T,0);
-    pp   = getvart(sys,constants::p,0);
+    rhop = getvart(constants::rho,0);
+    up = getvart(constants::u,0);
+    Tp = getvart(constants::T,0);
+    pp   = getvart(constants::p,0);
 
     const Gas& gas = sys.gas();
 
@@ -105,10 +106,10 @@ void Duct::residual(const TaSystem& sys,arma::subview_col<d> && residual) const 
         rho = rhop; u=up; T=Tp; p = pp; Ts=Tsp;
 
         // Update the next gp solution
-        rhop = getvart(sys,constants::rho,gp+1);
-        up = getvart(sys,constants::u,gp+1);
-        Tp = getvart(sys,constants::T,gp+1);
-        pp   = getvart(sys,constants::p,gp+1);
+        rhop = getvart(constants::rho,gp+1);
+        up = getvart(constants::u,gp+1);
+        Tp = getvart(constants::T,gp+1);
+        pp   = getvart(constants::p,gp+1);
 
         cont  = ((rhop%up)-(rho%u))/dx;
 
@@ -162,7 +163,7 @@ void Duct::residual(const TaSystem& sys,arma::subview_col<d> && residual) const 
     }
 
 }
-vd Duct::getvart(const TaSystem& sys,int varnr,int gp) const {
+vd Duct::getvart(int varnr,int gp) const {
     TRACE(15,"Duct::getvart()");
     const arma::subview_col<d> sol = sys.getSolution(_id);
 
@@ -177,18 +178,18 @@ vd Duct::getvart(const TaSystem& sys,int varnr,int gp) const {
     return sol.subvec((gp*vars_per_gp+varnr)*Ns,
                       (gp*vars_per_gp+varnr+1)*Ns-1);
 }
-vd Duct::getvarx(const TaSystem& sys,int varnr,int t) const {
+vd Duct::getvarx(int varnr,int t) const {
     vd res(ngp());
     for(us i=0;i<ngp();i++){
-        res(i) = getvart(sys,varnr,i)(t);
+        res(i) = getvart(varnr,i)(t);
     }
     return res;
 }
-vd Duct::initialSolution(const TaSystem& sys) const {
+vd Duct::initialSolution() const {
     
     TRACE(15,"Duct::initialSolution()");
 
-    vd initsol(getNDofs(sys));
+    vd initsol(getNDofs());
     VARTRACE(15,initsol.size());
 
     us vars_per_gp = 4;
@@ -228,7 +229,7 @@ vd Duct::initialSolution(const TaSystem& sys) const {
 
 }
 
-us Duct::getNEqs(const TaSystem& sys) const {
+us Duct::getNEqs() const {
     TRACE(15,"Duct::getNEqs()");    
     us Ns = sys.Ns();
 
@@ -253,7 +254,7 @@ us Duct::getNEqs(const TaSystem& sys) const {
     VARTRACE(15,neqs);
     return neqs;
 }
-us Duct::getNDofs(const TaSystem& sys) const {
+us Duct::getNDofs() const {
     TRACE(15,"Duct::getNDofs()");        
     us Ns = sys.Ns();  
 
@@ -264,14 +265,11 @@ us Duct::getNDofs(const TaSystem& sys) const {
 
     return Ns*nvars_per_gp*ngp();
 }
-d Duct::getMass(const TaSystem& sys) const {
+d Duct::getMass() const {
 
     return 0;
 }
-void Duct::jac(const TaSystem&,Jacobian&,us dof_start,us eq_start) const {
-
-}
-void Duct::show(const TaSystem&,us verbosity_level) const {
+void Duct::show(us verbosity_level) const {
 
 }
 
