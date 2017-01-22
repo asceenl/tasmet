@@ -47,7 +47,7 @@ public:
      *
      * @return The index of the degree of freedom
      */
-    Dof getDof(int varnr,int gp) const;
+    PosId getDof(int varnr,int gp) const;
 
     /// Postprocessing functions
     vd rhox(int t) const { return getvarx(constants::rho,t);}

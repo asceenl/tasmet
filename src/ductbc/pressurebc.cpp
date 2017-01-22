@@ -110,8 +110,8 @@ us PressureBc::getNEqs() const {
 
     bool has_solideq = dpb.stempmodel() != pb::Prescribed;
 
-    us neqs = sys.Ns()*(has_solideq ? 2: 1);
-    if(dpb.htmodel() != pb::Isentropic) neqs+= sys.Ns();
+    us neqs = (has_solideq ? 2: 1);
+    if(dpb.htmodel() != pb::Isentropic) neqs+= 1;
 
     VARTRACE(15,neqs);
     return neqs;

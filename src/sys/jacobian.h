@@ -14,12 +14,14 @@
 class TripletList;
 
 class Jacobian{
-    us ndofs_;
+    us _ndofs;
 public:
-    Jacobian(us ndofs):ndofs_(ndofs){}
+    Jacobian(us ndofs):_ndofs(ndofs){}
     vector<JacRow> jacrows;
+
     void operator+=(const Jacobian&);
     void operator+=(const JacRow&);
+
     operator TripletList() const;
 };
 

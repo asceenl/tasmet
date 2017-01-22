@@ -231,7 +231,6 @@ vd Duct::initialSolution() const {
 
 us Duct::getNEqs() const {
     TRACE(15,"Duct::getNEqs()");    
-    us Ns = sys.Ns();
 
     // The number of equations per gridpoint. We have: continuity,
     // momentum, energy, and state
@@ -240,15 +239,15 @@ us Duct::getNEqs() const {
     // When we have to solve a solid heat balance
     number_eqs+= (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
 
-    us neqs = Ns*number_eqs*(ngp()-1);
+    us neqs = number_eqs*(ngp()-1);
 
     // For the last gridpoint, we also have an equation of state
-    neqs += Ns;
+    neqs += 1;
 
     // We also have an extra equation for isentropic. For the energy
     // transport equation, this would result in a boundary condition
     if(_ductpb.htmodel() == pb::Isentropic) {
-        neqs += Ns;
+        neqs += 1;
     }
 
     VARTRACE(15,neqs);
@@ -256,14 +255,13 @@ us Duct::getNEqs() const {
 }
 us Duct::getNDofs() const {
     TRACE(15,"Duct::getNDofs()");        
-    us Ns = sys.Ns();  
-
+ 
     // rho,u,T,p
     us nvars_per_gp = 4;
     // Ts maybe
     nvars_per_gp += (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
 
-    return Ns*nvars_per_gp*ngp();
+    return nvars_per_gp*ngp();
 }
 d Duct::getMass() const {
 

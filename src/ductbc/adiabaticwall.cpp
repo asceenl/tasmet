@@ -43,12 +43,12 @@ void AdiabaticWall::residualJac(arma::subview_col<d>&& residual
                              ) const {
 
     TRACE(15,"AdiabaticWall::residual()");
-    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+    const Duct& duct = getDuct();
+    const pb::Duct& dpb = duct.getDuctPb();
     us Ns = sys.Ns();
 
-    const Duct& duct = getDuct(sys);
     if(_side == pb::left) {
-        residual.subvec(0,Ns-1) = duct.ut(sys,0);
+        residual.subvec(0,Ns-1) = duct.ut(0);
         if(dpb.htmodel() != pb::Isentropic) {
             // TODO: Put the boundary condition of zero heat flux here
             // residual.subvec(Ns,2*Ns-1) = 
@@ -56,7 +56,7 @@ void AdiabaticWall::residualJac(arma::subview_col<d>&& residual
         }
     }
     else {
-        residual.subvec(0,Ns-1) = duct.ut(sys,-1);
+        residual.subvec(0,Ns-1) = duct.ut(-1);
         if(dpb.htmodel() != pb::Isentropic) {
             // TODO: Put the boundary condition of zero heat flux here
             // residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,-1) - _T;
@@ -72,12 +72,12 @@ us AdiabaticWall::getNEqs() const {
     // dT/dx = 0 --> if htmodel is not Isentropic
     // dTs/dx = 0 => if stempmodel is not Prescribed
 
-    const pb::Duct& dpb = getDuct(sys).getDuctPb();
+    const pb::Duct& dpb = getDuct().getDuctPb();
 
     bool has_solideq = dpb.stempmodel() != pb::Prescribed;
 
-    us neqs = sys.Ns()*(has_solideq ? 2: 1);
-    if(dpb.htmodel() != pb::Isentropic) neqs+= sys.Ns();
+    us neqs = (has_solideq ? 2: 1);
+    if(dpb.htmodel() != pb::Isentropic) neqs+= 1;
 
     VARTRACE(15,neqs);
     return neqs;

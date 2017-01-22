@@ -8,32 +8,43 @@
 #pragma once
 #ifndef JACROW_H
 #define JACROW_H
-
+#include <vector>
 #include "jaccol.h"
 
-class Variable;
-
-  
 class JacRow{                 // Row in Jacobian matrix
-    int rowdof_=-1;            // Number of first row, default is
-    // invalid state
+
 public:
-    // Negate all terms
+
+    PosId id;                   /**< Specifies the row for this
+                                   JacRow */
+    std::vector<JacCol> jaccols; /**< The columns in this row */
+
+    /** 
+     * Initialize a Jacobian row with a single column block
+     *
+     * @param id The equation ID
+     * @param col The added column
+     */
+    JacRow(PosId id,const JacCol& col):JacRow(id){jaccols.push_back(col);}
+
+    JacRow(PosId id): id(id){}
+
     JacRow operator-() const;
 
-    vector<JacCol> jaccols;     // Column blocks
-    JacRow(const JacCol&);
-    JacRow(us rowdof,const JacCol&); // Initialization with only one column
-    JacRow(int rowdofnr,us cols=2): rowdof_(rowdofnr){ jaccols.reserve(cols);}
-    // void addCol(const JacCol& jaccol);
-    // JacRow& operator+=(JacCol&&);
     JacRow& operator+=(const JacCol&);
     JacRow& operator+=(const JacRow& jacrow);
-    JacRow& operator*=(const d& val); // Multiply all terms with constant value
+    JacRow& operator*=(const d val); // Multiply all terms with constant value
+
+    /** 
+     * Pre- and postmultiply all Column blocks with the given
+     * matrices. Hence the new columns will be col_new = pre*col_old*post
+     *
+     * @param pre : The pre-multiply matrix
+     * @param post: The post-multiply matrix
+     */
     void prePostMultiply(const dmat& pre,const dmat& post);
-    const int& getRowDof() const {return rowdof_;}
-    void setRowDof(us dofnr){rowdof_=dofnr;}
-    void show() const;
+
+
 };
 
   
