@@ -65,9 +65,8 @@ add_library(tasmet_src
   # sys/enginesystem.cpp
   sys/globalconf.cpp
   sys/tasmet_variable.cpp
-  sys/jaccol.cpp
+
   sys/jacobian.cpp
-  sys/jacrow.cpp
   sys/tasystem.cpp
   sys/triplets.cpp
 )

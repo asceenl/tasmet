@@ -21,11 +21,11 @@ using pb::air;
 using pb::helium;
 using pb::nitrogen;
 
-#define element_wise(varname) \
-    vd varname_(T.size());     \
+#define element_wise(function) \
+    vd function_(T.size());     \
     for(us i=0;i<T.size();i++) \
-        varname_ = varname(T(i),p(i));\
-    return varname_
+        function_(i) = function(T(i),p(i));     \
+    return function_
 
 
 

@@ -60,47 +60,8 @@ TaSystem::TaSystem(const pb::System& sys):
             throw e;
         }
     }
-    
-    // Create the initial solution from the segments and store it
-    // here. Please be careful not to call any virtual functions!
-    vus ndofs = getNDofs();
-    vus dofend = arma::cumsum(ndofs);
-    us total_dofs = arma::sum(ndofs);
-    vd solution = vd(total_dofs);
 
-    us i=0;
-
-
-
-    const Segment* seg;
-    for(auto& seg_: _segs) {
-        seg = seg_.second;
-
-        if(ndofs(i)>0) {
-            if(i==0) {
-                solution.subvec(0,ndofs(0)-1) =
-                    seg->initialSolution();
-            }
-            else {
-                solution.subvec(dofend(i-1),dofend(i)-1) =
-                    seg->initialSolution();
-            }
-            i++;
-        }
-    }
-    // TODO: work directly on the final solution array
-    _solution = solution;
-
-    // Copy solution vector, if valid
-    // const auto& sol = sys.solution();
-    // us size = sol.size(), i=0;
-    // if(size>0) {
-    //     _solution = vd(size);
-    //     for(auto& val: sol) {
-    //         _solution(i) = val;
-    //         i++;
-    //     }
-    // }
+    initSolRes();
 
 }
 TaSystem::TaSystem(const TaSystem& o):
@@ -117,7 +78,89 @@ TaSystem::TaSystem(const TaSystem& o):
         seg.second = seg.second->copy(*this);
         if(!seg.second) throw TaSMETBadAlloc();
     }
+
+    initSolRes();
+
 }
+ void TaSystem::initSolRes() {
+     // Create the initial solution from the segments and store it
+     // here. Please be careful not to call any virtual functions!
+     vus ndofs = getNDofs();
+     vus neqs = getNEqs();
+     
+     us Ns = this->Ns();
+
+     us total_dofs = arma::sum(ndofs);
+     us total_eqs = arma::sum(neqs);
+
+     if(total_dofs != total_eqs) {
+         throw TaSMETError("Number of equations does not match number of DOFS. "
+                           "This is probably due to missing, or too much boundary conditions");
+     }
+
+     if(total_dofs*Ns > constants::maxndofs) {
+        stringstream error;
+        error << "Too many DOFS required. Problem too large. "
+            "Number of equations computed: ";
+        error << total_dofs*Ns;
+        throw TaSMETError(error);
+     }
+
+
+     _solution = zeros(total_dofs*Ns);
+     _residual = zeros(total_dofs*Ns)+arma::datum::nan;
+    
+     d* solptr = _solution.memptr();
+     d* resptr = _residual.memptr();
+     
+     us globalposdof=0;
+     us globalposeq=0;
+
+     // Loop over the segments, and for each dof in the segment, we
+     // allocate a vd, with its memory pointed to from the global
+     // solution pointer.
+
+     for(auto& seg_: _segs) {
+
+         us segid = seg_.first;
+         VARTRACE(15,segid);
+
+         for(us i=0;i< ndofs(segid); i++) {
+            
+             // false: own memory (means the vd does not own the memory
+             // true: strict true means bound to the memory for its
+             // lifetime. Does not allow memory adjustments.
+             _solution_dofs[segid].push_back(new vd(&solptr[globalposdof*Ns],Ns,false,true));
+             globalposdof++;
+             VARTRACE(15,i);
+         }
+
+         // Set the initial solution
+         if(ndofs(segid)>0) 
+             seg_.second->initialSolution(_solution_dofs.at(segid));
+
+
+
+         for(us i=0;i< neqs(segid); i++) {
+            
+             // false: own memory (means the vd does not own the memory
+             // true: strict true means bound to the memory for its
+             // lifetime. Does not allow memory adjustments.
+             _residual_eqs[segid].push_back(new vd(&resptr[globalposeq*Ns],Ns,false,true));
+
+             _jac[segid].push_back(JacRow());
+
+             globalposeq++;
+         }
+
+     }
+
+     tasmet_assert(globalposdof == total_dofs,"Bug in assigning solution vectors");
+     tasmet_assert(globalposeq == total_eqs,"Bug in assigning residual vectors");
+
+ }
+
+
 int TaSystem::getArbitrateMassEq(const vus& neqs) const {
     // Tells the TaSystem which Dof should be overwritten with the
     // mass arbitration equation. The special value of -1 means, that
@@ -156,56 +199,85 @@ int TaSystem::getArbitrateMassEq(const vus& neqs) const {
 void TaSystem::residualJac(ResidualJac& resjac) const {
     TRACE(15,"TaSystem::residual()");
 
-    vus neqs = getNEqs();
-    us total_neqs = arma::sum(neqs);
-
-    if(total_neqs>constants::maxndofs)      {
-        stringstream error;
-        error << "Too many DOFS required. Problem too large. Number of equations computed: ";
-        error << total_neqs;
-        throw TaSMETError(error);
-    }
-
-    // This vector of indices stores the last equation number + 1 for
-    // each equation set in a Segment
-    vus eqsend = arma::cumsum(neqs);
-
-    int arbitrateMassEq = getArbitrateMassEq(neqs);
+    int arbitrateMassEq = -1;//getArbitrateMassEq(neqs);
 
     // This is the mass in the sytem. Only counted when there is an
     // equation present which arbitrates the mass in the system
     d mass=0;
-    
-    VARTRACE(25,total_neqs);
-    VARTRACE(25,eqsend);
-
-    vd residual(total_neqs);
 
     #ifdef TASMET_DEBUG
-    residual = arma::datum::nan*ones(total_neqs);
+    _residual *= arma::datum::nan;
     #endif
 
-    us i=0;
+    us segid;
     const Segment* seg;
     for(auto seg_: _segs) {
-
+        segid = seg_.first;
         seg = seg_.second;
 
-        if(i==0) {
             // Put the residual of the segment in the over-all residual
-            seg->residualJac(residual.subvec(0,eqsend(0)-1));
-        }
-        else {
-            seg->residualJac(residual.subvec(eqsend(i-1),eqsend(i)-1));
-        }
+        seg->residualJac(_residual_eqs[segid],_jac[segid]);
 
         // Count the mass, add it
         if(arbitrateMassEq!=-1) {
             mass += seg->getMass();
         }
         
-        i++;
-    }
+     }
+
+    us Ns = this->Ns();
+    vus neqs = getNEqs();
+    vus neqs_sum = arma::cumsum(neqs);
+    us total_neqs = arma::sum(neqs);
+
+    vus ndofs = getNDofs();
+    vus ndofs_sum = arma::cumsum(ndofs);
+    us total_ndofs = arma::sum(ndofs);
+
+    // Now we create the triplets
+    TripletList triplets(total_neqs*Ns);
+
+    for(auto& segjacrows : _jac) {
+
+        // The current segment number
+        us segno = segjacrows.first;
+
+        // The row offset for this segment
+        us rowoffset = (segno==0) ? 0 : neqs_sum(segno-1)*Ns;
+
+        for(auto& jacrow: segjacrows.second) {
+            
+            for(auto& jaccol : jacrow) {
+                const PosId& id = jaccol.first;
+
+                us coloffset = (id.segno==0) ? 0 : ndofs_sum(segno-1)*Ns;
+                coloffset += id.segoffset;
+                coloffset*=Ns;
+
+                dmat& colmat = jaccol.second;
+                
+                for(us i=0;i<Ns;i++){
+
+                    us row = rowoffset + i;
+
+                    for(us j=0;j<Ns;j++) {
+
+                        us col = coloffset + j;
+                        triplets.addTriplet(Triplet(row,col,colmat(i,j)));
+
+                    }
+
+                    
+                }
+                
+                
+            } // For loop over the columns
+
+            rowoffset += Ns;
+
+        } // For loop over the rows for this segment
+
+    } // For loop over the segments
 
     TRACE(15,"Obtained residual from all Segments");
 
@@ -214,48 +286,33 @@ void TaSystem::residualJac(ResidualJac& resjac) const {
     #endif // TASMET_DEBUG
 
     // Exchange equation if we need to arbitrate mass
-    if(arbitrateMassEq!=-1) {
-        residual(arbitrateMassEq)=mass - _mass;
+    if(arbitrateMassEq>=0) {
+        _residual(arbitrateMassEq)=mass - _mass;
     }
 
-    resjac.residual = residual;
+    resjac.jacobian = sdmat(triplets);
+    resjac.residual = _residual;
+
 }
 vd TaSystem::getSolution() const {
-
     return _solution;
 }
-const arma::subview_col<d> TaSystem::getSolution(const us seg_id) const {
-
-    vus ndofs = getNDofs();
-    vus dofsend = arma::cumsum(ndofs);
-    VARTRACE(15,dofsend);
-    VARTRACE(15,seg_id);
-    if(seg_id == 0) {
-        VARTRACE(15,_solution.size());
-        return _solution.subvec(0,dofsend(0)-1);
-    }
-    else {
-        return _solution.subvec(dofsend(seg_id-1),dofsend(seg_id)-1);
-    }
+const SegPositionMapper& TaSystem::getSolution(const us seg_id) const {
+    return _solution_dofs.at(seg_id);
 }
 vus TaSystem::getNDofs() const  {
     TRACE(0,"TaSystem::getNDofs()");
     vus Ndofs(_segs.size());
-    us i=0;
     for (auto seg : _segs) {
-        Ndofs(i)=seg.second->getNDofs();
-        i++;
+        Ndofs(seg.first)=seg.second->getNDofs();
     }
     return Ndofs;
 }
 vus TaSystem::getNEqs() const  {
     TRACE(15,"TaSystem::getNEqs()");
     vus Neqs(_segs.size());
-    us i=0;
     for (auto seg :_segs) {
-        Neqs(i)=seg.second->getNEqs();
-        VARTRACE(15,Neqs(i));
-        i++;
+        Neqs(seg.first)=seg.second->getNEqs();
     }
     return Neqs;
 }
@@ -341,7 +398,19 @@ TaSystem::~TaSystem() {
     cleanup();
 }
 void TaSystem::cleanup() {
+
     purge(_segs);
+    for(auto& segdofs: _solution_dofs) {
+        for(vd* dof : segdofs.second){
+            delete dof;
+        }
+    }
+    for(auto& segdofs: _residual_eqs) {
+        for(vd* dof : segdofs.second){
+            delete dof;
+        }
+    }
+
 }
 
 //////////////////////////////////////////////////////////////////////

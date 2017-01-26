@@ -11,9 +11,9 @@
 #include "system.h"
 #include "globalconf.h"
 #include "triplets.h"
+#include "jacobian.h"
 #include "gas.h"
 #include "protobuf/system.pb.h"
-#include <map>
 #include <memory>
 
 class Segment;
@@ -28,21 +28,48 @@ protected:
 
     std::unique_ptr<Gas> _gas;
 
+    mutable
     vd _solution;               /**< This column vector stores the
                                    current solution. */
 
-    std::vector<vd> _dofs;      /**< This vector of column vectors
-                                   stores columns of doubles that do
-                                   not own the memory they point
-                                   to. Instead, they use the memory of
-                                   _solution.*/
+    mutable
+    GlobalPositionMapper _solution_dofs; /**< This vector of column vectors
+                                                      stores columns of doubles that do
+                                                      not own the memory they point
+                                                      to. Instead, they use the memory of
+                                                      _solution.*/
 
-    vus _startdof;              // Store the start DOFS for each segment
+    
+    mutable
+    vd _residual;
+
+    mutable
+    GlobalPositionMapper _residual_eqs;
+
+    mutable
+    Jacobian _jac;              /**< Storing the Jacobian brings the
+                                   hugh benefit of only allocating the
+                                   memory once. Once this is done, all
+                                   values can be updated during each
+                                   iteration. */
     
     TaSystem& operator=(const TaSystem& other)=delete;
+
+private:
+    /** 
+     * Initializes the _solution and _solution_dofs vector. This
+     * should be done during construction of the object. The method is
+     * called from all constructors. Should be done after construction
+     * of the segments.
+     *
+     */
+    void initSolRes();
 public:
     TaSystem(const TaSystem& o);
     TaSystem(const pb::System&);
+
+
+
     static TaSystem testSystem() {
         return TaSystem(pb::System::default_instance());
     }
@@ -67,7 +94,7 @@ public:
     vd getSolution() const;
 
     // Obtain the solution vector for the Segment with given id
-    const arma::subview_col<d> getSolution(const us seg_id) const;
+    const SegPositionMapper& getSolution(const us seg_id) const;
     
     virtual void updateSolution(const vd& sol) {_solution = sol; }	// Update the solution
 

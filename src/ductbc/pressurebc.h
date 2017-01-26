@@ -38,10 +38,8 @@ public:
     
     PressureBc* copy(const TaSystem&) const;
 
-    vd initialSolution() const;
-
-    virtual void residualJac(arma::subview_col<d>&& residual
-                          ) const;
+    virtual void residualJac(SegPositionMapper& residual,
+                             SegJacRows& jac) const;
 
     // Return the total number of equations in this segment
     virtual us getNEqs() const;

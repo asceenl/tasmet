@@ -12,6 +12,7 @@
 #include "duct.pb.h"
 #include "geom.h"
 #include "tasmet_constants.h" // For the variable nrs
+#include "jacobian.h"
 
 class Equation;
 class Drag;
@@ -34,8 +35,9 @@ public:
 
     vd Tsprescribed() const { return _Tsprescribed;}
 
-    // Initialize the solution to something sensible
-    vd initializeSolution(const TaSystem& sys);
+    void initialSolution(SegPositionMapper&) const;
+
+
 
     virtual Duct* copy(const TaSystem&) const;
     const Geom& geom() const;
@@ -70,10 +72,10 @@ public:
     vd getvarx(int varnr,int t) const;
 
     d getvartx(int t,int gp) const;
-    // Solving
-    virtual void residualJac(arma::subview_col<d>&& residual) const;
 
-    vd initialSolution() const;
+    // Solving
+    virtual void residualJac(SegPositionMapper& residual,
+                             SegJacRows& jac) const;
 
     // virtual void getSolution(const TaSystem&,const us insertion_start) const;
 

@@ -69,31 +69,28 @@ PressureBc::~PressureBc() {
 PressureBc* PressureBc::copy(const TaSystem& sys) const {
     return new PressureBc(sys,*this);
 }
-vd PressureBc::initialSolution() const {
-    return vd();
-}
 
-void PressureBc::residualJac(arma::subview_col<d>&& residual
-                          ) const {
+void PressureBc::residualJac(SegPositionMapper& residual,
+                             SegJacRows& jacrows) const {
 
-    TRACE(15,"PressureBc::residual()");
+    TRACE(15,"PressureBc::residualJac()");
 
     const pb::Duct& dpb = getDuct().getDuctPb();
     us Ns = sys.Ns();
 
     const Duct& duct = getDuct();
     if(_side == pb::left) {
-        residual.subvec(0,Ns-1) = duct.pt(0) - _p;
-
+        *residual.at(0) = duct.pt(0) - _p;
+        jacrows.at(0)[duct.getDof(constants::p,0)] = eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
-            residual.subvec(Ns,2*Ns-1) = duct.Tt(0) - _T;
+            // residual.subvec(Ns,2*Ns-1) = duct.Tt(0) - _T;
         }
     }
     else {
-        residual.subvec(0,Ns-1) = duct.pt(-1) - _p;
-
+        *residual.at(0) = duct.pt(-1) - _p;
+        jacrows.at(0)[duct.getDof(constants::p,-1)] = eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
-            residual.subvec(Ns,2*Ns-1) = duct.Tt(-1) - _T;
+            // residual.subvec(Ns,2*Ns-1) = duct.Tt(-1) - _T;
         }
     }
 }

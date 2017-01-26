@@ -34,10 +34,8 @@ public:
     ~AdiabaticWall();
     AdiabaticWall* copy(const TaSystem& sys) const;
 
-    vd initialSolution() const;
-
-    virtual void residualJac(arma::subview_col<d>&& residual
-                          ) const;
+    virtual void residualJac(SegPositionMapper& residual,
+                             SegJacRows& jac) const;
 
     // Return the total number of equations in this segment
     virtual us getNEqs() const;
@@ -49,11 +47,6 @@ public:
 
     // Reset amplitude data in higher harmonics
     // virtual void resetHarmonics() = 0;
-
-    // Fill Jacobian with values from the equations in this
-    // segment/connector.
-    virtual void jac(const TaSystem&,Jacobian&,us dof_start,us eq_start) const;
-                  
 
 };
 

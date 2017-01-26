@@ -35,20 +35,22 @@ AdiabaticWall::~AdiabaticWall() {
 AdiabaticWall* AdiabaticWall::copy(const TaSystem& sys) const {
     return new AdiabaticWall(sys,*this);
 }
-vd AdiabaticWall::initialSolution() const {
-    return vd();
-}
 
-void AdiabaticWall::residualJac(arma::subview_col<d>&& residual
-                             ) const {
 
-    TRACE(15,"AdiabaticWall::residual()");
+void AdiabaticWall::residualJac(SegPositionMapper& residual,
+                                SegJacRows& jac) const {
+
+    TRACE(15,"AdiabaticWall::residualJac()");
     const Duct& duct = getDuct();
     const pb::Duct& dpb = duct.getDuctPb();
     us Ns = sys.Ns();
 
+    us i=0;
+
     if(_side == pb::left) {
-        residual.subvec(0,Ns-1) = duct.ut(0);
+        *residual.at(i) = duct.ut(0);
+        jac.at(i)[duct.getDof(constants::u,0)].eye(Ns,Ns);
+
         if(dpb.htmodel() != pb::Isentropic) {
             // TODO: Put the boundary condition of zero heat flux here
             // residual.subvec(Ns,2*Ns-1) = 
@@ -56,7 +58,8 @@ void AdiabaticWall::residualJac(arma::subview_col<d>&& residual
         }
     }
     else {
-        residual.subvec(0,Ns-1) = duct.ut(-1);
+        *residual.at(i) = duct.ut(-1);
+        jac.at(i)[duct.getDof(constants::u,-1)].eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
             // TODO: Put the boundary condition of zero heat flux here
             // residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,-1) - _T;

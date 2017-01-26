@@ -31,10 +31,10 @@ DuctBc* DuctBc::newDuctBc(const us id,
         return new PressureBc(sys,id,dbc);
         break;
     }
-    // case pb::AdiabaticWall: {
-    //     return new AdiabaticWall(id,sys,dbc);
-    //     break;
-    // }
+    case pb::AdiabaticWall: {
+        return new AdiabaticWall(sys,id,dbc);
+        break;
+    }
     default:
         tasmet_assert(false,"Not implemented DuctBc");
         break;

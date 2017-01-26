@@ -60,12 +60,11 @@ Duct::~Duct() {
     //     delete eq;
     // }
 }
-void Duct::residualJac(arma::subview_col<d> && residual) const {
+void Duct::residualJac(SegPositionMapper& residual,
+                       SegJacRows& jacrows) const {
 
-    TRACE(15,"Duct::residual()");
+    TRACE(15,"Duct::residualJac()");
     
-    const arma::subview_col<d> sol = sys.getSolution(_id);
-
     vd rho,u,T,p,Ts;            // Solution at this gp
     vd rhop,up,Tp,pp,Tsp;       // Solution at next gp
 
@@ -78,28 +77,26 @@ void Duct::residualJac(arma::subview_col<d> && residual) const {
     us number_eqs = 4;
     number_eqs += (has_solideq) ? 1 : 0;
 
+    // rho,u,T,p
+    // Ts maybe
+    us nvars_per_gp = (_ductpb.stempmodel()
+                       == pb::HeatBalance ? 5 : 4);
+
     VARTRACE(15,number_eqs);
 
     us Ns = sys.Ns();
-    us eq_offset = 0;           // Equation offset for current gp
-    us res_offset = 0;          // Residual offset for current gp
-    us res_offsetp = 0;         // Residual offset for next gp
 
-    us gp_jump = number_eqs * Ns; // The jump per gp
-    
     rhop = getvart(constants::rho,0);
     up = getvart(constants::u,0);
     Tp = getvart(constants::T,0);
-    pp   = getvart(constants::p,0);
+    pp = getvart(constants::p,0);
 
     const Gas& gas = sys.gas();
 
+    us i=0;
+
     for(us gp=0;gp<ngp()-1;gp++) {
 
-        eq_offset = gp*Ns*number_eqs;
-        res_offset = eq_offset;
-        res_offsetp = res_offset + gp_jump;
-        
         d dx = x(gp+1)-x(gp);
 
         // Update the current gp solution
@@ -112,8 +109,35 @@ void Duct::residualJac(arma::subview_col<d> && residual) const {
         pp   = getvart(constants::p,gp+1);
 
         cont  = ((rhop%up)-(rho%u))/dx;
+        *residual.at(i) = cont;
+
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
+            -diagmat(rho)/dx;
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
+            -diagmat(u)/dx;
+        jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::rho}] =
+            diagmat(up)/dx;
+        jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::u}] =
+            diagmat(rhop)/dx;
+        TRACE(15,"SFSG");
+        i++;
 
         mom = (rhop%up%up - rho%u%u + pp - p)/dx;
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
+            -diagmat(rho%u)/dx;
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
+            -diagmat(u%u)/dx;
+        jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::rho}] =
+            diagmat(u%u)/dx;
+        jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::u}] =
+            diagmat(up%rhop)/dx;
+        jacrows.at(i)[{_id,(gp)*nvars_per_gp+constants::p}] =
+            -eye(Ns,Ns)/dx;
+        jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::p}] =
+            eye(Ns,Ns)/dx;
+        *residual.at(i) = mom;
+        TRACE(15,"SFSG");
+        i++;
         
         switch (_ductpb.htmodel()) {
         case pb::Isentropic: {
@@ -125,32 +149,52 @@ void Duct::residualJac(arma::subview_col<d> && residual) const {
 
            en = p/p0 - pow(rho/rho0,gamma0);
 
+           *residual.at(i) = en;
+
+           jacrows.at(i)[{_id,gp*nvars_per_gp+constants::p}] =
+               eye(Ns,Ns)/p0;
+           jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
+               -(gamma0/rho0)*diagmat(pow(rho/rho0,gamma0-1));
+           TRACE(15,"SFSG");
         }
             break;
         default:
             tasmet_assert(false,"Not implemented htmodel");
         }
 
+        i++;
+        TRACE(15,"SFSG");
+        // Equation of state
         st = gas.rho(T,p) - rho;
-
-        residual.subvec(eq_offset+0*Ns,eq_offset+1*Ns-1) = cont;
-        residual.subvec(eq_offset+1*Ns,eq_offset+2*Ns-1) = mom;
-        residual.subvec(eq_offset+2*Ns,eq_offset+3*Ns-1) = en;
-        residual.subvec(eq_offset+3*Ns,eq_offset+4*Ns-1) = st;
-
+        TRACE(15,"SFSG");
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
+            -eye(Ns,Ns);
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::p}] =
+            diagmat(gas.drhodp(T,p));
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::T}] =
+            diagmat(gas.drhodT(T,p));
+           
+        *residual.at(i) = st; 
+        TRACE(15,"SFSG");
+        i++;
     }
-
-    eq_offset += number_eqs*Ns;
 
     // Equation of state for the last node
     st = gas.rho(Tp,pp) - rhop;
-    residual.subvec(eq_offset,eq_offset+Ns-1) = st;
+    *residual.at(i) = st; 
+
+    jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::rho}] =
+        -eye(Ns,Ns);
+    jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::p}] =
+        diagmat(gas.drhodp(T,p));
+    jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::T}] =
+        diagmat(gas.drhodT(T,p));
+
+    i++;
 
     // Two more equations for the last grid point in case
     // the heat transfer model is not a transport equation.
     if(_ductpb.htmodel() == pb::Isentropic) {
-
-        eq_offset += Ns;
 
         d T0 = gas.T0();
         d p0 = gas.p0();
@@ -159,24 +203,43 @@ void Duct::residualJac(arma::subview_col<d> && residual) const {
 
         en = p/p0 - pow(rho/rho0,gamma0);
 
-        residual.subvec(eq_offset,eq_offset+Ns-1) = en;
+        jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::p}] =
+            eye(Ns,Ns)/p0;
+        jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::rho}] =
+            -(gamma0/rho0)*diagmat(pow(rho/rho0,gamma0-1));
+
+        *residual.at(i) = en; i++;
     }
 
 }
+PosId Duct::getDof(int varnr,int gp) const {
+    // Wraparound
+    if(gp<0) gp+=ngp();
+
+    // rho,u,T,p
+    // Ts maybe
+    us nvars_per_gp = (_ductpb.stempmodel()
+                       == pb::HeatBalance ? 5 : 4);
+
+
+    return {_id,nvars_per_gp*gp+varnr};
+}
+
 vd Duct::getvart(int varnr,int gp) const {
-    TRACE(15,"Duct::getvart()");
-    const arma::subview_col<d> sol = sys.getSolution(_id);
+    TRACE(14,"Duct::getvart()");
+    const SegPositionMapper& sol = sys.getSolution(_id);
 
     us Ns = sys.Ns();
 
     // Wraparound
     if(gp<0) gp+=ngp();
 
-    us vars_per_gp = 4;
-    vars_per_gp+= (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
+    // rho,u,T,p
+    // Ts maybe
+    us nvars_per_gp = (_ductpb.stempmodel()
+                       == pb::HeatBalance ? 5 : 4);
     
-    return sol.subvec((gp*vars_per_gp+varnr)*Ns,
-                      (gp*vars_per_gp+varnr+1)*Ns-1);
+    return *sol.at((gp*nvars_per_gp+varnr));
 }
 vd Duct::getvarx(int varnr,int t) const {
     vd res(ngp());
@@ -185,47 +248,43 @@ vd Duct::getvarx(int varnr,int t) const {
     }
     return res;
 }
-vd Duct::initialSolution() const {
+void Duct::initialSolution(SegPositionMapper& sol) const {
     
     TRACE(15,"Duct::initialSolution()");
 
-    vd initsol(getNDofs());
-    VARTRACE(15,initsol.size());
+    VARTRACE(15,sol.size());
 
-    us vars_per_gp = 4;
-    vars_per_gp+= (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
-
-    us Ns = sys.Ns();
+    us nvars_per_gp = 4;
+    nvars_per_gp+= (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
 
     const Gas& gas = sys.gas();
-    
+
+    us segdof = 0;
+
     for(us i=0;i<ngp();i++){
         VARTRACE(15,i);
         // Initial density
-
-        initsol.subvec((i*vars_per_gp+0)*Ns,(i*vars_per_gp+1)*Ns-1) =
-            gas.rho0()+.01;
+        *sol.at(segdof) += gas.rho0()+0.1;
+        segdof++;
         
         // Initial velocity
-        initsol.subvec((i*vars_per_gp+1)*Ns,(i*vars_per_gp+2)*Ns-1) =
-            0;
+        *sol.at(segdof) += 0.1;
+        segdof++;
 
         // Initial Temperature
-        initsol.subvec((i*vars_per_gp+2)*Ns,(i*vars_per_gp+3)*Ns-1) =
-            _Tsprescribed(i);
+        *sol.at(segdof) += _Tsprescribed(i);
+        segdof++;
 
         // Initial pressure
-        initsol.subvec((i*vars_per_gp+3)*Ns,(i*vars_per_gp+4)*Ns-1) =
-            gas.p0();
-        
+        *sol.at(segdof) += gas.p0();
+        segdof++;
+
         // Initial solid temperature, if not prescribed
         if(_ductpb.stempmodel() != pb::Prescribed) {
-            initsol.subvec((i*vars_per_gp+4)*Ns,(i*vars_per_gp+5)*Ns-1) =
-                _Tsprescribed(i);
+            *sol.at(segdof) += _Tsprescribed(i);
+            segdof++;
         }
     }
-
-    return initsol;
 
 }
 
@@ -257,9 +316,9 @@ us Duct::getNDofs() const {
     TRACE(15,"Duct::getNDofs()");        
  
     // rho,u,T,p
-    us nvars_per_gp = 4;
     // Ts maybe
-    nvars_per_gp += (_ductpb.stempmodel() == pb::HeatBalance ? 1 : 0);
+    us nvars_per_gp = (_ductpb.stempmodel()
+                       == pb::HeatBalance ? 5 : 4);
 
     return nvars_per_gp*ngp();
 }

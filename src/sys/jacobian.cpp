@@ -2,14 +2,6 @@
 #include "triplets.h"
 #include "tasmet_tracer.h"
 
-void Jacobian::operator+=(const Jacobian& other){
-    TRACE(2,"Jacobian::append()");
-    jacrows.insert(jacrows.end(),other.jacrows.begin(),other.jacrows.end());
-}
-void Jacobian::operator+=(const JacRow& other){
-    TRACE(2,"Jacobian::append()");
-    jacrows.push_back(other);
-}
 // Jacobian::operator TripletList() const{
 
 //     TRACE(18,"Jacobian::operator Tripletlist()");

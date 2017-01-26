@@ -15,9 +15,10 @@
 
 #include "tasmet_types.h"
 #include "tasmet_exception.h"
+#include "jacobian.h"
 // #include "phaseconstraint.h"
 
-class Jacobian;
+
 class GlobalConf;
 class TaSystem;
 
@@ -51,9 +52,10 @@ public:
      */    
     virtual Segment* copy(const TaSystem&) const = 0;
     
-    virtual vd initialSolution() const = 0;
+    virtual void initialSolution(SegPositionMapper&) const = 0;
 
-    virtual void residualJac(arma::subview_col<d>&& residual // Here we store the residual
+    virtual void residualJac(SegPositionMapper& residual,
+                             SegJacRows& jacrows// Here we store the residual
                              ) const=0;
 
     // Get and set name

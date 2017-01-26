@@ -33,6 +33,8 @@ public:
 
     const Duct& getDuct() const;
 
+    virtual void initialSolution(SegPositionMapper&) const {}
+
 };
 
 

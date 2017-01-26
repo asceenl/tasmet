@@ -34,27 +34,23 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
     ResidualJac resjac;
     system.residualJac(resjac);
 
-    const sdmat& jac = resjac.jacobian;
-    const vd& residual = resjac.residual;
     vd dx;
 
-    #ifdef DEBUG_TASMET_SYSTEM
-    cout << "Initial residual: " << endl;
-    cout << residual << endl;
-    #endif  // DEBUG_TASMET_SYSTEM
-
-    assert(jac.n_cols==residual.size());
-    assert(jac.n_rows==residual.size());
+    assert(resjac.jacobian.n_cols==resjac.residual.size());
+    assert(resjac.jacobian.n_rows==resjac.residual.size());
 
     while (true) {
 
         #ifdef DEBUG_TASMET_SYSTEM
         cout << "Residual: ";
-        cout << residual << endl;
+        cout << resjac.residual << endl;
+        cout << dmat(resjac.jacobian) << endl;        
         #endif  // DEBUG_TASMET_SYSTEM
     
-        dx = -1*_dampfac*arma::spsolve(jac,residual,"superlu");
-
+        TRACE(15,"Solving system of eqs");
+        dx = -1*_dampfac*arma::spsolve(resjac.jacobian,resjac.residual,"superlu");
+        TRACE(15,"Solving system of eqs done");
+        
         progress.rel_err = norm(dx);
 
         guess += dx;
@@ -64,12 +60,14 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
         // Obtain a new residual and Jacobian matrix
         system.residualJac(resjac);
 
-        progress.fun_err = norm(residual);
+        progress.fun_err = norm(resjac.residual);
         progress.iteration++;
 
         action = (*callback)(progress);
 
         if(action==Stop){
+            TRACE(15,"Solution at stop:");
+            TRACE(15,guess);
             break;
         }
             
