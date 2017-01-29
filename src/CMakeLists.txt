@@ -62,6 +62,8 @@ add_library(tasmet_src
   material/solid.cpp
   material/adiabatictemp.cpp
 
+  export/export.cpp
+
   # sys/enginesystem.cpp
   sys/globalconf.cpp
   sys/tasmet_variable.cpp
@@ -73,4 +75,4 @@ add_library(tasmet_src
 
 add_subdirectory(gui) 
 add_subdirectory(protobuf)
-target_link_libraries(tasmet_src Qt5::Widgets superlu dl pthread)
+target_link_libraries(tasmet_src Qt5::Widgets hdf5 hdf5_hl dl superlu pthread)

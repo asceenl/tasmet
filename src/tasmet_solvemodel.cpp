@@ -58,6 +58,15 @@ int main(int argc, char *argv[]) {
     progress_callback cb = simple_progress_callback(1e-6,1e-6);
 
     solver.start(&cb);
+
+
+    vd sol = solver.getSolution();
+
+    // Put solution in our copy of system
+    system->updateSolution(sol);
+
+    system->exportHDF5(filename+".h5");
+
 }
 
 

@@ -12,12 +12,11 @@
 #pragma once
 #ifndef SEGMENT_H
 #define SEGMENT_H
-
+#include <hdf5.h>
 #include "tasmet_types.h"
 #include "tasmet_exception.h"
 #include "jacobian.h"
 // #include "phaseconstraint.h"
-
 
 class GlobalConf;
 class TaSystem;
@@ -82,6 +81,8 @@ public:
 
     // Reset amplitude data in higher harmonics
     // virtual void resetHarmonics() = 0;
+
+    virtual void exportHDF5(const hid_t group_id) const {}
 
 };
 

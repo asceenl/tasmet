@@ -10,6 +10,7 @@
 #include "tasmet_assert.h"
 #include "tasmet_evalscript.h"
 #include "perfectgas.h"
+#include "../export/export.h"
 
 Duct::Duct(const TaSystem& sys,
            const us id,
@@ -47,7 +48,7 @@ Duct::Duct(const TaSystem& sys,const Duct& other):
     _Tsprescribed(other._Tsprescribed)
 {
     // Do something with the equations here
-    TRACE(15,"Duct::~Duct");
+    TRACE(15,"Duct::Duct");
 
 
 }
@@ -109,6 +110,8 @@ void Duct::residualJac(SegPositionMapper& residual,
         pp   = getvart(constants::p,gp+1);
 
         cont  = ((rhop%up)-(rho%u))/dx;
+        // cont += sys.DDTtd()*rho;
+        
         *residual.at(i) = cont;
 
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
@@ -119,7 +122,7 @@ void Duct::residualJac(SegPositionMapper& residual,
             diagmat(up)/dx;
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::u}] =
             diagmat(rhop)/dx;
-        TRACE(15,"SFSG");
+
         i++;
 
         mom = (rhop%up%up - rho%u%u + pp - p)/dx;
@@ -136,7 +139,7 @@ void Duct::residualJac(SegPositionMapper& residual,
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::p}] =
             eye(Ns,Ns)/dx;
         *residual.at(i) = mom;
-        TRACE(15,"SFSG");
+
         i++;
         
         switch (_ductpb.htmodel()) {
@@ -155,7 +158,7 @@ void Duct::residualJac(SegPositionMapper& residual,
                eye(Ns,Ns)/p0;
            jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
                -(gamma0/rho0)*diagmat(pow(rho/rho0,gamma0-1));
-           TRACE(15,"SFSG");
+
         }
             break;
         default:
@@ -163,10 +166,10 @@ void Duct::residualJac(SegPositionMapper& residual,
         }
 
         i++;
-        TRACE(15,"SFSG");
+
         // Equation of state
         st = gas.rho(T,p) - rho;
-        TRACE(15,"SFSG");
+
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
             -eye(Ns,Ns);
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::p}] =
@@ -175,7 +178,7 @@ void Duct::residualJac(SegPositionMapper& residual,
             diagmat(gas.drhodT(T,p));
            
         *residual.at(i) = st; 
-        TRACE(15,"SFSG");
+
         i++;
     }
 
@@ -330,5 +333,78 @@ void Duct::show(us verbosity_level) const {
 
 }
 
+void Duct::exportHDF5(const hid_t group_id) const {
 
+    TRACE(15,"Duct::exportHDF5");
+
+    PosData x;
+    x.name = "Position";
+    x.unit = "m";
+    x.symbol = "x";
+    x.x = this->x;
+    x.exportHDF5(group_id);
+
+    PosData S;
+    S.name = "Cross-sectional area";
+    S.unit = "m^2";
+    S.symbol = "S";
+    S.x = this->S;
+    S.exportHDF5(group_id);
+
+    PosData phi;
+    phi.name = "Porosity";
+    phi.unit = "-";
+    phi.symbol = "phi";
+    phi.x = this->phi;
+    phi.exportHDF5(group_id);
+
+    PosData rh;
+    rh.name = "Hydraulic radius";
+    rh.unit = "m";
+    rh.symbol = "rh";
+    rh.x = this->rh;
+    rh.exportHDF5(group_id);
+
+    TXData u;
+    u.name = "Velocity";
+    u.unit = "m/s";
+    u.symbol = "u";
+    u.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        u.x.col(gp) = ut(gp);
+    }
+    u.exportHDF5(group_id);
+
+    TXData T;
+    T.name = "Fluid temperature";
+    T.unit = "K";
+    T.symbol = "T";
+    T.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        T.x.col(gp) = Tt(gp);
+    }
+    T.exportHDF5(group_id);
+
+    TXData p;
+    p.name = "Fluid pressure";
+    p.unit = "Pa";
+    p.symbol = "p";
+    p.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        p.x.col(gp) = pt(gp);
+    }
+    p.exportHDF5(group_id);
+
+    TXData Ts;
+    Ts.name = "Solid temperature";
+    Ts.unit = "K";
+    Ts.symbol = "Ts";
+    Ts.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        p.x.col(gp) = Tst(gp);
+    }
+    Ts.exportHDF5(group_id);
+    
+
+}
 //////////////////////////////////////////////////////////////////////

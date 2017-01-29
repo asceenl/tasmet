@@ -112,6 +112,17 @@ public:
 
     const Segment& getSegment(const us id) const {return *_segs.at(id);}
 
+    /** 
+     * Store the current results to a HDF5 file. For each segment, a
+     * group is created with the name corresponding to the segment
+     * ID. Then, the group contents is filled based on what the
+     * segment wants to store as result data. *Warning*: overwrites
+     * existing files without confirmation!
+     *
+     * @param filename The filename of the output file
+     */
+    void exportHDF5(const string& filename) const;
+
 protected:
     virtual int getArbitrateMassEq(const vus& neqs) const;
 private:

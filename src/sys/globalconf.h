@@ -22,7 +22,7 @@ class GlobalConf{
     d _omg;		// The "base" frequency in rad/s
     us _Nf;			// Number of frequencies to solve for
 
-    dmat _fDFT,_iDFT,_DDTfd;
+    dmat _fDFT,_iDFT,_DDTfd,_DDTtd;
     // d Wfo_=0;			// First order 'upwind' factor. If
     // Wfo=-1, interpolation is done from
     // the left side. If Wfo=0,
@@ -35,6 +35,7 @@ public:
     const dmat& iDFT = _iDFT; //inverse discrete Fourier transform matrix
     const dmat& fDFT =  _fDFT; //forward discrete Fourier transform matrix
     const dmat& DDTfd = _DDTfd; //Derivative in frequency domain
+    const dmat& DDTtd = _DDTtd; //Derivative in time domain
     
     us Nf() const {return _Nf;}
     us Ns() const {return 2*_Nf+1;}    

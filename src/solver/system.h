@@ -83,7 +83,7 @@ public:
     virtual vd getSolution() const=0;
 
     virtual void updateSolution(const vd& new_guess)=0;
-
+    virtual ~GradientNonlinearSystem(){}
 };
 
 

@@ -74,7 +74,7 @@ void GlobalConf::setomg(d omg){
         _DDTfd(2*i-1,2*i  )=-double(i)*_omg;
         _DDTfd(2*i  ,2*i-1)=double(i)*_omg;
     }
-
+    _DDTtd = _iDFT * _DDTfd * _fDFT;
 }
 
 //////////////////////////////////////////////////////////////////////

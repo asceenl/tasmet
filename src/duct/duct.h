@@ -93,6 +93,7 @@ public:
     // Reset amplitude data in higher harmonics
     // void resetHarmonics();
 
+    void exportHDF5(const hid_t group_id) const;
 };
 
 #endif // DUCT_H

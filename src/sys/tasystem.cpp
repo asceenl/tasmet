@@ -5,6 +5,8 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
+#include <hdf5.h>
+
 #include "segment.h"
 #include "tasystem.h"
 #include "triplets.h"
@@ -15,6 +17,7 @@
 #include "tasmet_constants.h"
 #include "duct.h"
 #include "ductbc.h"
+
 
 TaSystem::TaSystem(const pb::System& sys):
     GlobalConf(sys.nf(),sys.freq())
@@ -412,5 +415,43 @@ void TaSystem::cleanup() {
     }
 
 }
+
+void TaSystem::exportHDF5(const string& filename) const {
+
+    TRACE(15,"TaSystem::exportHDF5");
+    hid_t file_id;
+    herr_t status;
+
+    file_id = H5Fcreate (filename.c_str(),
+                         H5F_ACC_TRUNC,
+                         H5P_DEFAULT,
+                         H5P_DEFAULT);    
+
+    
+
+    for(const auto& seg_ : _segs) {
+        // Create a group for each segment
+        hid_t grp_id = H5Gcreate(file_id,
+                                  (string("/") + std::to_string(seg_.first)).c_str(),
+                                  H5P_DEFAULT,
+                                  H5P_DEFAULT,
+                                  H5P_DEFAULT);
+
+        seg_.second->exportHDF5(grp_id);
+
+        H5Gclose(grp_id);
+
+        // ^^ uncommenting above results in segfault. Why?
+        // seg_.second->exportHDF5(file_id);
+        
+    }
+
+    status = H5Fclose(file_id);
+    H5Eprint(status,0);
+
+
+}                              
+
+
 
 //////////////////////////////////////////////////////////////////////
