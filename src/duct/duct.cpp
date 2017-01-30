@@ -395,15 +395,15 @@ void Duct::exportHDF5(const hid_t group_id) const {
     }
     p.exportHDF5(group_id);
 
-    TXData Ts;
-    Ts.name = "Solid temperature";
-    Ts.unit = "K";
-    Ts.symbol = "Ts";
-    Ts.x = dmat(sys.Ns(),ngp());
-    for(us gp=0;gp<ngp();gp++){
-        p.x.col(gp) = Tst(gp);
-    }
-    Ts.exportHDF5(group_id);
+    // TXData Ts;
+    // Ts.name = "Solid temperature";
+    // Ts.unit = "K";
+    // Ts.symbol = "Ts";
+    // Ts.x = dmat(sys.Ns(),ngp());
+    // for(us gp=0;gp<ngp();gp++){
+    //     p.x.col(gp) = Tst(gp);
+    // }
+    // Ts.exportHDF5(group_id);
     
 
 }

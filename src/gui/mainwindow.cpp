@@ -123,9 +123,9 @@ void TaSMETMainWindow::newModel() {
     _filepath = "";
     set(_model);
 }
-void TaSMETMainWindow::loadModel() {
+void TaSMETMainWindow::loadModel(const string* filepath_s) {
     TRACE(15,"loadModel");
-    if(isDirty()) {
+    if(isDirty() && filepath_s == nullptr) {
         int answer = saveFileFirstQuestion(this);
         if(answer == QMessageBox::Yes) saveModel();
         else if(answer == QMessageBox::Cancel) return;
@@ -133,16 +133,22 @@ void TaSMETMainWindow::loadModel() {
 
     QString title = tr("Open existing TaSMET model file");
 
-    QString filepath = QFileDialog::getOpenFileName(this,
-                                                    title,
-                                                    start_file_location,
-                                                    filetype);
-    string filepath_s = filepath.toStdString();
-    if(filepath.size()!=0) {
+    if(filepath_s == nullptr) {
+
+        QString filepath = QFileDialog::getOpenFileName(this,
+                                                        title,
+                                                        start_file_location,
+                                                        filetype);
+        if(filepath.size()!=0) {
+            string filepath_s2 = filepath.toStdString();
+            return loadModel(&filepath_s2);
+        }
+    }
+    else {
         try {
             TRACE(15,"Setting loaded model");
-            _filepath = filepath_s;
-            set(loadMessage<pb::Model>(filepath_s));
+            _filepath = *filepath_s;
+            set(loadMessage<pb::Model>(*filepath_s));
         }
         catch(TaSMETError &e) {
             _filepath = "";

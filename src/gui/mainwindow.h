@@ -25,29 +25,61 @@ class TaSMETMainWindow: public QMainWindow {
 
     // In-memory model
     pb::Model _model;
-    pb::System& _system;
+
+    pb::System& _system;        /**< In constructor set to the
+                                   _model.mutable_system() */
 
     // Where the file is stored
     string _filepath = "";
 
-    bool _init = true;
+    bool _init = true;          /**<  */
 
 public:
     TaSMETMainWindow();
     ~TaSMETMainWindow();
 private:
     void newModel();
-    void loadModel();
+public:
+    /** 
+     * Load a model from a file. Called by File->Open. If no filepath
+     * is given, a dialog is opened to specify the file. This function
+     * is public such that it can be called for main.cpp.
+     *
+     * @param filepath the filepath of the file to load
+     */
+    void loadModel(const string* filepath=nullptr);
+private:
+    /** 
+     * Save the model to a file. If no filepath is given, a dialog is
+     * opened to ask the user for a filepath.
+     *
+     * @param filepath 
+     */
     void saveModel(string* filepath=nullptr);
+    /** 
+     * Save the model with a different filename.
+     */
     void saveAsModel();
 
-    // When the user interacts, we call this function to update the
-    // internal state and set the widget status accordingly
+    /** 
+     * When the user interacts, we call this function to update the
+     * internal state and set the widget status accordingly.
+     */
     void changed();
-    void set(const pb::Model&);
+    /** 
+     * Change the widget states according to the model 
+     *
+     * @param model The model to set
+     */
+    void set(const pb::Model& model);
 
-    // Check whether the filepath contents agree with the system in
-    // memory
+    /** 
+     * Check whether the filepath contents agree with the system in
+     * memory.
+     *
+     * @return true when the model in memory does not agree with the
+     * file contents.
+     */
     bool isDirty() const;
 
 private slots:

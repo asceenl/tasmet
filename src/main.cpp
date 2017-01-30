@@ -28,7 +28,8 @@ void catchUnixSignals(const std::vector<int>& quitSignals,
     for ( int sig : ignoreSignals )
         signal(sig, SIG_IGN);
 
-    // each of these signals calls the handler (quits the QCoreApplication).
+    // each of these signals calls the handler (quits the
+    // QCoreApplication).
     for ( int sig : quitSignals )
         signal(sig, handler);
 }
@@ -61,6 +62,11 @@ int main(int argc, char *argv[]) {
     TaSMETMainWindow win;
 
     win.show();
+
+    if(argc>1) {
+        string filepath = argv[1];
+        win.loadModel(&filepath);
+    }
     
     return app.exec();
 }
