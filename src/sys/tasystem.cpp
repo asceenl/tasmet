@@ -5,7 +5,6 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-#include <hdf5.h>
 
 #include "segment.h"
 #include "tasystem.h"
@@ -18,6 +17,9 @@
 #include "duct.h"
 #include "ductbc.h"
 
+#include <hdf5.h>
+// Lite version of the library
+#include <hdf5_hl.h>
 
 TaSystem::TaSystem(const pb::System& sys):
     GlobalConf(sys.nf(),sys.freq())
@@ -423,27 +425,65 @@ void TaSystem::exportHDF5(const string& filename) const {
     herr_t status;
 
     file_id = H5Fcreate (filename.c_str(),
-                         H5F_ACC_TRUNC,
+                         H5F_ACC_TRUNC, // Truncate any existing file
                          H5P_DEFAULT,
                          H5P_DEFAULT);    
 
     
+    d freq = getfreq();
+    H5LTset_attribute_double(file_id,
+                             "/",
+                             "freq",
+                             &freq,1);
+
+
+    int Ns = this->Ns();
+    H5LTset_attribute_int(file_id,
+                             "/",
+                             "Ns",
+                             &Ns,1);
+
+    vd timeInstances = this->timeInstances();
+    H5LTset_attribute_double(file_id,
+                             "/",
+                             "t",
+                             timeInstances.memptr(),
+                             timeInstances.size());
+
+    d p0 = _gas->p0();
+    H5LTset_attribute_double(file_id,
+                             "/",
+                             "p0",
+                             &p0,1);
+
+    d T0 = _gas->T0();
+    H5LTset_attribute_double(file_id,
+                             "/",
+                             "T0",
+                             &T0,1);
+
+
+    
+    const string& gasName = _gas->gasName();
+    H5LTset_attribute_string(file_id,
+                             "/",
+                             "gas",
+                             gasName.c_str());
 
     for(const auto& seg_ : _segs) {
         // Create a group for each segment
         hid_t grp_id = H5Gcreate(file_id,
-                                  (string("/") + std::to_string(seg_.first)).c_str(),
+                                  (string("/") +
+                                   std::to_string(seg_.first)).c_str(),
                                   H5P_DEFAULT,
                                   H5P_DEFAULT,
                                   H5P_DEFAULT);
 
         seg_.second->exportHDF5(grp_id);
 
+
         H5Gclose(grp_id);
 
-        // ^^ uncommenting above results in segfault. Why?
-        // seg_.second->exportHDF5(file_id);
-        
     }
 
     status = H5Fclose(file_id);

@@ -372,7 +372,7 @@ void Duct::exportHDF5(const hid_t group_id) const {
     u.x = dmat(sys.Ns(),ngp());
     for(us gp=0;gp<ngp();gp++){
         u.x.col(gp) = ut(gp);
-    }
+     }
     u.exportHDF5(group_id);
 
     TXData T;

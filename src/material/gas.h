@@ -49,7 +49,7 @@ public:
     static Gas* newGas(const GasType gastype,d T0, d p0);
 
     operator GasType() { return _gastype;}
-
+    const string& gasName() const { return pb::GasType_Name(_gastype); }
     d T0() const {return _T0;}
     d p0() const {return _p0;}
 
