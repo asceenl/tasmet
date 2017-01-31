@@ -64,7 +64,7 @@
                <item row="5" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="text">
-                  <string>&amp;System type:</string>
+                  <string>S&amp;ystem type:</string>
                  </property>
                  <property name="buddy">
                   <cstring>systemtype</cstring>
@@ -151,7 +151,7 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>&amp;Fundamental frequency: </string>
+                  <string>F&amp;undamental frequency: </string>
                  </property>
                  <property name="buddy">
                   <cstring>freq</cstring>
@@ -348,7 +348,7 @@
      <x>0</x>
      <y>0</y>
      <width>683</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -372,11 +372,11 @@
    </widget>
    <widget class="QMenu" name="menuSolver">
     <property name="title">
-     <string>Solver</string>
+     <string>So&amp;lver</string>
     </property>
     <addaction name="actionSolve"/>
-    <addaction name="actionReinitialize_solver"/>
-    <addaction name="actionPosprocess_model"/>
+    <addaction name="actionReinitialize_solution"/>
+    <addaction name="actionPostprocess_model"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSolver"/>
@@ -446,17 +446,17 @@
   </action>
   <action name="actionSolve">
    <property name="text">
-    <string>Solve...</string>
+    <string>&amp;Solve...</string>
    </property>
   </action>
-  <action name="actionReinitialize_solver">
+  <action name="actionReinitialize_solution">
    <property name="text">
-    <string>Reinitialize solver</string>
+    <string>&amp;Reinitialize solution</string>
    </property>
   </action>
-  <action name="actionPosprocess_model">
+  <action name="actionPostprocess_model">
    <property name="text">
-    <string>Posprocess model...</string>
+    <string>Create postprocessing file</string>
    </property>
   </action>
  </widget>

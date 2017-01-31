@@ -98,6 +98,9 @@ private slots:
     void on_actionAbout_triggered(); // Show about dialog
     void on_actionSolve_triggered(); // Solve the system
 
+    void on_actionReinitialize_solution_triggered();
+    void on_actionPostprocess_model_triggered();
+
     void on_nf_valueChanged(int) {changed();}
     void on_freq_textEdited() {changed();}
     void on_gastype_currentIndexChanged(int) {changed();}

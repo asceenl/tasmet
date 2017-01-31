@@ -22,7 +22,7 @@
 #include <qcustomplot.h>
 
 SolverDialog::SolverDialog(QWidget* parent,
-                           pb::System& sys,
+                           const GradientNonlinearSystem& sys,
                            pb::SolverParams& sparams):
     QDialog(parent),
     _sys(sys),
@@ -125,8 +125,13 @@ void SolverDialog::solver_progress(const SolverProgress& progress){
 
     TRACE(15,"SolverDialog::solver_progress()");
 
-    // VARTRACE(15,progress.fun_err);
-    // VARTRACE(15,progress.iteration);
+    if(progress.error) {
+        QMessageBox::warning(this,
+                             "Solver error",
+                             QString::fromStdString(progress.err_msg));
+        
+    }
+
     d funtol = _sparams.funtol();
     d reltol = _sparams.reltol();
 
@@ -159,17 +164,18 @@ void SolverDialog::on_solve_clicked() {
     _funtol->setData(empty,empty);
     _reltol->setData(empty,empty);
 
-
     assert(!_solver_worker);
 
     qRegisterMetaType<SolverProgress>();
 
     _solver_worker = new SolverWorker(_sys,_sparams);
+    
     QThread* thread = new QThread;
+    if(!_solver_worker || !thread) throw TaSMETBadAlloc();
 
+    // Move the _solver_worker to its own thread
     _solver_worker->moveToThread(thread);
     
-
     connect(thread, &QThread::started,
             _solver_worker, &SolverWorker::solver_start);
 
@@ -192,12 +198,9 @@ void SolverDialog::on_solve_clicked() {
 
 
 }
-void SolverDialog::on_singleiteration_clicked() {
-    
-}
+
 void SolverDialog::setEnabled(bool enabled){
     _dialog->solve->setEnabled(enabled);
-    _dialog->singleiteration->setEnabled(enabled);
     _dialog->stop->setEnabled(!enabled);
 
     _dialog->solvertype->setEnabled(enabled);
@@ -210,6 +213,9 @@ void SolverDialog::solver_stopped(bool converged) {
     // stop the solver and delete it
     if(_solver_worker!=nullptr) {
         _solver_worker->solver_stop();
+        if(converged) {
+            _solution = _solver_worker->getSolution();
+        }
         _solver_worker = nullptr;
     }
 

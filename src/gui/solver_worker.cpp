@@ -9,22 +9,38 @@
 #include "solver_worker.h"
 #include <functional>
 #include "tasmet_tracer.h"
-
+#include "solver.h"
 #include "system.pb.h"
 #include "solver.pb.h"
 
 #include <QThread>
 
+// Solvers available
+#include "newton_raphson.h"
+#include "tasystem.h"
 
-SolverWorker::SolverWorker(const pb::System& sys,const pb::SolverParams& sparams):
+SolverWorker::SolverWorker(const GradientNonlinearSystem& sys,
+                           const pb::SolverParams& sparams):
     _run(false),
-    _reltol(sparams.reltol()),
-    _funtol(sparams.funtol())
+    _funtol(sparams.funtol()),
+    _reltol(sparams.reltol())
 {
+    TRACE(15,"SolverWorker");
 
+    switch (sparams.solvertype()) {
+    case pb::NewtonRaphson: {
+        _solver = new NewtonRaphson(sys);
+        break;
+    }
+    default:
+        tasmet_assert(false,"Not implemented solver type");
+        break;
+    }
+    
 }
 SolverWorker::~SolverWorker(){
     TRACE(15,"~SolverWorker");
+    if(_solver!=nullptr) delete _solver;
 }
 void SolverWorker::solver_stop() {
     _run = false;
@@ -39,23 +55,10 @@ void SolverWorker::solver_start() {
     progress_callback callback = std::bind(&SolverWorker::pg_callback,
                                            this,_1);
 
-    SolverProgress p;
-    // For testing purposes
+    
+    tasmet_assert(_solver!=nullptr,"Solver not initialized");
 
-    SolverAction action;
-    while(true) {
-        TRACE(15,"Solver start virtual iteration");
-
-        
-        SolverAction action = callback(p);
-        if(action != Continue) break;
-        sleep(1);
-
-        p.fun_err/=10;
-        p.rel_err/=10;
-        p.iteration++;
-
-    }
+    _solver->start(&callback);
 
     emit solver_stopped(_converged);
 }
@@ -66,11 +69,15 @@ SolverAction SolverWorker::pg_callback(SolverProgress pg) {
 
     emit progress(pg);
 
+    if(pg.error) {
+        _converged = false;
+        return Stop;
+    }
     if(pg.fun_err <= _funtol && pg.rel_err <= _reltol) {
         _converged = true;
         return Stop;
     }
-
+    
     return Continue;
 
 

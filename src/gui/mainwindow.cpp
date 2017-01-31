@@ -417,20 +417,71 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
     TRACE(15,"actionSolve()");
     
     SolverDialog *d;
+
+    std::unique_ptr<TaSystem> sys;
     try {
-        d = new SolverDialog(this,_system,*_model.mutable_sparams());
+        sys = std::unique_ptr<TaSystem>(new TaSystem(_model.system()));
+        
+        if(_model.solution_size()>0) {
+            vd solution(_model.solution_size());
+            for(us i=0;i<_model.solution_size();i++) {
+                solution(i) = _model.solution(i);
+            }
+
+            // Throws in case the solution size does not match.
+            try {
+                sys->updateSolution(solution);
+            }
+            catch(...) {}
+        }
+        d = new SolverDialog(this,*sys.get(),*_model.mutable_sparams());
     }
+
     catch(TaSMETError &e) {
         e.show_user("Solver failed to initialize");
         return;
     }
-    d->exec();
+
+    if(d->exec()) {
+
+        // On succes, we copy the solution to the model
+        const vd& sol = d->getSolution();
+        
+        // Clear old solution
+        _model.clear_solution();
+        for(us i=0;i<sol.size();i++) {
+            _model.add_solution(sol(i));
+        }
+
+    }
 
     // Solution is put in system, system updated from solver
     // dialog. Therefore we are now probably dirty
     changed();
 
     delete d;
+}
+void TaSMETMainWindow::on_actionPostprocess_model_triggered() {
+
+    try {
+        TaSystem sys(_model.system());
+        if(_model.solution_size() == 0)
+            throw TaSMETError("No solution found");
+        vd sol(_model.solution_size());
+        for(us i=0;i<sol.size();i++) {
+            sol(i) = _model.solution(i);
+        }
+        sys.updateSolution(sol);
+
+        if(_filepath.size() == 0)
+            throw TaSMETError("Model has not yet been saved");
+        sys.exportHDF5(_filepath + ".h5");
+
+    }
+    catch(TaSMETError &e) {
+        e.show_user("Postprocessing failed");
+    }
+
 }
 bool TaSMETMainWindow::isDirty() const {
     TRACE(15,"isDirty()");
@@ -451,6 +502,11 @@ bool TaSMETMainWindow::isDirty() const {
 void TaSMETMainWindow::on_actionAbout_triggered(){
     
     AboutDialog(this).exec();
+}
+void TaSMETMainWindow::on_actionReinitialize_solution_triggered() {
+    
+    _model.clear_solution();
+    changed();
 }
 
 //////////////////////////////////////////////////////////////////////

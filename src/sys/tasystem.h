@@ -64,14 +64,24 @@ private:
      *
      */
     void initSolRes();
-public:
+
     TaSystem(const TaSystem& o);
+public:
+
     TaSystem(const pb::System&);
 
 
 
-    static TaSystem testSystem() {
-        return TaSystem(pb::System::default_instance());
+    /** 
+     * Returns an empty TaSystem with default GlobalConf
+     * parameters. The caller of this function owns the object and is
+     * responsible for its destruction.
+     *
+     *
+     * @return the TaSystem instance pointer.
+     */
+    static TaSystem* testSystem() {
+        return new TaSystem(pb::System::default_instance());
     }
     const Gas& gas() const {return *_gas;}
     
@@ -96,7 +106,7 @@ public:
     // Obtain the solution vector for the Segment with given id
     const SegPositionMapper& getSolution(const us seg_id) const;
     
-    virtual void updateSolution(const vd& sol) {_solution = sol; }	// Update the solution
+    virtual void updateSolution(const vd& sol);
 
     // Change Nf in the system, while keeping the results.
     void updateNf(us);

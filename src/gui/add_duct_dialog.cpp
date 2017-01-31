@@ -141,8 +141,8 @@ void AddDuctDialog::accept(){
     
     try {
         // If duct can be built without exceptions, everything is OK
-        TaSystem sys(TaSystem::testSystem());
-        Duct duct (sys,0,_duct);
+        std::unique_ptr<TaSystem> sys(TaSystem::testSystem());
+        Duct duct (*sys,0,_duct);
     }
     catch(TaSMETError& e) {
 
@@ -220,10 +220,10 @@ void AddDuctDialog::changed(){
     
     PreviewShow pshow = (PreviewShow) _dialog->previewshow->currentIndex();
     
-    TaSystem sys = TaSystem::testSystem();
+    std::unique_ptr<TaSystem> sys(TaSystem::testSystem());
     std::unique_ptr<Duct> duct;
     try {
-        duct = std::unique_ptr<Duct>(new Duct(sys,0,_duct));
+        duct = std::unique_ptr<Duct>(new Duct(*sys,0,_duct));
     }
     catch(TaSMETError& e) {
         return;

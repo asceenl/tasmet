@@ -32,6 +32,8 @@ struct SolverProgress
                                    Solver stops as an action of
                                    itself. Probably due to an internal
                                    error. */
+    string err_msg;
+
 };
 
 

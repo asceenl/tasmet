@@ -71,8 +71,7 @@ TaSystem::TaSystem(const pb::System& sys):
 }
 TaSystem::TaSystem(const TaSystem& o):
     GlobalConf(o),                 // Share a ptr to the Global conf
-    _gas(o._gas->copy()),
-    _solution(o._solution)
+    _gas(o._gas->copy())
 {
     TRACE(25,"TaSystem::TaSystem(TaSystem&) copy");
 
@@ -84,7 +83,11 @@ TaSystem::TaSystem(const TaSystem& o):
         if(!seg.second) throw TaSMETBadAlloc();
     }
 
-    initSolRes();
+    initSolRes();               // This empties the
+                                // solution. Therefore we copy it
+                                // after this phase.
+
+    _solution = o._solution;
 
 }
  void TaSystem::initSolRes() {
@@ -272,7 +275,6 @@ void TaSystem::residualJac(ResidualJac& resjac) const {
 
                     }
 
-                    
                 }
                 
                 
@@ -295,6 +297,7 @@ void TaSystem::residualJac(ResidualJac& resjac) const {
         _residual(arbitrateMassEq)=mass - _mass;
     }
 
+    // Store the Jacobian and the residual
     resjac.jacobian = sdmat(triplets);
     resjac.residual = _residual;
 
@@ -302,9 +305,20 @@ void TaSystem::residualJac(ResidualJac& resjac) const {
 vd TaSystem::getSolution() const {
     return _solution;
 }
+void TaSystem::updateSolution(const vd& solution) {
+    
+    if(_solution.size() == solution.size()) {
+        _solution = solution;
+    }
+    else {
+        throw  TaSMETError("Solution vector size does not match.");
+    }
+
+}
 const SegPositionMapper& TaSystem::getSolution(const us seg_id) const {
     return _solution_dofs.at(seg_id);
 }
+
 vus TaSystem::getNDofs() const  {
     TRACE(0,"TaSystem::getNDofs()");
     vus Ndofs(_segs.size());
@@ -481,7 +495,7 @@ void TaSystem::exportHDF5(const string& filename) const {
 
         seg_.second->exportHDF5(grp_id);
 
-
+        // Close the group
         H5Gclose(grp_id);
 
     }

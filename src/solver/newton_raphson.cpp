@@ -9,7 +9,7 @@
 #include "newton_raphson.h"
 #include "tasmet_tracer.h"
 
-#define DEBUG_TASMET_SYSTEM
+// #define DEBUG_TASMET_SYSTEM
 
 void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
                                          progress_callback* callback) {
@@ -48,7 +48,15 @@ void NewtonRaphson::start_implementation(GradientNonlinearSystem& system,
         #endif  // DEBUG_TASMET_SYSTEM
     
         TRACE(15,"Solving system of eqs");
-        dx = -1*_dampfac*arma::spsolve(resjac.jacobian,resjac.residual,"superlu");
+        try {
+            dx = -1*_dampfac*arma::spsolve(resjac.jacobian,resjac.residual,"superlu");
+        }
+        catch(...) {
+            progress.error = true;
+            progress.err_msg = "Failed to solve linear system of equations";
+            (*callback)(progress);
+            return;
+        }
         TRACE(15,"Solving system of eqs done");
         
         progress.rel_err = norm(dx);

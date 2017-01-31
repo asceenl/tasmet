@@ -19,18 +19,28 @@ namespace pb{
     class SolverParams;
 }
 
+class TaSystem;
+
 Q_DECLARE_METATYPE(SolverProgress);
 
 class SolverWorker: public QObject {
     Q_OBJECT
 
     std::atomic<bool> _run;
-    Solver<GradientNonlinearSystem,vd>* _solver;
+    Solver<GradientNonlinearSystem,vd>* _solver = nullptr;
     bool _converged = false;
     d _funtol,_reltol;
 public:
-    SolverWorker(const pb::System& sys,const pb::SolverParams& sparams);
+    SolverWorker(const GradientNonlinearSystem& sys,
+                 const pb::SolverParams& sparams);
+    
     ~SolverWorker();
+
+    vd getSolution() const { return _solver ? _solver->getSolution() : zeros<vd>(0);}
+
+    /** 
+     * Stop the solver. Called when the user presses the `stop' button
+     */
     void solver_stop();
                       
 public slots:

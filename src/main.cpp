@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     // This can be used to store files in the application. Very useful
     // when our application grows bigger
     // Q_INIT_RESOURCE(application);
-    INITTRACE(15);
+    INITTRACE(16);
 
     QApplication app(argc, argv);
     
