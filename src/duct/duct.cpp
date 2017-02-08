@@ -346,7 +346,7 @@ void Duct::exportHDF5(const hid_t group_id) const {
 
     PosData S;
     S.name = "Cross-sectional area";
-    S.unit = "m^2";
+    S.unit = "m$^2$";
     S.symbol = "S";
     S.x = this->S;
     S.exportHDF5(group_id);

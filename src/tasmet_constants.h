@@ -14,25 +14,25 @@
 // Unfortunately to let the code compile with Swig v 2.0, strongly
 // typed enums are not supported. Therefore this is a normal
 // enumerated type and not an enum class.
-DECLARE_ENUM(Varnr,
-             none,                         // None
-             rho,                        // Density
-             m,                          // Mass flow (rho*U)
-             T,                          // Temperature
-             p,                          // Pressure
-             Ts,                         // Temperature of the solid
-             Tw,                         // Temperature of the solid wall
-             mH,                         // Enthalpy flow (Watts)
-             U,                          // Volume flow (m^3/s)
-             u,                          // Velocity (U/Sf)
-             mu,                         // Momentum flux
-             Q,                          // Heat flow
-             Qs,                 // Solid heat Flow
-             F,                 // A mechanical domain force [N]
-             x,                // A mechanical displacement [m]
-             Z,                 // A mechanical impedance [N/m]
-             mEkin	       // Kinetic energy flow (Watts)
-             );
+// DECLARE_ENUM(Varnr,
+//              none,                         // None
+//              rho,                        // Density
+//              m,                          // Mass flow (rho*U)
+//              T,                          // Temperature
+//              p,                          // Pressure
+//              Ts,                         // Temperature of the solid
+//              Tw,                         // Temperature of the solid wall
+//              mH,                         // Enthalpy flow (Watts)
+//              U,                          // Volume flow (m^3/s)
+//              u,                          // Velocity (U/Sf)
+//              mu,                         // Momentum flux
+//              Q,                          // Heat flow
+//              Qs,                 // Solid heat Flow
+//              F,                 // A mechanical domain force [N]
+//              x,                // A mechanical displacement [m]
+//              Z,                 // A mechanical impedance [N/m]
+//              mEkin	       // Kinetic energy flow (Watts)
+//              );
 
 DECLARE_ENUM(Pos,posleft,posright);
 

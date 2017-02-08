@@ -110,13 +110,11 @@ include_directories(
   src/sys
   )
 
-link_directories(/usr/lib/chaiscript)
-
 # Add the code subdirectory
 add_subdirectory(src)
 add_subdirectory(testing)
 
 add_executable(tasmet src/main.cpp src/gui/tasmet_resources.qrc)
 add_executable(tasmet_solvemodel src/tasmet_solvemodel.cpp)
-target_link_libraries(tasmet tasmet_gui tasmet_src messages Qt5::Widgets chaiscript_stdlib-5.7.0 openblas)
-target_link_libraries(tasmet_solvemodel tasmet_src messages openblas chaiscript_stdlib-5.7.0)
+target_link_libraries(tasmet tasmet_gui tasmet_src messages Qt5::Widgets muparser openblas)
+target_link_libraries(tasmet_solvemodel tasmet_src messages openblas muparser)

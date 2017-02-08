@@ -27,7 +27,6 @@ include_directories(
   )
 
 add_library(tasmet_src
-  chaiscript.cpp
 
   tasmet_tracer.cpp
   tasmet_exception.cpp

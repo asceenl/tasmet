@@ -5,85 +5,85 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-
+// #define TRACERPLUS 16
 #include "tasmet_evalscript.h"
-#include <chaiscript/chaiscript.hpp>
-#include "chaiscript.h"
 #include "tasmet_exception.h"
 #include "tasmet_tracer.h"
 #include <sstream>
-using chaiscript::ChaiScript;
-using std::stringstream;
+#include <muParser.h>
 
-template<typename T>
-inline T wrap_eval(ChaiScript* chai,const string& script) {
-   try {
-       return chai->eval<T>(script);
-    }
-    catch(chaiscript::exception::eval_error &e) {
-        TRACE(15,script);
-        throw TaSMETError(e.what());
-    }
-   catch(std::bad_cast &e) {
-        TRACE(15,script);
-        throw TaSMETError("Cannot get return value from script");
-    }
-
-}
-template<>
-inline void wrap_eval<void>(ChaiScript* chai,const string& script) {
-   try {
-       chai->eval(script);
-    }
-   catch(std::runtime_error &e) {
-        TRACE(15,script);
-        throw TaSMETError(e.what());
-    }
-   catch(std::bad_cast &e) {
-        TRACE(15,script);
-        throw TaSMETError("Cannot get return value from script");
-    }
-
-}
+const int vector_prealloc = 30;
 
 EvaluateFun::EvaluateFun(const string& fun_return,
                          const string& err_msg,
-                         const string& vars):
+                         const string& var):
     _err_msg(err_msg),
     _fun_return(fun_return)
 {
-    TRACE(15,"EvaluateFun::EvaluateFun()");
-    _chai = getChaiScriptInstance();
-    if(!_chai) throw TaSMETBadAlloc();
 
-    string script = string("def myfun(") + vars + ") {\n";
-    script += "return " + fun_return + "; }\n";
-    
-    wrap_eval<void>(_chai.get(),script);
+    TRACE(15,"EvaluateFun::EvaluateFun()");
+
+    _parser = new mu::Parser();
+    if(!_parser) throw TaSMETBadAlloc();
+
+    /**
+     * It is imperative to put a reserve operation here, which
+     * preallocates enough space in the vector. Otherwise a
+     * reallocation may invalidate the pointers which the parser
+     * points to.
+     * 
+     */
+    _values.reserve(vector_prealloc);
+
+    _values.push_back(0);       // This is the (x), or (t)
+
+    // Add pi, as it unfortunately does not exist
+    _values.push_back(number_pi);
+    try {
+        _parser->DefineVar(var,&_values[0]);
+        _parser->DefineVar("pi",&_values[1]);
+        _parser->SetExpr(fun_return);
+    }
+    catch(mu::Parser::exception_type& e) {
+        TRACE(15,e.GetMsg());
+        throw TaSMETError(_err_msg);
+    }
     
 }
 void EvaluateFun::addGlobalDef(const string& name,const d value) {
     TRACE(15,"EvaluateFun::addGlobalDef()");
-
-    _chai->add_global(chaiscript::var(value),name);
+    if(_values.size() == vector_prealloc -1)
+        throw TaSMETError("Too many definitions");
+    
+    _values.push_back(value);
+    try {    
+        _parser->DefineVar(name,&_values[_values.size()-1]);
+    }
+    catch(mu::Parser::exception_type& e) {
+        TRACE(15,e.GetMsg());
+        throw TaSMETError(_err_msg);
+    }
 }
 vd EvaluateFun::operator()(const vd& x) {
     TRACE(15,"EvaluateFun::operator(vd)");
     vd y(x.size());
 
     for(us i=0;i<x.size();i++) {
-
-        stringstream value;
-        value << "myfun(" << std::scientific << x(i) << ");";
-
-        y(i) = wrap_eval<d>(_chai.get(),value.str());
-        
+        _values[0] = x[i];
+        VARTRACE(15,_values[0]);
+        try {
+            y(i) = _parser->Eval();
+        }
+        catch(mu::Parser::exception_type& e) {
+            TRACE(15,e.GetMsg());
+            throw TaSMETError(_err_msg);
+        }
     }
     return y;
 }
 
 EvaluateFun::~EvaluateFun() {
-
+    delete _parser;
 }
 
 
