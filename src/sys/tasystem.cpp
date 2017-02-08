@@ -486,13 +486,18 @@ void TaSystem::exportHDF5(const string& filename) const {
 
     for(const auto& seg_ : _segs) {
         // Create a group for each segment
+        string group = string("/") + std::to_string(seg_.first);
+        VARTRACE(15,group);
         hid_t grp_id = H5Gcreate(file_id,
-                                  (string("/") +
-                                   std::to_string(seg_.first)).c_str(),
-                                  H5P_DEFAULT,
-                                  H5P_DEFAULT,
-                                  H5P_DEFAULT);
+                                 group.c_str(),
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT);
 
+        if(grp_id < 0)
+            throw TaSMETError("Group creation failed");
+
+        
         seg_.second->exportHDF5(grp_id);
 
         // Close the group

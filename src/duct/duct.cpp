@@ -366,7 +366,7 @@ void Duct::exportHDF5(const hid_t group_id) const {
     rh.exportHDF5(group_id);
 
     TXData u;
-    u.name = "Velocity";
+    u.name = "Axial velocity";
     u.unit = "m/s";
     u.symbol = "u";
     u.x = dmat(sys.Ns(),ngp());

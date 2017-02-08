@@ -48,6 +48,11 @@ namespace {
                                   "symbol",
                                   data.symbol.c_str());
 
+         H5LTset_attribute_string(hfgroup,
+                                  dsetname.c_str(),
+                                  "datatype",
+                                  data.datatype.c_str());
+
 
     }
 }
@@ -60,16 +65,14 @@ void PointData::exportHDF5(hid_t hfgroup) {
     hsize_t rank = 1;
     herr_t status;
 
-    string dsetname = (string("/") + symbol); // name 
-
     status = make_dataset(hfgroup,                        // Group
-                          dsetname.c_str(),
+                          symbol.c_str(),
                           rank,
                           dims,
                           &x);
 
 
-    setAttributes(*this,dsetname,hfgroup);
+    setAttributes(*this,symbol,hfgroup);
 
 
 }
@@ -80,16 +83,14 @@ void TimeData::exportHDF5(hid_t hfgroup) {
     hsize_t dims[] = {x.size()};         // First dimension has lenght 1
     hsize_t rank = 1;
     
-    string dsetname = (string("/") + symbol); // name 
     herr_t status;
     status = make_dataset(hfgroup, // Group
-                          dsetname.c_str(), // Dataset name
+                          symbol.c_str(), // Dataset name
                           rank,
                           dims,
                           x.memptr());
 
-
-    setAttributes(*this,dsetname,hfgroup);
+    setAttributes(*this,symbol,hfgroup);
 
 }
 void PosData::exportHDF5(hid_t hfgroup) {
@@ -101,17 +102,15 @@ void PosData::exportHDF5(hid_t hfgroup) {
     hsize_t dims[] = {x.size()};         // First dimension has lenght 1
     hsize_t rank = 1;
     
-
-    string dsetname = (string("/") + symbol); // name 
     herr_t status;
     status = make_dataset(hfgroup,                        // Group
-                          dsetname.c_str(),
+                          symbol.c_str(),
                           rank,
                           dims,
                           x.memptr());
 
 
-    setAttributes(*this,dsetname,hfgroup);
+    setAttributes(*this,symbol,hfgroup);
 
     H5Eprint(status,0);
 
@@ -119,11 +118,6 @@ void PosData::exportHDF5(hid_t hfgroup) {
 void TXData::exportHDF5(hid_t hfgroup) {
 
     // We use the lite API for setting the data
-
-    // HDF5 Stores data in row-major ordering. Armadillo uses
-    // column-major ordering. Therefore, we store the transpose of the data.
-    dmat x = this->x.t();
-    
     hsize_t dims[] = {x.n_cols,x.n_rows};         // First dimension has lenght 1
     hsize_t rank = 2;
 
@@ -135,20 +129,32 @@ void TXData::exportHDF5(hid_t hfgroup) {
         col_ptrs[col] = &xptr[col*x.n_rows];
     }
     
-    string dsetname = (string("/") + symbol); // name
-    
     make_dataset(hfgroup, // Group
-                 dsetname.c_str(), // name 
+                 symbol.c_str(), // name 
                  rank,
                  dims,
                  &col_ptrs[0][0]);
 
     setAttributes(*this,
-                  dsetname,
+                  symbol,
                   hfgroup);
+
+
+    // Generate the time-averaged values and export them as well
+    PosData time_avg;
+
+    time_avg.x = arma::mean(x).t();
+    time_avg.name = name + " (time-averaged)";
+    time_avg.unit = unit;
+    time_avg.symbol = symbol + "_gem";
+
+    time_avg.exportHDF5(hfgroup);
+    
 }
 
 
 
 //////////////////////////////////////////////////////////////////////
+
+
 

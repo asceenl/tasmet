@@ -47,4 +47,6 @@ message Duct {
     required string stempfunc = 16 [default = "293.15+x*x/L"];
     required SolidTemperatureModel stempmodel = 17 [default = Prescribed];
 
+    // Whether the total surface area is time-dependent or not
+    optional bool Sfixed = 18;
 }

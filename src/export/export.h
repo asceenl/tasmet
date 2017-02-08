@@ -17,25 +17,12 @@
 #include <hdf5.h>
 #endif
 
-DECLARE_ENUM(FileType,FileTypeTXT)
-
 struct ExportData
 {
     string name;                /**< Full name of the quantity */
     string unit;                /**< Unit of the quantity */
     string symbol;              /**< Used symbol / abbreviation */
-
-    /** 
-     * Export the data to a text file
-     *
-     * @param FileType 
-     * @param filename 
-     * @param group 
-     *
-     * 
-     */
-    // void export(const string& filename)=0;
-
+    string datatype;            /**< Key representing the datatype */
     /** 
      * Export the result to an existing HDF5 
      *
@@ -45,9 +32,6 @@ struct ExportData
     virtual void exportHDF5(hid_t hfgroup)=0;
     #endif
 
-
-    // void show() const = 0;
-    
     virtual ~ExportData(){}
 };
 
@@ -57,7 +41,7 @@ struct ExportData
  */
 struct PointData: public ExportData {
     d x;                        /**< The value */
-
+    PointData() { datatype = "point";}
     #ifdef TASMET_HDF5
     void exportHDF5(hid_t hfgroup);
     #endif
@@ -69,8 +53,8 @@ struct PointData: public ExportData {
  */
 struct TimeData: public ExportData
 {
-    vd t;                       /**< The time instances of the
-                                   record */
+    TimeData() { datatype = "time";}
+
     vd x;                       /**< The quantity at the time
                                    instance */
 
@@ -86,10 +70,9 @@ struct TimeData: public ExportData
  */
 struct PosData: public ExportData
 {
-    vd X;                       /**< The positions of the
-                                   record */
-    vd x;                       /**< The quantity as function of the
-                                   position */
+    PosData() { datatype = "pos"; }
+    vd x; /**< The quantity as function of the
+             position */
 
     #ifdef TASMET_HDF5
     void exportHDF5(hid_t hfgroup);
@@ -104,11 +87,8 @@ struct PosData: public ExportData
  */
 struct TXData : public ExportData
 {
+    TXData() { datatype = "postime"; }
 
-    vd t; /**< The time instances of the
-             record */
-    vd X; /**< The positions of the record */
-    
     dmat x; /**< The quantity at the time and position instance. Note:
                the first axis denotes time, the second axis denotes
                position! */

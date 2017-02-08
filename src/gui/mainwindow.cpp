@@ -416,7 +416,7 @@ void TaSMETMainWindow::on_segmentname_textChanged() {
 void TaSMETMainWindow::on_actionSolve_triggered() {
     TRACE(15,"actionSolve()");
     
-    SolverDialog *d;
+    std::unique_ptr<SolverDialog> d;
 
     std::unique_ptr<TaSystem> sys;
     try {
@@ -434,7 +434,7 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
             }
             catch(...) {}
         }
-        d = new SolverDialog(this,*sys.get(),*_model.mutable_sparams());
+        d = std::unique_ptr<SolverDialog>(new SolverDialog(this,*sys.get(),*_model.mutable_sparams()));
     }
 
     catch(TaSMETError &e) {
@@ -459,7 +459,6 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
     // dialog. Therefore we are now probably dirty
     changed();
 
-    delete d;
 }
 void TaSMETMainWindow::on_actionPostprocess_model_triggered() {
 
