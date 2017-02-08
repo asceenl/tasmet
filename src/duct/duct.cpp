@@ -5,6 +5,7 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
+#define TRACERPLUS (-10)
 #include "duct.h"
 #include "tasystem.h"
 #include "tasmet_assert.h"

@@ -437,13 +437,33 @@ void TaSystem::exportHDF5(const string& filename) const {
     TRACE(15,"TaSystem::exportHDF5");
     hid_t file_id;
     herr_t status;
+    // hid_t error_stack = H5Eget_current_stack();
+    
+    /* Save old error handler */
+    // herr_t (*old_func)(void*);
+    // void *old_client_data;
+
+    // H5Eget_auto(error_stack, &old_func, &old_client_data);
+    /* Turn off error handling */
+    // H5Eset_auto(error_stack, NULL, NULL);
+    // H5Eset_auto( NULL, NULL);
 
     file_id = H5Fcreate (filename.c_str(),
                          H5F_ACC_TRUNC, // Truncate any existing file
                          H5P_DEFAULT,
                          H5P_DEFAULT);    
 
-    
+    /* Restore previous error handler */
+    // H5Eset_auto(error_stack, old_func, old_client_data);    /// Disable HDF5 error printing
+
+    if(file_id < 0)
+        throw TaSMETError("Creation of export file failed. "
+                          "This could mean that the file is blocked "
+                          "by another program, or the user has insufficient "
+                          "privileges to create the file at the given path."
+                          );
+
+    /// Enable HDF5 error printing
     d freq = getfreq();
     H5LTset_attribute_double(file_id,
                              "/",
