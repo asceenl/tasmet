@@ -67,7 +67,7 @@ public:
         return -p/Rs()/pow(T,2);
     }
     d drhodp(d T,d p) const {
-        return Rs()/T;
+        return 1/(Rs()*T);
     }
 
     d cv(d T,d p) const {

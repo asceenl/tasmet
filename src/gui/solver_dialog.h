@@ -29,18 +29,22 @@ class SolverProgress;
 class SolverDialog: public QDialog {
     Q_OBJECT
 
-    pb::SolverParams& _sparams;
+    pb::SolverParams& _sparams; /**< Reference to solver params as
+                                   given in constructor. */
+
+    const GradientNonlinearSystem& _sys;
 
     Ui::solver_dialog* _dialog;
 
-    bool _init = true;
+    bool _init = true;          /**< Disables Qt callbacks */
 
-    QCustomPlot* _plot;
-    QCPGraph *_funer,*_reler,*_funtol,*_reltol;
+    QCustomPlot* _plot = nullptr;
+    QCPGraph *_funer=nullptr,*_reler=nullptr,
+        *_funtol=nullptr,*_reltol=nullptr;
 
     SolverWorker* _solver_worker = nullptr;
 
-    const GradientNonlinearSystem& _sys;
+
 
     /// Place where the final solution will be stored
     vd _solution;

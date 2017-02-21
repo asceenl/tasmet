@@ -14,9 +14,9 @@ GlobalConf::GlobalConf(us Nf,d freq):
     _Nf(Nf)
 {
 
-    TRACE(10,"GlobalConf constructor done");
+    TRACE(10,"GlobalConf()");
 
-    if(Nf>=constants::max_Nf)
+    if(Nf>constants::max_Nf)
         throw TaSMETError("Too large number of frequencies given");
 
 
@@ -38,7 +38,7 @@ GlobalConf::GlobalConf(us Nf,d freq):
     }
 
     _iDFT.col(0).fill(1.0);	// Steady part
-    for(us k=0;k<Ns;k++){
+    for(us k=0;k<Ns;k++) {
         for (us n=1;n<=_Nf;n++){
             _iDFT(k,2*n-1)=cos(2.0*number_pi*double(n)*double(k)/Ns);
             _iDFT(k,2*n)=-sin(2.0*number_pi*double(n)*double(k)/Ns);
@@ -71,10 +71,10 @@ void GlobalConf::setomg(d omg){
     this->_omg=omg;
 
     for(us i=1;i<=_Nf;i++){
-        _DDTfd(2*i-1,2*i  )=-double(i)*_omg;
-        _DDTfd(2*i  ,2*i-1)=double(i)*_omg;
+        _DDTfd(2*i-1,2*i  )=- ((d) i)*_omg;
+        _DDTfd(2*i  ,2*i-1)= ((d) (i))*_omg;
     }
-    _DDTtd = _iDFT * _DDTfd * _fDFT;
+    _DDTtd = _iDFT * (_DDTfd * _fDFT);
 }
 
 //////////////////////////////////////////////////////////////////////

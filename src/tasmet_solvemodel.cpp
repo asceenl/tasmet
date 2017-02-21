@@ -16,17 +16,35 @@
 
 void usage(const char* fn) {
     cout << "Usage: " << endl;
-    cout << fn << " [Input file] " << endl;
+    cout << fn << " [Input file] ";
+    #ifdef TASMET_DEBUG
+    cout << "[Tracer_Level]";
+    #endif
+    cout << endl;
 }
 
 int main(int argc, char *argv[]) {
 
-    INITTRACE(10);
 
-    if(argc != 2) {
+
+    if(argc < 2 || argc > 3) {
         usage(argv[0]);
         return -1;
     }
+    #ifdef TASMET_DEBUG
+    int trace_level = 20;
+
+    if(argc >= 3) {
+        try {
+            trace_level = std::stoi(argv[2]);
+        }
+        catch(...) {
+            usage(argv[0]);
+            return -1;
+        }
+    }
+    INITTRACE(trace_level);
+    #endif
 
     pb::Model model;
     

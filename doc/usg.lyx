@@ -290,7 +290,7 @@ TaSMET
 Open source and free to use.
  As the author is aware of the possibilities created by using open source
  codes, the choice of publishing this computer code as open source was not
- a hard choice.
+ a hard one.
 \end_layout
 
 \begin_layout Itemize
@@ -370,6 +370,166 @@ TaSMET
 \noun default
 , the periodic steady-state of a TA system is simulated using a numerical
  model.
+ The convergence speed is much accelerated by assuming a periodic steady
+ state of the system.
+ When a system is in periodic steady state, every physical quantity 
+\begin_inset Formula $\xi$
+\end_inset
+
+ can be described by a Fourier series:
+\begin_inset Formula 
+\begin{equation}
+\xi(t)=\sum_{n=0}^{\infty}\Re\left[\hat{\xi}_{n}e^{in\omega t}\right],
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\hat{\xi}_{n}$
+\end_inset
+
+ denote the Fourier coefficients of the quantity 
+\begin_inset Formula $\xi$
+\end_inset
+
+, which can be computed as
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Formula $\int\limits _{0}^{T}\xi(t)e^{-im\omega t}\mathrm{d}t=\int\limits _{0}^{T}\sum\limits _{n=0}^{\infty}\Re\left[\hat{\xi}_{n}e^{in\omega t}\right]e^{-im\omega t}\mathrm{d}t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $\int\limits _{0}^{T}\xi(t)e^{-im\omega t}\mathrm{d}t=\int\limits _{0}^{T}\sum\limits _{n=0}^{\infty}\frac{1}{2}\left(\hat{\xi}_{n}e^{in\omega t}+\hat{\xi}_{n}^{*}e^{-in\omega t}\right)e^{-im\omega t}\mathrm{d}t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+For 
+\begin_inset Formula $m=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $\int\limits _{0}^{T}\xi(t)\mathrm{d}t=T\hat{\xi}_{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+And for 
+\begin_inset Formula $m\neq0$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $\hat{\xi}_{n}=\frac{2}{T}\int\limits _{0}^{T}\xi(t)e^{-im\omega t}\mathrm{d}t$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\hat{\xi}_{n}=\frac{2}{T}\int\limits _{0}^{T}\xi(t)e^{-im\omega t}\mathrm{d}t
+\end{equation}
+
+\end_inset
+
+ Now, to solve the Fourier coefficients, only a finite number of terms (
+\begin_inset Formula $N$
+\end_inset
+
+) can be taken into account.
+ This also results in a finite time resolution.
+ Writing both the time and frequency domain in a discrete form:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Formula $t=m\Delta t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $T=M\Delta t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $M=\Delta t/T=\Delta t\omega$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\xi_{m}\equiv\xi(t_{m})=\sum_{n=0}^{N-1}\Re\left[\hat{\xi}_{n}e^{inm/M}\right].
+\end{equation}
+
+\end_inset
+
+This can be written in matrix-vector form as
+\begin_inset Formula 
+\begin{equation}
+\xi_{m}=\boldsymbol{f}_{m}^{-1}\cdot\hat{\boldsymbol{\xi}},
+\end{equation}
+
+\end_inset
+
+or, for all time-instances 
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\xi}=\boldsymbol{\mathcal{F}}^{-1}\cdot\sum_{n=0}^{N-1}\Re\left[in\omega\hat{\xi}_{n}e^{in\omega t}\right]
+\end{equation}
+
+\end_inset
+
+The time-derivative can be easily obtained
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial\boldsymbol{\xi}}{\partial t}=\boldsymbol{\mathcal{F}}^{-1}\cdot\boldsymbol{\text{\omega}}\cdot\boldsymbol{\mathcal{F}}\cdot\boldsymbol{\xi},
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\omega}=\left[\begin{array}{ccccc}
+0 & 0 & 0 & 0 & \dots\\
+0 & i\omega & 0 & 0 & \dots\\
+0 & 0 & 2i\omega & 0 & \dots\\
+0 & 0 & 0 & 3i\omega & \dots\\
+\vdots & \vdots & \vdots & \vdots & \ddots
+\end{array}\right]
+\end{equation}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Chapter

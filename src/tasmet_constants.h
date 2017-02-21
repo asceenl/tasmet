@@ -101,7 +101,8 @@ namespace constants {
     const int T=2;
     const int p=3;
     const int Ts=4;
-  
+    const int varnr_max = 5;
+    
     const char* const model_fileext = ".tasmet";
 
 } // namespace constants

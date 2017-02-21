@@ -111,14 +111,18 @@ void Duct::residualJac(SegPositionMapper& residual,
         pp   = getvart(constants::p,gp+1);
 
         cont  = ((rhop%up)-(rho%u))/dx;
-        // cont += sys.DDTtd()*rho;
+        cont += sys.DDTtd*rho;
         
         *residual.at(i) = cont;
 
-        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
-            -diagmat(rho)/dx;
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
             -diagmat(u)/dx;
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] +=
+            sys.DDTtd;
+        
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
+            -diagmat(rho)/dx;
+        
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::rho}] =
             diagmat(up)/dx;
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::u}] =
@@ -127,19 +131,33 @@ void Duct::residualJac(SegPositionMapper& residual,
         i++;
 
         mom = (rhop%up%up - rho%u%u + pp - p)/dx;
+        mom += sys.DDTtd *(rho%u);
+
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] =
             -diagmat(rho%u)/dx;
+
+        // Time-derivative term
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::u}] +=
+            sys.DDTtd*diagmat(rho);
+
         jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] =
             -diagmat(u%u)/dx;
+
+        // Time-derivative term
+        jacrows.at(i)[{_id,gp*nvars_per_gp+constants::rho}] +=
+            sys.DDTtd*diagmat(u);
+
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::rho}] =
-            diagmat(u%u)/dx;
+            diagmat(up%up)/dx;
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::u}] =
             diagmat(up%rhop)/dx;
         jacrows.at(i)[{_id,(gp)*nvars_per_gp+constants::p}] =
             -eye(Ns,Ns)/dx;
         jacrows.at(i)[{_id,(gp+1)*nvars_per_gp+constants::p}] =
             eye(Ns,Ns)/dx;
-        *residual.at(i) = mom;
+ 
+
+       *residual.at(i) = mom;
 
         i++;
         
@@ -181,7 +199,7 @@ void Duct::residualJac(SegPositionMapper& residual,
         *residual.at(i) = st; 
 
         i++;
-    }
+    } // end of for loop over gridpoints
 
     // Equation of state for the last node
     st = gas.rho(Tp,pp) - rhop;
@@ -190,9 +208,9 @@ void Duct::residualJac(SegPositionMapper& residual,
     jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::rho}] =
         -eye(Ns,Ns);
     jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::p}] =
-        diagmat(gas.drhodp(T,p));
+        diagmat(gas.drhodp(Tp,pp));
     jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::T}] =
-        diagmat(gas.drhodT(T,p));
+        diagmat(gas.drhodT(Tp,pp));
 
     i++;
 
@@ -205,12 +223,12 @@ void Duct::residualJac(SegPositionMapper& residual,
         d rho0 = gas.rho0();
         d gamma0 = gas.gamma(T0,p0);
 
-        en = p/p0 - pow(rho/rho0,gamma0);
+        en = pp/p0 - pow(rhop/rho0,gamma0);
 
         jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::p}] =
             eye(Ns,Ns)/p0;
         jacrows.at(i)[{_id,(ngp()-1)*nvars_per_gp+constants::rho}] =
-            -(gamma0/rho0)*diagmat(pow(rho/rho0,gamma0-1));
+            -(gamma0/rho0)*diagmat(pow(rhop/rho0,gamma0-1));
 
         *residual.at(i) = en; i++;
     }
@@ -231,6 +249,11 @@ PosId Duct::getDof(int varnr,int gp) const {
 
 vd Duct::getvart(int varnr,int gp) const {
     TRACE(14,"Duct::getvart()");
+
+    tasmet_assert(varnr >=0 &&
+                  varnr < constants::varnr_max,
+                  "Illegal variable number");
+
     const SegPositionMapper& sol = sys.getSolution(_id);
 
     us Ns = sys.Ns();
@@ -268,11 +291,11 @@ void Duct::initialSolution(SegPositionMapper& sol) const {
     for(us i=0;i<ngp();i++){
         VARTRACE(15,i);
         // Initial density
-        *sol.at(segdof) += gas.rho0()+0.1;
+        *sol.at(segdof) += gas.rho0();
         segdof++;
         
         // Initial velocity
-        *sol.at(segdof) += 0.1;
+        // *sol.at(segdof) += 0.1;
         segdof++;
 
         // Initial Temperature
@@ -395,6 +418,27 @@ void Duct::exportHDF5(const hid_t group_id) const {
         p.x.col(gp) = pt(gp);
     }
     p.exportHDF5(group_id);
+
+    TXData rho;
+    rho.name = "Fluid density";
+    rho.unit = "kg/m$^3$";
+    rho.symbol = "rho";
+    rho.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        rho.x.col(gp) = rhot(gp);
+    }
+    rho.exportHDF5(group_id);
+
+    TXData m;
+    m.name = "Mass flow";
+    m.unit = "kg/s";
+    m.symbol = "m";
+    m.x = dmat(sys.Ns(),ngp());
+    for(us gp=0;gp<ngp();gp++){
+        m.x.col(gp) = this->S(gp) * rho.x.col(gp) % u.x.col(gp);
+    }
+    m.exportHDF5(group_id);
+    
 
     // TXData Ts;
     // Ts.name = "Solid temperature";

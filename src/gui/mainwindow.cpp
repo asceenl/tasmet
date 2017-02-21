@@ -204,6 +204,12 @@ void TaSMETMainWindow::saveAsModel() {
                                                     filetype);
 
     if(fileName.size()!=0) {
+
+        // Add extension if necessary
+        if(!fileName.contains(constants::model_fileext)) {
+            fileName += constants::model_fileext;
+        }
+
         string fn = fileName.toStdString();
 
         saveModel(&fn);
@@ -327,13 +333,14 @@ int add_edit_segment(QWidget* parent,
     dialogtype dialog(name,parent);
     
     if(segmap.find(id) != segmap.end()) {
+        TRACE(16,"Found the segment in the list");
         dialog.set(segmap[id]);
     }
 
     int exitcode = dialog.exec();
     
     if(exitcode == QDialog::Accepted) {
-
+        TRACE(16,"Updating existing segment");
         segmap[id] = dialog.get();
         
     }
@@ -424,7 +431,7 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
         
         if(_model.solution_size()>0) {
             vd solution(_model.solution_size());
-            for(us i=0;i<_model.solution_size();i++) {
+            for(int i=0;i<_model.solution_size();i++) {
                 solution(i) = _model.solution(i);
             }
 

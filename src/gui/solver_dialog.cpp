@@ -25,8 +25,8 @@ SolverDialog::SolverDialog(QWidget* parent,
                            const GradientNonlinearSystem& sys,
                            pb::SolverParams& sparams):
     QDialog(parent),
-    _sys(sys),
     _sparams(sparams),
+    _sys(sys),
     _dialog(new Ui::solver_dialog())
 {
     

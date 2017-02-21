@@ -30,7 +30,11 @@ private:
 
 private slots:
     void on_type_currentIndexChanged(int) {changed();}
+    void on_duct_id_valueChanged(int) { changed();}
+    void on_side_currentIndexChanged(int) {changed();}    
     void on_isentropic_stateChanged(int) {changed();}
+    void on_pressure_textChanged() {changed();}
+    void on_temperature_textChanged() {changed();}
     void accept();
     void reject();
 

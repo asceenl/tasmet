@@ -97,7 +97,8 @@ public:
 
 protected:
     /// This member fcn should be implemented by the Solver instance.
-    virtual void start_implementation(system_T& sys,progress_callback*)=0;
+    virtual void start_implementation(system_T& sys,
+                                      progress_callback*)=0;
 };
 
 

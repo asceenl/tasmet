@@ -12,6 +12,7 @@
 #include <memory>
 #include "tasmet_exception.h"
 #include "tasmet_tracer.h"
+#include "tasmet_assert.h"
 
 Geom::Geom(const pb::Duct& duct) {
 
@@ -98,16 +99,16 @@ d Geom::getFluidVolume() const {
   }
   d Geom::getSolidVolume() const {
     d Vs=0;
-    int i=0;
 
-    Vs+=0.5*(x(i+1)-x(i))*Ss(i); // First 'cell'
+    tasmet_assert(false,"Not updated function");
+    // Vs+=0.5*(x(i+1)-x(i))*Ss(i); // First 'cell'
 
-    for(int i=1;i<ngp()-1;i++){    // Middle cells
-        Vs+=0.5*(x(i)-x(i-1))*Ss(i);
-        Vs+=0.5*(x(i+1)-x(i))*Ss(i);
+    for(us i=1;i<ngp()-1;i++){    // Middle cells
+        // Vs+=0.5*(x(i)-x(i-1))*Ss(i);
+        // Vs+=0.5*(x(i+1)-x(i))*Ss(i);
     }
 
-    Vs+=0.5*(x(i)-x(i-1))*Ss(i); // Last 'cell'
+    // Vs+=0.5*(x(i)-x(i-1))*Ss(i); // Last 'cell'
     return Vs;
   }
 

@@ -25,7 +25,6 @@ class Variable;
 class PressureBc: public DuctBc {
     vd _p,_T,_Ts;               /**< Prescribed values for pressure,
                                    temperature and solid temperature */
-    pb::DuctSide _side;         /**< Duct side at which this b.c. works */
 protected:
     PressureBc(const TaSystem&,const PressureBc&);
 public:

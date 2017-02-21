@@ -49,6 +49,7 @@ AddDuctBcDialog::AddDuctBcDialog(const std::string& name,QWidget* parent):
 }
 void AddDuctBcDialog::changed() {
     if(_init) return;
+    TRACE(16,"AddDuctBcDialog::changed() continue");
     pb::DuctBcType type = (pb::DuctBcType) _dialog->type->currentIndex();
     bool isentropic =  _dialog->isentropic->isChecked();
     VARTRACE(15,type);

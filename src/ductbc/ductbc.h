@@ -15,6 +15,7 @@ class TaSystem;
 class Duct;
 
 class DuctBc :public Segment {
+protected:
     pb::DuctBc _dbc;
 public:
     DuctBc(const TaSystem& sys,

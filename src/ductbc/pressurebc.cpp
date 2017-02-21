@@ -41,6 +41,7 @@ PressureBc::PressureBc(const TaSystem& sys,
     }
 
     else {
+        TRACE(25,"PressureBc not Isentropic");
         EvaluateFun Tfun(dbc.temperature(),
                          "Error in evaluating prescribed temperature",
                          "t");
@@ -58,10 +59,10 @@ PressureBc::PressureBc(const TaSystem& sys,
                        const PressureBc& o):
     DuctBc(sys,o),
     _p(o._p),
-    _T(o._T) {
-
+    _T(o._T),
+    _Ts(o._Ts)
+{
     TRACE(15,"PressureBc(o)");
-
 }
 PressureBc::~PressureBc() {
     
@@ -78,20 +79,29 @@ void PressureBc::residualJac(SegPositionMapper& residual,
     const pb::Duct& dpb = getDuct().getDuctPb();
     us Ns = sys.Ns();
 
+    // VARTRACE(25,_T-sys.gas().T0);
+    
     const Duct& duct = getDuct();
-    if(_side == pb::left) {
+    if(_dbc.side() == pb::left) {
+        TRACE(25,"PressureBc LEFT");
         *residual.at(0) = duct.pt(0) - _p;
-        jacrows.at(0)[duct.getDof(constants::p,0)] = eye(Ns,Ns);
+        jacrows.at(0)[duct.getDof(constants::p,0)].eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
+            tasmet_assert(false,"");
             // residual.subvec(Ns,2*Ns-1) = duct.Tt(0) - _T;
         }
     }
-    else {
+    else if(_dbc.side() == pb::right) {
+        TRACE(25,"PB RIGHT");
         *residual.at(0) = duct.pt(-1) - _p;
-        jacrows.at(0)[duct.getDof(constants::p,-1)] = eye(Ns,Ns);
+        jacrows.at(0)[duct.getDof(constants::p,-1)].eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
+            tasmet_assert(false,"");
             // residual.subvec(Ns,2*Ns-1) = duct.Tt(-1) - _T;
         }
+    }
+    else {
+        throw TaSMETError("Illegal side parameter given in PressureBc.");
     }
 }
 

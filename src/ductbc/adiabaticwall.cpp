@@ -16,7 +16,6 @@ AdiabaticWall::AdiabaticWall(const TaSystem& sys,
                              const us id,
                              const pb::DuctBc& dbc):
     DuctBc(sys,id,dbc)
-    
 {
     TRACE(15,"AdiabaticWall(id,sys,dbc)");
     tasmet_assert(dbc.type() == pb::AdiabaticWall,"Wrong type given to constructor");
@@ -47,7 +46,7 @@ void AdiabaticWall::residualJac(SegPositionMapper& residual,
 
     us i=0;
 
-    if(_side == pb::left) {
+    if(_dbc.side() == pb::left) {
         *residual.at(i) = duct.ut(0);
         jac.at(i)[duct.getDof(constants::u,0)].eye(Ns,Ns);
 
@@ -57,7 +56,8 @@ void AdiabaticWall::residualJac(SegPositionMapper& residual,
             tasmet_assert(false,"");
         }
     }
-    else {
+    else if(_dbc.side() == pb::right) {
+        TRACE(25,"AdWall RIGHT");
         *residual.at(i) = duct.ut(-1);
         jac.at(i)[duct.getDof(constants::u,-1)].eye(Ns,Ns);
         if(dpb.htmodel() != pb::Isentropic) {
@@ -65,6 +65,9 @@ void AdiabaticWall::residualJac(SegPositionMapper& residual,
             // residual.subvec(Ns,2*Ns-1) = duct.Tt(sys,-1) - _T;
             tasmet_assert(false,"");
         }
+    }
+    else {
+        throw TaSMETError("Illegal side parameter given in AdiabaticWall.");
     }
 
 }

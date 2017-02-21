@@ -5,7 +5,7 @@
 // Description:
 //
 //////////////////////////////////////////////////////////////////////
-
+#define TRACERPLUS (-10)
 #include "segment.h"
 #include "tasystem.h"
 #include "triplets.h"
