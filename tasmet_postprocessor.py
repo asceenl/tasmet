@@ -5,17 +5,26 @@ Created on Thu Feb  2 08:33:53 2017
 
 @author: anne
 """
-
+qt = 5
 # Here we provide the necessary imports.
 # The basic GUI widgets are located in QtGui module. 
 import sys, h5py
 import numpy as np
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon,QDoubleValidator
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+if qt==4:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+else:
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtGui import QIcon,QDoubleValidator
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+
 from matplotlib.figure import Figure
+
+import time
+from matplotlib.animation import FuncAnimation
 from gui.about_dialog import Ui_about_dialog
 
 scale = [('nano',-9,'n'),
@@ -68,7 +77,7 @@ class TaSMETFigure(Figure):
     
     def __init__(self, width=5, height=4, dpi=100):
         
-        Figure.__init__(self,figsize=(width, height), dpi=dpi)
+        Figure.__init__(self, figsize=(width, height), dpi=dpi)
         
         self._axes = self.add_subplot(111)
 
@@ -76,6 +85,9 @@ class TaSMETFigure(Figure):
         
         self._plots = []
         self._grid = False
+    def setCanvas(self,canvas):
+        self._canvas = canvas
+
     def addPlot(self,plot,one):
         if one:
             self._plots = [plot]
@@ -94,7 +106,8 @@ class TaSMETFigure(Figure):
             
         self._axes.grid(self._grid,'both')
         
-        self.canvas.draw_idle()
+        self.canvas.draw()
+        
     def setGrid(self,grid):
         self._grid = grid
         self.rePlot()
@@ -107,7 +120,44 @@ class TaSMETFigure(Figure):
         self._plots = []
         self.rePlot()
 
+    def animate(self, data):
+        line = self._axes.get_lines()[0]
         
+        max_val = np.max(data)
+        min_val = np.min(data)
+        
+        self._axes.set_ylim((min_val,max_val))
+        
+        # Number of frames available in a period
+        frames_per_period = data.shape[1]
+
+        # Time to pass to show one period
+        time_per_period = 1.0
+        
+        # interval in seconds
+        interval = time_per_period/frames_per_period
+        
+        # We need a max, here because due to a bug intervals lower than 200
+        # are going plain wrong in matplotlib
+        interval_ms = max(int(interval*1000),200)
+
+        def animate_i(i):
+            line.set_ydata(data[:,i%frames_per_period])
+            return line,
+        
+        ani = FuncAnimation(self, 
+                            animate_i,
+                            interval = max(200,interval_ms),
+                            frames = frames_per_period,
+                            blit=True,
+                            repeat = True,
+                            save_count = 300 # High value here as animate_i repeats itself
+                            )
+        self.canvas.draw()        
+#        for i in range(100):
+#            print(i)
+#            animate_i(i)
+#        
 class TaSMETCanvas(FigureCanvas):
 
     def __init__(self, parent, figure):
@@ -120,7 +170,7 @@ class TaSMETCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
         
         FigureCanvas.updateGeometry(self)
-
+        figure.setCanvas(self)
 
 class MainWindow(QMainWindow):
     
@@ -277,7 +327,7 @@ class MainWindow(QMainWindow):
 
         # Plot menu
         plot_menu = QMenu('&Plot', self)
-        self._grid_option = QAction('Enable grid')
+        self._grid_option = QAction('Enable grid',plot_menu)
         self._grid_option.setCheckable(True)
         self._grid_option.triggered.connect(self._figure.setGrid)
         plot_menu.addAction(self._grid_option)
@@ -335,8 +385,28 @@ class MainWindow(QMainWindow):
     def output(self):
         print('output')
     
+    def disableAll(self):
+        self._seg_box.setEnabled(False)
+        self._qty_box.setEnabled(False)
+        self._vspos.setEnabled(False)
+        self._vstime.setEnabled(False)
+        self._vs_instance.setEnabled(False)
+        self._plot_button.setEnabled(False)
+        self._output_button.setEnabled(False)
+        self._animate_button.setEnabled(False)        
+    
     def animate(self):
-        print('animate')
+        self.disableAll()
+        self._hold_button.setChecked(False)
+        self.plot()
+        try:
+            data,datatype = self.getCurrentData()
+        except:
+            return
+        
+        self._figure.animate(data[:,:])
+        
+        self.qtyItemChanged()
     
     def getCurrentData(self):
         """
@@ -353,13 +423,12 @@ class MainWindow(QMainWindow):
             datatype = data.attrs['datatype'].decode('utf-8')
             return data,datatype
         
-  
-        
-    
-    def segItemChanged(self,item):
+   
+    def segItemChanged(self,item=None):
         """
         Update the combobox with quantities
         """
+        
         self._suppressed = True
         self._qty_box.clear()
         one = False
@@ -373,14 +442,14 @@ class MainWindow(QMainWindow):
             
         self._suppressed = False
         self._qty_box.setCurrentIndex(0)
-        self.qtyItemChanged(0)
+        self.qtyItemChanged()
     
-    def qtyItemChanged(self,item):
+    def qtyItemChanged(self,item=None):
         """
         The quantity item has been changed
         """
-        
         if self._suppressed: return
+
         try:
             data,datatype = self.getCurrentData()
         except:
@@ -388,16 +457,15 @@ class MainWindow(QMainWindow):
         
         segitemno = self._seg_box.currentText()
         
-        if data is None:
-            self._vstime.setChecked(False)
-            self._vspos.setEnabled(False)
-            self._vstime.setEnabled(False)
-            self._vs_instance.setEnabled(False)
-            self._plot_button.setEnabled(False)
-            self._output_button.setEnabled(False)
-            self._animate_button.setEnabled(False)
-            return
+        self.disableAll()
         
+        self._seg_box.setEnabled(True)
+        self._qty_box.setEnabled(True)
+        
+        if data is None:
+            return
+
+                
         self._plot_button.setEnabled(True)
         self._output_button.setEnabled(True)
         
@@ -405,9 +473,6 @@ class MainWindow(QMainWindow):
         if datatype == 'time':
             self._vstime.setChecked(True)
             self._vspos.setEnabled(False)
-            self._vstime.setEnabled(False)
-            self._vs_instance.setEnabled(False)
-            self._animate_button.setEnabled(False)
             
         elif datatype == 'pos':
             self._vspos.setChecked(True)
@@ -429,6 +494,7 @@ class MainWindow(QMainWindow):
             self._vspos.setEnabled(True)
             self._vstime.setEnabled(True)
             self._vs_instance.setEnabled(True)
+            self._animate_button.setEnabled(True)
         
     def initGui(self):
         self.defaultOutput()
@@ -552,8 +618,7 @@ def usage():
 if __name__ == '__main__':
     if(len(sys.argv) < 2):
         usage()
-        file_ = '../second_duct_sinomgt.tasmet.h5'
-#        return -1
+        exit(-1)
     else:
         file_ = sys.argv[1]
         

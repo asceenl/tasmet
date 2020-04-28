@@ -348,7 +348,7 @@
      <x>0</x>
      <y>0</y>
      <width>683</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -456,7 +456,7 @@
   </action>
   <action name="actionPostprocess_model">
    <property name="text">
-    <string>Create postprocessing file</string>
+    <string>Start &amp;postprocessor...</string>
    </property>
   </action>
  </widget>

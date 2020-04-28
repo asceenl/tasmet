@@ -11,14 +11,6 @@
 
 #include <sstream>
 
-#include <QString>
-#include <QSettings>
-#include <QWidget>
-#include <QDoubleValidator>
-#include <QIntValidator>
-#include <QFileDialog>
-#include <QStandardPaths>
-
 #include "tasmet_config.h"
 #include "tasmet_tracer.h"
 #include "tasmet_assert.h"
@@ -31,6 +23,16 @@
 #include "solver_dialog.h"
 #include "message_tools.h"
 
+#include <QString>
+#include <QSettings>
+#include <QWidget>
+#include <QDoubleValidator>
+#include <QIntValidator>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QProcess>
+
+
 const QString default_model_name = QString("Unsaved TaSMET Model") +
     constants::model_fileext;
 const QString default_segment_name = "Unnamed segment";
@@ -38,6 +40,7 @@ const QString start_file_location = QStandardPaths::
     writableLocation(QStandardPaths::DocumentsLocation);
 const QString filetype = QString("TaSMET Model files (*") + constants::model_fileext + ")";
 const QString window_title_part = "TaSMET Model Builder - ";
+
 namespace {
 
     int saveFileFirstQuestion(QWidget* parent) {
@@ -55,6 +58,7 @@ namespace {
 TaSMETMainWindow::TaSMETMainWindow():
     _window(new Ui::MainWindow()),
     _model(pb::Model::default_instance()),
+    _saved_model(_model),
     _system(*_model.mutable_system())
 {
 
@@ -120,6 +124,7 @@ TaSMETMainWindow::~TaSMETMainWindow(){
 void TaSMETMainWindow::newModel() {
     TRACE(15,"newModel");
     _model = pb::Model::default_instance();
+    _saved_model = _model;
     _filepath = "";
     set(_model);
 }
@@ -148,7 +153,11 @@ void TaSMETMainWindow::loadModel(const string* filepath_s) {
         try {
             TRACE(15,"Setting loaded model");
             _filepath = *filepath_s;
-            set(loadMessage<pb::Model>(*filepath_s));
+            _model = loadMessage<pb::Model>(*filepath_s);
+            _saved_model = _model;
+            _system = *_model.mutable_system();
+            set(_model);
+
         }
         catch(TaSMETError &e) {
             _filepath = "";
@@ -172,6 +181,7 @@ void TaSMETMainWindow::saveModel(string* filepath) {
         }
         try {
             saveMessage<pb::Model>(*filepath,_model);
+            _saved_model = _model;
             _filepath = *filepath;
             changed();
         }
@@ -282,8 +292,6 @@ void TaSMETMainWindow::set(const pb::Model& model) {
 
     _window->backlog->setPlainText(QString::fromStdString(model.backlog()));
 
-    _model = model;
-    _system = *_model.mutable_system();
     _init = false;
 
     changed();
@@ -311,6 +319,9 @@ void TaSMETMainWindow::closeEvent(QCloseEvent *event) {
         }
     } 
 
+    // If we are here, the model is not dirty anymore. We can savely
+    // close the application.
+    
     // Save window configuration to settings
     QSettings settings(company,appname);
     settings.setValue("geometry", saveGeometry());
@@ -470,10 +481,12 @@ void TaSMETMainWindow::on_actionSolve_triggered() {
 void TaSMETMainWindow::on_actionPostprocess_model_triggered() {
 
     try {
+        
         TaSystem sys(_model.system());
         if(_model.solution_size() == 0)
             throw TaSMETError("No solution found");
         vd sol(_model.solution_size());
+        
         for(us i=0;i<sol.size();i++) {
             sol(i) = _model.solution(i);
         }
@@ -483,6 +496,21 @@ void TaSMETMainWindow::on_actionPostprocess_model_triggered() {
             throw TaSMETError("Model has not yet been saved");
         sys.exportHDF5(_filepath + ".h5");
 
+        QString command = "python";
+        QString appfilepath = QCoreApplication::applicationDirPath();
+        QString postprocessor_program = appfilepath +
+            QDir::separator() + "tasmet_postprocessor.py";
+        QString filepath_post = QString::fromStdString(_filepath) + ".h5";
+
+        QStringList params;        
+        params << postprocessor_program;
+        params << filepath_post;
+
+        // Start the process, which is destroyed whenever the program
+        // is killed
+        QProcess *p = new QProcess(this);
+        // connect(p,&QProcess::finished,p,&QProcess::deleteLater);
+        p->startDetached(command,params);
     }
     catch(TaSMETError &e) {
         e.show_user("Postprocessing failed");
@@ -491,18 +519,7 @@ void TaSMETMainWindow::on_actionPostprocess_model_triggered() {
 }
 bool TaSMETMainWindow::isDirty() const {
     TRACE(15,"isDirty()");
-    if(_filepath.size()==0) return true;
-
-    try {
-        pb::Model filemodel = loadMessage<pb::Model>(_filepath);
-        bool dirty = !compareMessage<pb::Model>(filemodel,_model);
-        VARTRACE(15,dirty);
-        return dirty;
-    }
-    catch(TaSMETError& e) {
-        TRACE(15,"Files could not be compared");
-        return true;
-    }
+    return !compareMessage(_model,_saved_model);
 }
 
 void TaSMETMainWindow::on_actionAbout_triggered(){

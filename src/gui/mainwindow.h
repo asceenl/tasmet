@@ -26,6 +26,10 @@ class TaSMETMainWindow: public QMainWindow {
     // In-memory model
     pb::Model _model;
 
+    pb::Model _saved_model;     /**< Last saved state of the model, to
+                                   compare with to check whether we
+                                   are dirty yes or no */
+
     pb::System& _system;        /**< In constructor set to the
                                    _model.mutable_system() */
 

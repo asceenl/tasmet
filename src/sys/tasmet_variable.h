@@ -96,7 +96,7 @@ public:
     // add two Variableiables
     Variable operator+(const Variable& other) const;
     //Subtract two Variableiables
-    Variable operator-(const Variable& Variable2) const;
+    Variable operator-(const Variable& other) const;
     // with Note multiplication is defined outside of the class
 
     // If we need to multiply two numbers in frequency domain, this

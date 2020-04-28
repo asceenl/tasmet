@@ -457,10 +457,11 @@ void TaSystem::exportHDF5(const string& filename) const {
     // H5Eset_auto(error_stack, old_func, old_client_data);    /// Disable HDF5 error printing
 
     if(file_id < 0)
-        throw TaSMETError("Creation of export file failed. "
-                          "This could mean that the file is blocked "
-                          "by another program, or the user has insufficient "
-                          "privileges to create the file at the given path."
+        throw TaSMETError("Creation of export file failed. This is probably "
+                          "because the postprocessor is already running. "
+                          "However, this could also mean that the file is blocked "
+                          "by another program, or you have insufficient "
+                          "privileges to create the postprocessing file."
                           );
 
     /// Enable HDF5 error printing
